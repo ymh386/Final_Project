@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.spring.app.user.UserDAO">
+  	<insert id="join" parameterType="UserVO">
+ 		INSERT INTO USER
+ 		(USERNAME, PASSWORD, NAME, EMAIL, PHONE, BIRTH, FILE_NAME, ORI_NAME, ACCOUNTNONEXPIRED, ACCOUNTNONLOCKED, CREDENTIALSNONEXPIRED, ENABLED, SNS)
+ 		 VALUES (#{username}, #{password}, #{name}, #{email}, #{phone}, #{birth}, #{fileName}, #{oriName}, 1, 1, 1, 1, #{sns})
+  	</insert>
+  	
+  	<select id="detail" resultMap="detailMap">
+		SELECT *
+		FROM USER U
+			 INNER JOIN
+			 MEMBER_ROLE MR
+			 USING (USERNAME)
+			 INNER JOIN
+			 ROLE R
+			 USING (ROLE_NUM)
+		WHERE USERNAME=#{username}
+ 	</select>
+ 	
+ 	<resultMap type="UserVO" id="detailMap">
+ 		<id column="USERNAME" property="username"/>
+ 		<result column="PASSWORD" property="password"/>
+ 		<result column="NAME" property="name"/>
+ 		<result column="EMAIL" property="email"/>
+ 		<result column="PHONE" property="phone"/>
+ 		<result column="BIRTH" property="birth"/>
+ 		<result column="FILE_NAME" property="fileName"/>
+ 		<result column="ORI_NAME" property="oriName"/>
+ 		<result column="ACCOUNTNONEXPIRED" property="accountNonExpired"/>
+ 		<result column="ACCOUNTNONLOCKED" property="accountNonLocked"/>
+ 		<result column="CREDENTIALSNONEXPIRED" property="credentialsNonExpired"/>
+ 		<result column="ENABLED" property="enabled"/>
+ 		<result column="SNS" property="sns"/>
+ 		<result column="CREATED_AT" property="createdAt"/>
+ 		<result column="POSITION" property="position"/>
+ 		<result column="PARENT" property="parent"/>
+ 		<result column="DEPARTMENT_ID" property="departmentId"/>
+ 		
+ 		<collection property="list" javaType="java.util.List" ofType="RoleVO">
+ 			<result column="ROLE_NAME" property="roleName"/>
+ 		</collection>
+ 		
+ 	</resultMap>
+  </mapper>
