@@ -6,15 +6,15 @@
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
-</head>
+</head>	
 <body>
 	<h3>home</h3>
 	
 	<a href="user/join">join</a>
 	<a href="user/login">login</a>
-	<sec:authentication property="principal" var="user"/>
 	<sec:authorize access="isAuthenticated()">
-		<h3>${user}</h3>
+		<sec:authentication property="principal" var="user"/>
+		${user.username}
 	</sec:authorize>
 </body>
 </html>
