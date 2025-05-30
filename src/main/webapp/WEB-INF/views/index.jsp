@@ -8,5 +8,8 @@
 </head>
 <body>
 	<h3>home</h3>
+	
+	<a href="user/join">join</a>
+	<a href="user/login">login</a>
 </body>
 </html>
