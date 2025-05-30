@@ -12,7 +12,6 @@ public class UserService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		// TODO Auto-generated method stub
 		UserVO userVO = new UserVO();
-		username = userVO.setUsername();
 		
 		return null;
 	}
