@@ -7,7 +7,9 @@
   	
   	
   	  <!-- 1) 출근 기록 삽입 -->
-  <insert id="insertCheckIn" parameterType="AttendanceVO">
+  <insert id="insertCheckIn" parameterType="AttendanceVO" useGeneratedKeys= "true"
+        keyProperty="attendanceId"
+        keyColumn="ATTENDANCE_ID">
     INSERT INTO ATTENDANCE
       (ATTENDANCE_DATE, CHECKIN_TIME, STATUS, RECORDED_AT, USERNAME)
     VALUES
@@ -18,9 +20,8 @@
   	  <!-- 2) 퇴근 시간 업데이트 -->
   <update id="updateCheckOut" parameterType="AttendanceVO">
     UPDATE ATTENDANCE
-    SET CHECKOUT_TIME = #{checkoutTime},
-        STATUS = '퇴근',
-        UPDATE_AT= NOW()
+    SET CHECKOUT_TIME = NOW(),
+        STATUS = '퇴근'
     WHERE ATTENDANCE_ID = #{attendanceId}
   </update>
   	

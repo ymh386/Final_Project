@@ -36,18 +36,18 @@ public class AttendanceService {
 	  
 	  public List<AttendanceVO> listByUser(String username){
 		  
-		  return attendanceDAO.listByUser(username);
+		  return attendanceDAO.selectByUser(username);
 		  
 	  }
 	  
 	  public List<AttendanceVO> listByDate(LocalDate date){
 		  
-		  return attendanceDAO.listByDate(date);
+		  return attendanceDAO.selectByDate(date);
 	  }
 	  
 	  public List<AttendanceVO> listAll(){
 		  
-		  return attendanceDAO.listAll();
+		  return attendanceDAO.selectAll();
 	  }
 	  
 	  
