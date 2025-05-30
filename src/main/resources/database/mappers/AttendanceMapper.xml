@@ -3,6 +3,29 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
-  <mapper namespace="dao">
+  <mapper namespace="com.spring.app.attendance.AttendanceDAO">
+  	
+  	
+  	  <!-- 1) 출근 기록 삽입 -->
+  <insert id="insertCheckIn" parameterType="">
+    INSERT INTO ATTENDANCE
+      (ATTENDANCE_DATE, CHECKIN_TIME, STATUS, RECORDED_AT, USERNAME)
+    VALUES
+      (#{attendanceDate}, #{checkinTime}, '출근', NOW(), #{username})
+  </insert>
+  	
+  	
+  	  <!-- 2) 퇴근 시간 업데이트 -->
+  <update id="updateCheckOut" parameterType="">
+    UPDATE ATTENDANCE
+    SET CHECKOUT_TIME = #{checkoutTime},
+        STATUS       = '퇴근',
+        UPDATE_AT    = NOW()
+    WHERE ATTENDANCE_ID = #{attendanceId}
+  </update>
+  	
+  	
+  	
+  	
   	
   </mapper>
