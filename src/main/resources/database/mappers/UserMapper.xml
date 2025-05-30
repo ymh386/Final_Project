@@ -41,7 +41,7 @@
  		<result column="PARENT" property="parent"/>
  		<result column="DEPARTMENT_ID" property="departmentId"/>
  		
- 		<collection property="list" javaType="java.util.list" ofType="RoleVO">
+ 		<collection property="list" javaType="java.util.List" ofType="RoleVO">
  			<result column="ROLE_NAME" property="roleName"/>
  		</collection>
  		

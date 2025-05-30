@@ -44,7 +44,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter{
 		authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
 		Authentication authentication = this.authenticationManager.authenticate(authenticationToken);
 		
-		log.info("Result : {} ", authentication);
+		log.info("Result : {} ", authentication.getPrincipal());
 		
 		return authentication; 
 	}
@@ -73,7 +73,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter{
 			AuthenticationException failed) throws IOException, ServletException {
 		// TODO Auto-generated method stub
 		
-		response.sendRedirect("/user/logins");
+		response.sendRedirect("/user/login");
 	}
 
 }
