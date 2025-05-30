@@ -8,7 +8,5 @@
   			SELECT * FROM USER WHERE USERNAME='test'
   		</select>
   		
-  		<insert id="join" parameterType="UserVO">
-  			INSERT INTO USER VALUES (#{}, #{}, #{}, #{}, #{}, #{}, #{}, #{}, 1, 1, 1, 1, NULL, NOW(), NULL, NULL, NULL)
-  		</insert>
+  	
   </mapper>

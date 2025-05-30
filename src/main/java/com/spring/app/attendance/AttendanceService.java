@@ -2,6 +2,7 @@ package com.spring.app.attendance;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,6 @@ public class AttendanceService {
 
 	@Autowired
 	public AttendanceDAO attendanceDAO;
-	
 	
 	
 	  public AttendanceVO checkIn(String username) {
@@ -32,6 +32,28 @@ public class AttendanceService {
 	    attendanceDAO.updateCheckOut(vo);
 	    return vo;
 	  }
+	  
+	  
+	  public List<AttendanceVO> listByUser(String username){
+		  
+		  return attendanceDAO.listByUser(username);
+		  
+	  }
+	  
+	  public List<AttendanceVO> listByDate(LocalDate date){
+		  
+		  return attendanceDAO.listByDate(date);
+	  }
+	  
+	  public List<AttendanceVO> listAll(){
+		  
+		  return attendanceDAO.listAll();
+	  }
+	  
+	  
+	  
+	  
+	  
 	  
 	  
 	  

@@ -7,7 +7,7 @@
   	
   	
   	  <!-- 1) 출근 기록 삽입 -->
-  <insert id="insertCheckIn" parameterType="">
+  <insert id="insertCheckIn" parameterType="AttendanceVO">
     INSERT INTO ATTENDANCE
       (ATTENDANCE_DATE, CHECKIN_TIME, STATUS, RECORDED_AT, USERNAME)
     VALUES
@@ -16,13 +16,32 @@
   	
   	
   	  <!-- 2) 퇴근 시간 업데이트 -->
-  <update id="updateCheckOut" parameterType="">
+  <update id="updateCheckOut" parameterType="AttendanceVO">
     UPDATE ATTENDANCE
     SET CHECKOUT_TIME = #{checkoutTime},
-        STATUS       = '퇴근',
-        UPDATE_AT    = NOW()
+        STATUS = '퇴근',
+        UPDATE_AT= NOW()
     WHERE ATTENDANCE_ID = #{attendanceId}
   </update>
+  	
+  	
+ <select id="selectByUser" resultType="AttendanceVO" parameterType="string">
+    SELECT * FROM ATTENDANCE
+    WHERE USERNAME = #{username}
+    ORDER BY ATTENDANCE_DATE DESC, CHECKIN_TIME
+  </select>
+
+  <select id="selectByDate" resultType="AttendanceVO" parameterType="java.time.LocalDate">
+    SELECT * FROM ATTENDANCE
+    WHERE ATTENDANCE_DATE = #{attendanceDate}
+    ORDER BY CHECKIN_TIME
+  </select>
+
+  <select id="selectAll" resultType="AttendanceVO">
+    SELECT * FROM ATTENDANCE
+    ORDER BY ATTENDANCE_DATE DESC, CHECKIN_TIME
+  </select>
+  	
   	
   	
   	
