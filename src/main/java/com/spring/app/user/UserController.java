@@ -27,12 +27,8 @@ public class UserController {
 	}
 	
 	@GetMapping("login")
-	public String login(@AuthenticationPrincipal UserVO userVO) {
-		
-		if (userVO!=null) {
-			return "redirect:/";
-		}
-		
+	public String login() {
 		return "user/login";
 	}
+	
 }

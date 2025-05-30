@@ -56,7 +56,7 @@ public class SecurityConfig {
 		.httpBasic(httpBasic -> httpBasic.disable())
 		.addFilter(new JwtLoginFilter(authenticationConfiguration.getAuthenticationManager(), jwtTokenManager))
 		.addFilter(new JwtAuthenticationFilter(authenticationConfiguration.getAuthenticationManager(), jwtTokenManager));
-		
+		;
 		return security.build();
 		
 		

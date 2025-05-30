@@ -13,8 +13,6 @@
 	<a href="user/join">join</a>
 	<a href="user/login">login</a>
 	<sec:authorize access="isAuthenticated()">
-		<sec:authentication property="principal" var="user"/>
-		${user.username}
 	</sec:authorize>
 </body>
 </html>

@@ -44,38 +44,4 @@ public class JwtTokenManager {
 		this.key = Keys.hmacShaKeyFor(s.getBytes());
 	}
 	
-	public String createToken(Authentication authentication) {
-		return Jwts
-					.builder()
-					.setSubject(authentication.getName())
-					.claim("roles", authentication.getAuthorities())
-					.setIssuedAt(new Date(System.currentTimeMillis()))
-					.setExpiration(new Date(System.currentTimeMillis()+accessValidTime))
-					.setIssuer(issuer) //token 발급자
-					.signWith(key)
-					.compact();
-		
-		
-	}
-	
-	public Claims tokenValidation(String token) throws Exception {
-		return Jwts
-				.parser()
-				.setSigningKey(this.key)
-				.build()
-				.parseClaimsJws(token)
-				.getBody();
-	}
-	
-	public Authentication getAuthentication(String username) {
-		UserDetails userDetails = userService.loadUserByUsername(username);
-		
-		Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
-		
-		return authentication;
-	}
-	
-	
-	
-	
 }
