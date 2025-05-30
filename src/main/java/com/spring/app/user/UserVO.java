@@ -24,4 +24,7 @@ public class UserVO {
 	private boolean enabled;
 	private String sns;
 	private Date createdAt;
+	private String position;
+	private String parent;
+	private Long departmentId;
 }
