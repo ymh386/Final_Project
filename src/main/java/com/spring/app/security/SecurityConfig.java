@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.DefaultSecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFilter;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
 
@@ -55,7 +56,7 @@ public class SecurityConfig {
 		})
 		.httpBasic(httpBasic -> httpBasic.disable())
 		.addFilter(new JwtLoginFilter(authenticationConfiguration.getAuthenticationManager(), jwtTokenManager))
-		.addFilter(new JwtAuthenticationFilter(authenticationConfiguration.getAuthenticationManager(), jwtTokenManager));
+		.addFilter(new JwtAuthenticationFilter(jwtTokenManager, authenticationConfiguration.getAuthenticationManager()));
 		
 		return security.build();
 		
