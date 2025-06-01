@@ -27,7 +27,6 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter{
 	
 	private AuthenticationManager authenticationManager;
 	
-	
 	public JwtLoginFilter(AuthenticationManager authenticationManager, JwtTokenManager jwtTokenManager) {
 		//Spring Security의 내부 인증 매니저를 필터에 저장
 		this.authenticationManager=authenticationManager;
