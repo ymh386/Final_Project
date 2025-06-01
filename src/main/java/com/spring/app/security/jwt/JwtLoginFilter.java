@@ -3,6 +3,7 @@ package com.spring.app.security.jwt;
 import java.io.IOException;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -42,24 +43,28 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter{
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException {
 		
+		request.getMethod();
+		
+		if (!request.getMethod().equals("POST")) {
+			throw new AuthenticationServiceException("지원하지 않는 형식입니다.");
+		}
+		
 		//id, pw 파라미터 가져옴
-	 	String username = request.getParameter("username");
+		String username = request.getParameter("username");
 		String password = request.getParameter("password");
 		
 		//가져온 파라미터 내용을 authenticationToken에 담음
-		UsernamePasswordAuthenticationToken authenticationToken;
-		authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
+		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 		
 		//내용을 담은 authenticationToken을 검증함 (내부적으로 authenticationProvider.authenticate를 실행 > userdetailsService 호출)
 		//인증을 위임하여 비밀번호 검증 또한 내부적으로 passwordEncoder.matches()로 처리됨.
-		Authentication authentication = this.authenticationManager.authenticate(authenticationToken);
-		
-		log.info("Result : {} ", authentication.getPrincipal());
+		Authentication authentication = this.authenticationManager.authenticate(token);
+		log.info("token : {}", authentication);
 		
 		//리턴된 값은 successfulAuthentication()의 매개변수로 전달됨.
 		//호출하지 않아도 리턴값이 전달되는 이유는 successfulAuthentication() 메서드는 attemptAuthentication()의 리턴값을
 		//security 내부에서 받아서 자동으로 호출해주는 콜백 메서드이기 때문.
-		return authentication; 
+		return authentication;
 	}
 	
 	@Override
@@ -69,7 +74,6 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter{
 		
 		 //jwt를 token형식으로 저장
 		 String token = jwtTokenManager.createToken(authResult);
-		 log.info("Token : {}", token);
 		
 		 //저장된 token형식을 cookie에 저장
 		 Cookie cookie = new Cookie("accessToken", token);

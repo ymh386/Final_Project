@@ -1,5 +1,6 @@
 package com.spring.app.security.jwt;
 
+import java.security.SignatureException;
 import java.util.Base64;
 import java.util.Date;
 
