@@ -14,7 +14,7 @@
 	<a href="user/login">login</a>
 	<sec:authentication property="principal" var="user"/>
 	<sec:authorize access="isAuthenticated()">
-		<h3>${user}</h3>
+		<h3>${user.email}</h3>
 	</sec:authorize>
 </body>
 </html>
