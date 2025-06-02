@@ -11,9 +11,22 @@
 	<h1>ADMIN</h1>
 	
 	<h2>승인 대기 리스트</h2>
-    <c:forEach items="${userList}" var="u">
-    	<h3>${u.username} 허가 필요</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>유저ID</th>
+                <th>상태</th>
+            </tr>
+        </thead>
+        <tbody>
+            <c:forEach items="${userList}" var="u">
+                <tr>
+                    <td>${u.username}</td>
+                    <td>허가 필요</td>
+                </tr>
     </c:forEach>
+        </tbody>
+    </table>
 
 </body>
 </html>
