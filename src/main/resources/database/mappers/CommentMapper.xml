@@ -6,7 +6,7 @@
 <mapper namespace="com.spring.app.board.comment.CommentDAO">
 
   <!-- ▶ resultMap: COMMENTS 테이블 컬럼 → CommentVO 필드 매핑 -->
-  <resultMap id="CommentResultMap" type="com.spring.app.board.CommentVO">
+  <resultMap id="CommentResultMap" type="CommentVO">
     <id     column="COMMENT_ID"       property="commentId"       jdbcType="BIGINT"/>
     <result column="USERNAME"         property="userName"        jdbcType="VARCHAR"/>
     <result column="BOARD_NUM"        property="boardNum"        jdbcType="BIGINT"/>
@@ -16,7 +16,7 @@
 
   <!-- 1) 댓글 추가 -->
   <insert id="addComment"
-          parameterType="com.spring.app.board.CommentVO"
+          parameterType="CommentVO"
           useGeneratedKeys="true"
           keyProperty="commentId"
           keyColumn="COMMENT_ID">
@@ -43,7 +43,7 @@
 
   <!-- 3) 댓글 삭제 -->
   <delete id="deleteComment"
-          parameterType="com.spring.app.board.CommentVO">
+          parameterType="CommentVO">
     DELETE FROM COMMENTS
     WHERE COMMENT_ID = #{commentId}
       AND BOARD_NUM  = #{boardNum}

@@ -3,6 +3,9 @@ package com.spring.app.board.interaction;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
 public interface InteractionDAO {
     /** 좋아요 추가 */
     int addLike(InteractionVO interactionVO) throws Exception;
