@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.spring.app.schedule.ScheduleDAO">
+  	
+  	<!-- 전체 조회 -->
+  	<select id="selectAll" resultType="ScheduleVO">
+  		
+  		SELECT * FROM SECHEDULE
+  		ORDER BY SCHEDULE_DATE, START_TIME
+ 
+  	</select>
+ 
+ 	<select id="selectById" parameterType="String">
+ 	
+ 	SELECT * FROM SECHEDULE
+ 	WHERE USERNAME = #{username}
+ 	
+ 	</select>
+ 
+ 
+     <!-- 일정 생성 -->
+    <insert id="insertSchedule" parameterType="ScheduleVO"
+            useGeneratedKeys="true" keyProperty="scheduleId" keyColumn="SCHEDULE_ID">
+        INSERT INTO SCHEDULE
+            (USERNAME, FACILITY_ID, SCHEDULE_DATE, START_TIME, END_TIME, CREATED_AT)
+        VALUES
+            (#{username}, #{facilityId}, #{scheduleDate}, #{startTime}, #{endTime}, NOW())
+    </insert>
+ 
+ 
+     <!--  일정 삭제 -->
+    <delete id="deleteSchedule" parameterType="long">
+        DELETE FROM SCHEDULE
+        WHERE SCHEDULE_ID = #{scheduleId}
+    </delete>
+    
+    
+    
+</mapper>
+ 
+  	
+  	
+  	
+

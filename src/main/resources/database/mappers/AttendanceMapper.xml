@@ -3,6 +3,49 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
-  <mapper namespace="dao">
+  <mapper namespace="com.spring.app.attendance.AttendanceDAO">
+  	
+  	
+  	  <!-- 1) 출근 기록 삽입 -->
+  <insert id="insertCheckIn" parameterType="AttendanceVO" useGeneratedKeys= "true"
+        keyProperty="attendanceId"
+        keyColumn="ATTENDANCE_ID">
+    INSERT INTO ATTENDANCE
+      (ATTENDANCE_DATE, CHECKIN_TIME, STATUS, RECORDED_AT, USERNAME)
+    VALUES
+      (#{attendanceDate}, #{checkinTime}, '출근', NOW(), #{username})
+  </insert>
+  	
+  	
+  	  <!-- 2) 퇴근 시간 업데이트 -->
+  <update id="updateCheckOut" parameterType="AttendanceVO">
+    UPDATE ATTENDANCE
+    SET CHECKOUT_TIME = NOW(),
+        STATUS = '퇴근'
+    WHERE ATTENDANCE_ID = #{attendanceId}
+  </update>
+  	
+  	
+ <select id="selectByUser" resultType="AttendanceVO" parameterType="string">
+    SELECT * FROM ATTENDANCE
+    WHERE USERNAME = #{username}
+    ORDER BY ATTENDANCE_DATE DESC, CHECKIN_TIME
+  </select>
+
+  <select id="selectByDate" resultType="AttendanceVO" parameterType="java.time.LocalDate">
+    SELECT * FROM ATTENDANCE
+    WHERE ATTENDANCE_DATE = #{attendanceDate}
+    ORDER BY CHECKIN_TIME
+  </select>
+
+  <select id="selectAll" resultType="AttendanceVO">
+    SELECT * FROM ATTENDANCE
+    ORDER BY ATTENDANCE_DATE DESC, CHECKIN_TIME
+  </select>
+  	
+  	
+  	
+  	
+  	
   	
   </mapper>
