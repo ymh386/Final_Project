@@ -10,5 +10,5 @@ import lombok.ToString;
 public class StateVO {
 	
 	private Long stateNum;
-	private String stateName;
+	private String state;
 }

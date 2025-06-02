@@ -10,16 +10,42 @@
  		 VALUES (#{username}, #{password}, #{name}, #{email}, #{phone}, #{birth}, #{fileName}, #{oriName}, 1, 1, 1, 1, #{sns})
   	</insert>
   	
+  	  	<insert id="trainerJoin" parameterType="UserVO">
+ 		INSERT INTO USER
+ 		(USERNAME, PASSWORD, NAME, EMAIL, PHONE, BIRTH, FILE_NAME, ORI_NAME, ACCOUNTNONEXPIRED, ACCOUNTNONLOCKED, CREDENTIALSNONEXPIRED, ENABLED, SNS, TRAINER_CODE)
+ 		 VALUES (#{username}, #{password}, #{name}, #{email}, #{phone}, #{birth}, #{fileName}, #{oriName}, 1, 1, 1, 1, #{sns}, NULL)
+  	</insert>
+  	
+  	<select id="getTrainerCode" resultType="Long">
+  		SELECT AUTO_INCREMENT
+		FROM INFORMATION_SCHEMA.TABLES
+		WHERE TABLE_SCHEMA = 'final'
+		  AND TABLE_NAME = 'USER';
+  	</select>
+  	
   	<select id="detail" resultMap="detailMap">
-		SELECT *
-		FROM USER U
-			 INNER JOIN
-			 MEMBER_ROLE MR
+		SELECT * FROM USER U
+			 INNER JOIN MEMBER_ROLE MR
 			 USING (USERNAME)
-			 INNER JOIN
-			 ROLE R
+			 INNER JOIN ROLE R
 			 USING (ROLE_NUM)
+			 INNER JOIN MEMBER_STATE MS
+			 USING (USERNAME)
+			 INNER JOIN STATE
+			 USING (STATE_NUM)
 		WHERE USERNAME=#{username}
+ 	</select>
+ 	
+ 	<select id="awaitUserList" resultType="UserVO">
+		SELECT * FROM 
+			USER U
+			INNER JOIN
+			MEMBER_STATE MS
+			USING (USERNAME)
+			INNER JOIN
+			STATE
+			USING (STATE_NUM)
+			WHERE STATE_NUM=2	
  	</select>
  	
  	<resultMap type="UserVO" id="detailMap">
@@ -41,8 +67,12 @@
  		<result column="PARENT" property="parent"/>
  		<result column="DEPARTMENT_ID" property="departmentId"/>
  		
- 		<collection property="list" javaType="java.util.List" ofType="RoleVO">
+ 		<collection property="roleList" javaType="java.util.List" ofType="RoleVO">
  			<result column="ROLE_NAME" property="roleName"/>
+ 		</collection>
+ 		
+ 		<collection property="stateList" javaType="java.util.List" ofType="StateVO">
+ 			<result column="STATE" property="state"/>
  		</collection>
  		
  	</resultMap>

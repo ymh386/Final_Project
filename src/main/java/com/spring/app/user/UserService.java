@@ -1,5 +1,7 @@
 package com.spring.app.user;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -39,6 +41,19 @@ public class UserService implements UserDetailsService {
 		int result = userDAO.join(userVO);
 		
 		return result;
+	}
+
+	
+	public String getTrainerId() throws Exception {
+		Long code = userDAO.getTrainerCode();
+		String trainerId = "T"+code;
+		return trainerId;
+	}
+	
+	public List<UserVO> awaitUserList(UserVO userVO) throws Exception {
+		List<UserVO> ar = userDAO.awaitUserList(userVO);
+		
+		return ar;
 	}
 	
 	

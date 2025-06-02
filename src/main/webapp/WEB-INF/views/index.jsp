@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,12 +13,16 @@
 	
 	<sec:authentication property="principal" var="user"/>
 	<sec:authorize access="isAuthenticated()">
+		<h3>${user.username}</h3>
+		<a href="/user/mypage">mypage</a>
 		<a href="/user/logout">logout</a>
-		<h3>${user.email}</h3>
 	</sec:authorize>
 	<sec:authorize access="!isAuthenticated()">
-		<a href="user/join">join</a>
+		<a href="user/join/join">join</a>
 		<a href="user/login">login</a>
+	</sec:authorize>
+		<sec:authorize access="hasRole('ADMIN')">
+		<a href="admin">admin</a>
 	</sec:authorize>
 </body>
 </html>
