@@ -43,7 +43,18 @@
     </style>
 </head>
 <body>
-    <h2>안녕하세요, <sec:authentication property="name"/> 님</h2>
+  	<h2>
+		안녕하세요,
+		<c:choose>
+			<c:when test="${not empty pageContext.request.userPrincipal}">
+                ${pageContext.request.userPrincipal.name} 
+            </c:when>
+			<c:otherwise>
+                손님
+            </c:otherwise>
+		</c:choose>
+		님
+	</h2>
 
     <div id="buttons">
         <button id="checkInBtn">출근</button>

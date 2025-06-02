@@ -8,14 +8,14 @@
   	<!-- 전체 조회 -->
   	<select id="selectAll" resultType="ScheduleVO">
   		
-  		SELECT * FROM SECHEDULE
+  		SELECT * FROM SCHEDULE
   		ORDER BY SCHEDULE_DATE, START_TIME
  
   	</select>
  
  	<select id="selectById" parameterType="String">
  	
- 	SELECT * FROM SECHEDULE
+ 	SELECT * FROM SCHEDULE
  	WHERE USERNAME = #{username}
  	
  	</select>
