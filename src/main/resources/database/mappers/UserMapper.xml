@@ -49,7 +49,7 @@
  	</select>
  	
  	<update id="updateUserState" parameterType="MemberStateVO">
- 		UPDATE MEMBER_ROLE SET STATE_NUM=#{stateNum} WHERE USERNAME=#{username}
+ 		UPDATE MEMBER_STATE SET USERNAME=#{username}, STATE_NUM=1 WHERE USERNAME=#{username}
  	</update>
  	
  	<resultMap type="UserVO" id="detailMap">

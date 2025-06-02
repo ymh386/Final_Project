@@ -22,7 +22,7 @@
 		<a href="user/login">login</a>
 	</sec:authorize>
 		<sec:authorize access="hasRole('ADMIN')">
-		<a href="admin">admin</a>
+		<a href="admin/main">admin</a>
 	</sec:authorize>
 </body>
 </html>

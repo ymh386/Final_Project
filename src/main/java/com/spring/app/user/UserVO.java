@@ -36,6 +36,8 @@ public class UserVO implements UserDetails {
 	private String parent;
 	private Long departmentId;
 	private Long trainerCode;
+	private Long stateNum;
+	private String state;
 	
 	private List<RoleVO> roleList;
 	private List<StateVO> stateList;
