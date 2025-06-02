@@ -35,18 +35,28 @@ public class UserVO implements UserDetails {
 	private String position;
 	private String parent;
 	private Long departmentId;
+	private Long trainerCode;
 	
-	private List<RoleVO> list;
+	private List<RoleVO> roleList;
+	private List<StateVO> stateList;
 	
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		// TODO Auto-generated method stub
 		List<GrantedAuthority> ar = new ArrayList<>();
 		
-		for (RoleVO roleVO : this.list) {
+		for (RoleVO roleVO : this.roleList) {
 			GrantedAuthority g = new SimpleGrantedAuthority(roleVO.getRoleName());
 			ar.add(g);
 		}
+		
+		if (this.stateList!=null) {
+			for (StateVO stateVO : this.stateList) {
+				GrantedAuthority g = new SimpleGrantedAuthority(stateVO.getState());
+				ar.add(g);
+			}
+		}
 		return ar;
 	}
+	
 }

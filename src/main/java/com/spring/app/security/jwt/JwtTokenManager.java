@@ -18,15 +18,17 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class JwtTokenManager {
 	
-	@Value("${jwt.secretKey}")
-	private String secretKey;
-	
 	@Value("${jwt.issuer}")
 	private String issuer;
+	
+	@Value("${jwt.secretKey}")
+	private String secretKey;
 	
 	@Value("${jwt.access.ValidTime}")
 	private long validTime;
@@ -37,48 +39,59 @@ public class JwtTokenManager {
 	private UserService userService;
 	
 	@PostConstruct
-	//사인에 사용할 키 설정
 	public void init() {
 		String s = Base64.getEncoder().encodeToString(secretKey.getBytes());
-		this.key=Keys.hmacShaKeyFor(s.getBytes());
+		this.key = Keys.hmacShaKeyFor(s.getBytes());
 	}
 	
 	//토큰 생성
 	public String createToken(Authentication authentication) {
+		
+		//생성하기 위한 토큰 빌더 객체 생성
+		//사용자 이름, 권한 정보, 발급/만료 시간, 발급자, 발급된 키로 서명, 문자열로 직렬화
 		String token = Jwts
 						.builder()
 						.setSubject(authentication.getName())
 						.claim("roles", authentication.getAuthorities())
-						.setIssuedAt(new Date(System.currentTimeMillis()))
-						.setExpiration(new Date(System.currentTimeMillis()+validTime))
+						.issuedAt(new Date(System.currentTimeMillis()))
+						.expiration(new Date(System.currentTimeMillis()+validTime))
 						.issuer(issuer)
 						.signWith(key)
 						.compact()
 						;
 		
 		return token;
+		
 	}
 	
 	//토큰 검증
 	public Claims validateToken(String token) {
+		
+		//검증하기 위해 builder객체 초기화
+		//서명 키 설정 및 빌드
+		//토큰 파싱(유효성, 서명, 만료 여부 검증)
+		//파싱된 토큰의 payload(Claims) 추출
 		Claims c = Jwts
 					.parser()
-					.setSigningKey(this.key)
+					.setSigningKey(key)
 					.build()
 					.parseClaimsJws(token)
 					.getBody()
 					;
 		
 		return c;
+					
 	}
 	
 	public Authentication getAuthentication(String username) {
 		
 		UserDetails userDetails = userService.loadUserByUsername(username);
+		
 		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+		
+		log.info("userDetails.getAuthorities : {}", userDetails.getAuthorities());
 		
 		return authentication;
 	}
-	
 
 }

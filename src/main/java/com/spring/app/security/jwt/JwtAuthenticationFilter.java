@@ -6,14 +6,15 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import reactor.netty.http.Cookies;
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 	
@@ -21,7 +22,8 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 	
 	public JwtAuthenticationFilter(JwtTokenManager jwtTokenManager, AuthenticationManager authenticationManager) {
 		super(authenticationManager);
-		this.jwtTokenManager=jwtTokenManager;
+		this.jwtTokenManager= jwtTokenManager;
+		
 	}
 
 	@Override
@@ -29,24 +31,24 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 			throws IOException, ServletException {
 		// TODO Auto-generated method stub
 		Cookie [] cookies = request.getCookies();
-		String accessToken = "";
+		String access="";
 		
-		if (cookies != null) {
-			for (Cookie cookie : cookies) {
+		if (cookies!=null) {
+			for (Cookie cookie:cookies) {
 				if (cookie.getName().equals("accessToken")) {
-					accessToken=cookie.getValue();
+					access=cookie.getValue();
 				}
 			}
 		}
 		
-		if (accessToken.length()>0) {
-			Claims claims = jwtTokenManager.validateToken(accessToken);
-			Authentication authenticaiton = jwtTokenManager.getAuthentication(claims.getSubject());
+		if (access.length()>0) {
+			Claims claims = jwtTokenManager.validateToken(access);
+			Authentication authentication = jwtTokenManager.getAuthentication(claims.getSubject());
 			
-			SecurityContextHolder.getContext().setAuthentication(authenticaiton);
+			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
 		
-		doFilter(request, response, chain);
+		super.doFilterInternal(request, response, chain);
 	}
 
 }

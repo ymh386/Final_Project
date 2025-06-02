@@ -8,10 +8,8 @@
 </head>
 <body>
 
-	<h3>join</h3>
-
-    <form action="" method="post">
-        <input type="text" name="username">
+	    <form action="" method="post">
+        <input type="text" name="username" value="${code}" readonly>
         <input type="password" name="password">
         <input type="text" name="name">
         <input type="email" name="email">
