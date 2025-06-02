@@ -7,6 +7,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 @RequestMapping("/user/*")
 public class UserController {
@@ -27,7 +31,22 @@ public class UserController {
 	}
 	
 	@GetMapping("login")
-	public void login(@AuthenticationPrincipal UserVO userVO) {
+	public String login(@AuthenticationPrincipal UserVO userVO) {
+		if (userVO != null) {
+			return "redirect:/";
+		}
 		
+		return "user/login";
+	}
+	
+	@GetMapping("logout")
+	public String logout(HttpSession session, HttpServletResponse response) throws Exception{
+		session.invalidate();
+		Cookie cookie = new Cookie("accessToken", "");
+		cookie.setMaxAge(0);
+		cookie.setPath("/");
+		response.addCookie(cookie);
+		
+		return "redirect:/";
 	}
 }

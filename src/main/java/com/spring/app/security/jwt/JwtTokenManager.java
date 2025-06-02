@@ -18,64 +18,67 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
 
 @Component
-@Slf4j
 public class JwtTokenManager {
 	
-	@Value("${jwt.access.ValidTime}")
-	private long accessValidTime;
-	
 	@Value("${jwt.secretKey}")
-	private String jwtSecretKey;
+	private String secretKey;
 	
 	@Value("${jwt.issuer}")
 	private String issuer;
-
+	
+	@Value("${jwt.access.ValidTime}")
+	private long validTime;
+	
 	private SecretKey key;
 	
 	@Autowired
 	private UserService userService;
 	
 	@PostConstruct
+	//사인에 사용할 키 설정
 	public void init() {
-		String s = Base64.getEncoder().encodeToString(jwtSecretKey.getBytes());
-		this.key = Keys.hmacShaKeyFor(s.getBytes());
+		String s = Base64.getEncoder().encodeToString(secretKey.getBytes());
+		this.key=Keys.hmacShaKeyFor(s.getBytes());
 	}
 	
+	//토큰 생성
 	public String createToken(Authentication authentication) {
-		return Jwts
-					.builder()
-					.setSubject(authentication.getName())
-					.claim("roles", authentication.getAuthorities())
-					.setIssuedAt(new Date(System.currentTimeMillis()))
-					.setExpiration(new Date(System.currentTimeMillis()+accessValidTime))
-					.setIssuer(issuer) //token 발급자
-					.signWith(key)
-					.compact();
+		String token = Jwts
+						.builder()
+						.setSubject(authentication.getName())
+						.claim("roles", authentication.getAuthorities())
+						.setIssuedAt(new Date(System.currentTimeMillis()))
+						.setExpiration(new Date(System.currentTimeMillis()+validTime))
+						.issuer(issuer)
+						.signWith(key)
+						.compact()
+						;
 		
-		
+		return token;
 	}
 	
-	public Claims tokenValidation(String token) throws Exception {
-		return Jwts
-				.parser()
-				.setSigningKey(this.key)
-				.build()
-				.parseClaimsJws(token)
-				.getBody();
+	//토큰 검증
+	public Claims validateToken(String token) {
+		Claims c = Jwts
+					.parser()
+					.setSigningKey(this.key)
+					.build()
+					.parseClaimsJws(token)
+					.getBody()
+					;
+		
+		return c;
 	}
 	
 	public Authentication getAuthentication(String username) {
-		UserDetails userDetails = userService.loadUserByUsername(username);
 		
-		Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
+		UserDetails userDetails = userService.loadUserByUsername(username);
+		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 		
 		return authentication;
 	}
 	
-	
-	
-	
+
 }

@@ -10,11 +10,14 @@
 <body>
 	<h3>home</h3>
 	
-	<a href="user/join">join</a>
-	<a href="user/login">login</a>
 	<sec:authentication property="principal" var="user"/>
 	<sec:authorize access="isAuthenticated()">
-		<h3>${user}</h3>
+		<a href="/user/logout">logout</a>
+		<h3>${user.email}</h3>
+	</sec:authorize>
+	<sec:authorize access="!isAuthenticated()">
+		<a href="user/join">join</a>
+		<a href="user/login">login</a>
 	</sec:authorize>
 </body>
 </html>
