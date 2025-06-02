@@ -59,7 +59,14 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		// 로그인 요청이 성공했으므로 토큰 생성
 		String token = jwtTokenManager.createToken(authResult);
 		Cookie cookie = new Cookie("accessToken", token);
-		cookie.setMaxAge(120);
+		
+		boolean isAuto = "true".equals(request.getParameter("auto"));
+		
+		if (isAuto) {
+			cookie.setMaxAge(360000);			
+		} else {
+			cookie.setMaxAge(-1);
+		}
 		cookie.setPath("/");
 		cookie.setHttpOnly(true);
 		

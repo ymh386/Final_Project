@@ -9,11 +9,15 @@
 <body>
 
 	<h3>login</h3>
-    <form action="/users/login" method="post">
-        <input type="text" name="username">
-        <input type="password" name="password">
+    <form id="loginForm" action="/users/login" method="post">
+        <input type="text" name="username" id="username">
+        <input type="password" name="password"><br>
+        <input id="autoLogin" type="checkbox"><label>자동 로그인</label>
+        <input id="autoFlag" name="auto" type="hidden" value="false">
+        <input id="rememberId" type="checkbox"><label>id 저장</label><br>
         <button type="submit">login</button>
     </form>
 
+<script src="/js/login.js"></script>
 </body>
 </html>
