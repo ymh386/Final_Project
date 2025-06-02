@@ -3,6 +3,7 @@ package com.spring.app.user;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,20 +19,37 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 	
-	@GetMapping("join")
-	public void join() {
-		
-	}
+	@GetMapping("join/join")
+	void join() {}
 	
-	@PostMapping("join")
-	public String join(UserVO userVO) throws Exception{
+	@GetMapping("join/memberJoin")
+	void memberJoin() {}
+	
+	@GetMapping("mypage")
+	void myPage() {}
+	
+	@PostMapping("join/memberJoin")
+	String memberJoin(UserVO userVO) throws Exception{
 		int result = userService.join(userVO);
 		
-		return "redirect:../";
+		return "redirect:/";
+	}
+	
+	@GetMapping("join/trainerJoin")
+	void trainerJoin(Model model) throws Exception {
+		String trainerId = userService.getTrainerId();
+		model.addAttribute("code", trainerId);
+	}
+	
+	@PostMapping("join/trainerJoin")
+	String trainerJoin(UserVO userVO) throws Exception{
+		int result = userService.join(userVO);
+		
+		return "redirect:/";
 	}
 	
 	@GetMapping("login")
-	public String login(@AuthenticationPrincipal UserVO userVO) {
+	String login(@AuthenticationPrincipal UserVO userVO) {
 		if (userVO != null) {
 			return "redirect:/";
 		}
@@ -40,7 +58,7 @@ public class UserController {
 	}
 	
 	@GetMapping("logout")
-	public String logout(HttpSession session, HttpServletResponse response) throws Exception{
+	String logout(HttpSession session, HttpServletResponse response) throws Exception{
 		session.invalidate();
 		Cookie cookie = new Cookie("accessToken", "");
 		cookie.setMaxAge(0);

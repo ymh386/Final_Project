@@ -36,7 +36,7 @@ public class SecurityConfig {
 	@Bean
 	WebSecurityCustomizer custom() {
 		return (web)->{
-			web.ignoring().requestMatchers("/css/**", "/js/**", "/img/**");
+			web.ignoring().requestMatchers("/css/**", "/js/**", "/img/**", "/user/join", "/user/login");
 		};
 	}
 	
@@ -47,7 +47,8 @@ public class SecurityConfig {
 		.csrf(csrf->csrf.disable())
 		.authorizeHttpRequests(request->{
 			request
-				.requestMatchers("/admin/**").hasRole("ADMIN")
+				.requestMatchers("/user/admin/**").hasRole("ADMIN")
+				.requestMatchers("/user/mypage/**").hasAuthority("APPROVE")
 				.anyRequest().permitAll();
 		})
 		.formLogin(login->login.disable())
@@ -55,7 +56,7 @@ public class SecurityConfig {
 			session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		})
 		.httpBasic(httpBasic -> httpBasic.disable())
-		.addFilter(new JwtLoginFilter(authenticationConfiguration.getAuthenticationManager(), jwtTokenManager))
+		.addFilter(new JwtLoginFilter(jwtTokenManager, authenticationConfiguration.getAuthenticationManager()))
 		.addFilter(new JwtAuthenticationFilter(jwtTokenManager, authenticationConfiguration.getAuthenticationManager()));
 		
 		return security.build();
