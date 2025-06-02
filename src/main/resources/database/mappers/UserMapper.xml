@@ -48,6 +48,10 @@
 			WHERE STATE_NUM=2	
  	</select>
  	
+ 	<update id="updateUserState" parameterType="MemberStateVO">
+ 		UPDATE MEMBER_ROLE SET STATE_NUM=#{stateNum} WHERE USERNAME=#{username}
+ 	</update>
+ 	
  	<resultMap type="UserVO" id="detailMap">
  		<id column="USERNAME" property="username"/>
  		<result column="PASSWORD" property="password"/>

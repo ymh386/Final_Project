@@ -9,9 +9,10 @@
 </head>
 <body>
 	<h1>ADMIN</h1>
-
-    <c:forEach items="${userList}">
-    
+	
+	<h2>승인 대기 리스트</h2>
+    <c:forEach items="${userList}" var="u">
+    	<h3>${u.username} 허가 필요</h3>
     </c:forEach>
 
 </body>

@@ -56,5 +56,11 @@ public class UserService implements UserDetailsService {
 		return ar;
 	}
 	
+	public int updateUserState(MemberStateVO memberStateVO) throws Exception {
+		int result = userDAO.updateUserState(memberStateVO);
+		
+		return result;
+	}
+	
 	
 }
