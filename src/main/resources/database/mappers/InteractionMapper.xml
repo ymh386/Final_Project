@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.app.board.interaction.InteractionDAO">
+
+  <!-- ▶ resultMap: BOARD_INTERACTION 테이블 컬럼 → InteractionVO 필드 매핑 -->
+  <resultMap id="InteractionResultMap" type="com.spring.app.board.InteractionVO">
+    <result column="USERNAME" property="userName" jdbcType="VARCHAR"/>
+    <result column="BOARD_NUM" property="boardNum"  jdbcType="BIGINT"/>
+  </resultMap>
+
+  <!-- 1) 좋아요 추가 -->
+  <insert id="addLike" parameterType="com.spring.app.board.InteractionVO">
+    INSERT INTO BOARD_INTERACTION
+      (USERNAME, BOARD_NUM)
+    VALUES
+      (#{userName}, #{boardNum})
+  </insert>
+
+  <!-- 2) 좋아요 삭제 -->
+  <delete id="removeLike" parameterType="com.spring.app.board.InteractionVO">
+    DELETE FROM BOARD_INTERACTION
+    WHERE USERNAME  = #{userName}
+      AND BOARD_NUM = #{boardNum}
+  </delete>
+
+  <!-- 3) 특정 게시글의 좋아요 개수 조회 -->
+  <select id="getLikeCount" parameterType="long" resultType="long">
+    SELECT COUNT(*)
+      FROM BOARD_INTERACTION
+    WHERE BOARD_NUM = #{boardNum}
+  </select>
+
+  <!-- 4) 특정 사용자가 해당 게시글을 이미 좋아요했는지 확인 -->
+  <select id="isLiked" parameterType="com.spring.app.board.InteractionVO" resultType="int">
+    SELECT COUNT(*)
+      FROM BOARD_INTERACTION
+    WHERE USERNAME  = #{userName}
+      AND BOARD_NUM = #{boardNum}
+  </select>
+
+</mapper>
