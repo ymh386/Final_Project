@@ -18,5 +18,7 @@ public interface UserDAO {
 	List<UserVO> awaitUserList(UserVO userVO) throws Exception;
 	
 	int updateUserState(MemberStateVO memberStateVO) throws Exception;
+	
+	int update(UserVO userVO) throws Exception;
 
 }

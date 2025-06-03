@@ -35,6 +35,12 @@ public class UserService implements UserDetailsService {
 		return userVO;
 	}
 	
+	public UserVO detail(UserVO userVO) throws Exception {
+		userVO = userDAO.detail(userVO);
+		
+		return userVO;
+	}
+	
 	public int join(UserVO userVO) throws Exception {
 		
 		userVO.setPassword(encoder.encode(userVO.getPassword()));
@@ -58,6 +64,12 @@ public class UserService implements UserDetailsService {
 	
 	public int updateUserState(MemberStateVO memberStateVO) throws Exception {
 		int result = userDAO.updateUserState(memberStateVO);
+		
+		return result;
+	}
+	
+	public int update(UserVO userVO) throws Exception {
+		int result = userDAO.update(userVO);
 		
 		return result;
 	}

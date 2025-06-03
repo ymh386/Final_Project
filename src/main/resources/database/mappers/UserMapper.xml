@@ -52,6 +52,10 @@
  		UPDATE MEMBER_STATE SET USERNAME=#{username}, STATE_NUM=1 WHERE USERNAME=#{username}
  	</update>
  	
+ 	<update id="update" parameterType="UserVO">
+ 		UPDATE USER SET PASSWORD=#{password}, NAME=#{name}, EMAIL=#{email}, PHONE=#{phone} WHERE USERNAME=#{username}
+ 	</update>
+ 	
  	<resultMap type="UserVO" id="detailMap">
  		<id column="USERNAME" property="username"/>
  		<result column="PASSWORD" property="password"/>

@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +18,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class UserVO implements UserDetails {
+public class UserVO implements UserDetails, OAuth2User {
 	
 	private String username;
 	private String password;
@@ -41,6 +43,8 @@ public class UserVO implements UserDetails {
 	
 	private List<RoleVO> roleList;
 	private List<StateVO> stateList;
+	private Map<String, Object> attributes;
+	private String accessToken;
 	
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
