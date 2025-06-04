@@ -93,21 +93,18 @@
 
             // 출근 버튼 클릭 이벤트
             checkInBtn.addEventListener('click', () => {
-                if (checkInBtn.classList.contains('disabled')) return;
-                const url = contextPath
-                          + '/attendance/checkIn?username='
-                          + encodeURIComponent(username);
-                fetch(url, {
-                    method: 'POST'
-                })
+                if (checkInBtn.disabled) return;
+                const url = contextPath + '/attendance/checkIn?username=' + encodeURIComponent(username);
+                fetch(url, { method: 'POST' })
                 .then(res => {
                     if (!res.ok) throw new Error('출근 처리 실패');
                     return res.json();
                 })
                 .then(vo => {
-                    // 출근 성공 시 버튼 토글 및 목록 업데이트
+                    // 출근 성공 시
                     latestAttendanceId = vo.attendanceId;
-                    latestStatus       = '출근';
+                    // 서비스에서는 "정상출근", "지각", "결근" 중 하나를 status로 넘겨줍니다.
+                    latestStatus       = vo.status;
                     toggleButtons();
                     prependAttendanceRow(vo);
                 })
@@ -118,20 +115,16 @@
 
             // 퇴근 버튼 클릭 이벤트
             checkOutBtn.addEventListener('click', () => {
-                if (checkOutBtn.classList.contains('disabled')) return;
+                if (checkOutBtn.disabled) return;
                 if (!latestAttendanceId) return;
-                const url = contextPath
-                          + '/attendance/checkout?attendanceId='
-                          + latestAttendanceId;
-                fetch(url, {
-                    method: 'POST'
-                })
+                const url = contextPath + '/attendance/checkOut?attendanceId=' + latestAttendanceId;
+                fetch(url, { method: 'POST' })
                 .then(res => {
                     if (!res.ok) throw new Error('퇴근 처리 실패');
                     return res.json();
                 })
                 .then(vo => {
-                    // 퇴근 성공 시 버튼 토글 및 목록 업데이트
+                    // 퇴근 성공 시
                     latestStatus = '퇴근';
                     toggleButtons();
                     updateLatestRow(vo);
@@ -143,9 +136,7 @@
 
             // 본인 근태 목록을 불러와 테이블에 표시
             function fetchAttendanceList() {
-                const url = contextPath
-                          + '/attendance/user?username='
-                          + encodeURIComponent(username);
+                const url = contextPath + '/attendance/user?username=' + encodeURIComponent(username);
                 fetch(url)
                 .then(res => {
                     if (!res.ok) throw new Error('목록 조회 실패');
@@ -153,9 +144,7 @@
                 })
                 .then(list => {
                     tbody.innerHTML = '';
-                    list.forEach(vo => {
-                        appendAttendanceRow(vo);
-                    });
+                    list.forEach(vo => appendAttendanceRow(vo));
                     determineButtonState(list);
                 })
                 .catch(err => {
@@ -211,7 +200,8 @@
                 tr.appendChild(tdStatus);
 
                 // 최신 레코드 정보 갱신
-                if (!latestAttendanceId || vo.attendanceDate >= getToday()) {
+                const today = getToday();
+                if (!latestAttendanceId && vo.attendanceDate === today) {
                     latestAttendanceId = vo.attendanceId;
                     latestStatus       = vo.status;
                 }
@@ -221,14 +211,16 @@
 
             // 버튼 활성화/비활성화 토글
             function toggleButtons() {
-                if (latestStatus === '출근') {
-                    // 출근 후, 퇴근 버튼 활성화, 출근 버튼 비활성화
+                // 수정: latestStatus가 "정상출근", "지각", "결근" 중 하나이면 "퇴근" 버튼을 활성화,
+                // 출근("checkIn")은 비활성화. 그 외(= latestStatus가 "퇴근"이거나 null)이면 출근 버튼만 활성화.
+                if (latestStatus === '정상출근' || latestStatus === '지각' || latestStatus === '결근') {
+                    // 이미 출근했거나 지각/결근 상태 → 출근 버튼 비활성, 퇴근 버튼 활성
                     checkInBtn.classList.add('disabled');
                     checkInBtn.disabled = true;
                     checkOutBtn.classList.remove('disabled');
                     checkOutBtn.disabled = false;
                 } else {
-                    // 퇴근 했거나 목록이 없으면 출근 버튼 활성화, 퇴근 버튼 비활성화
+                    // 아직 출근 전이거나, 이미 퇴근한 경우 → 출근 버튼 활성, 퇴근 버튼 비활성
                     checkInBtn.classList.remove('disabled');
                     checkInBtn.disabled = false;
                     checkOutBtn.classList.add('disabled');
@@ -236,21 +228,23 @@
                 }
             }
 
-            // 초기 상태 결정: 오늘자 최신 레코드가 있는지, 상태가 출근인지
+            // 초기 상태 결정: 오늘자 최신 레코드가 있는지, 상태가 출근(정상/지각/결근)인지
             function determineButtonState(list) {
                 const today = getToday();
+                // list 배열에서 오늘자 항목만 필터링
                 const todayRecords = list.filter(vo => vo.attendanceDate === today);
+
                 if (todayRecords.length === 0) {
-                    // 오늘 기록이 없으면 출근 버튼만 활성화
+                    // 오늘 기록이 없으면 “아직 출근 전” 상태
                     latestAttendanceId = null;
                     latestStatus       = null;
-                    toggleButtons();
                 } else {
+                    // 오늘자 기록이 있으면 가장 최근(첫 번째) 항목을 최신으로 간주
                     const mostRecent = todayRecords[0];
                     latestAttendanceId = mostRecent.attendanceId;
                     latestStatus       = mostRecent.status;
-                    toggleButtons();
                 }
+                toggleButtons();
             }
 
             // 현재 날짜를 "YYYY-MM-DD" 형식으로 반환

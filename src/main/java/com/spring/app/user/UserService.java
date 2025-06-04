@@ -62,5 +62,12 @@ public class UserService implements UserDetailsService {
 		return result;
 	}
 	
+	// 트레이너 스케쥴 등록 할때 트레이너/일반회원 구분하기 위해
+    public List<UserVO> getUsersByUsernamePrefix(String prefix) {
+        return userDAO.selectUsersByUsernamePrefix(prefix);
+    }
+
+
+	
 	
 }

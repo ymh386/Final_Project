@@ -4,6 +4,19 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
   <mapper namespace="com.spring.app.user.UserDAO">
+  
+  
+    <select id="selectUsersByUsernamePrefix"
+          parameterType="map"
+          resultType="UserVO">
+    SELECT USERNAME, NAME
+      FROM USER
+     WHERE BINARY USERNAME LIKE #{prefix}
+  </select>
+  
+  
+  
+  
   	<insert id="join" parameterType="UserVO">
  		INSERT INTO USER
  		(USERNAME, PASSWORD, NAME, EMAIL, PHONE, BIRTH, FILE_NAME, ORI_NAME, ACCOUNTNONEXPIRED, ACCOUNTNONLOCKED, CREDENTIALSNONEXPIRED, ENABLED, SNS)
@@ -19,7 +32,7 @@
   	<select id="getTrainerCode" resultType="Long">
   		SELECT AUTO_INCREMENT
 		FROM INFORMATION_SCHEMA.TABLES
-		WHERE TABLE_SCHEMA = 'final'
+		WHERE TABLE_SCHEMA = 'user99'
 		  AND TABLE_NAME = 'USER';
   	</select>
   	

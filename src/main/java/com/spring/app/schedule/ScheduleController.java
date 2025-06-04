@@ -1,20 +1,23 @@
 package com.spring.app.schedule;
 
 import java.security.Principal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import com.spring.app.user.UserService;
+import com.spring.app.user.UserVO;
 
 /**
  * 역할:
  *  - ROLE_TRAINER: 본인 일정(User 기준) 조회만 가능
  *  - ROLE_ADMIN  : 전체 일정 조회·생성·수정·삭제 가능
+ *
  */
 @Controller
 @RequestMapping("/schedule")
@@ -22,62 +25,133 @@ public class ScheduleController {
 
     @Autowired
     private ScheduleService scheduleService;
+    
+    
+    @Autowired
+    private UserService userService; 
 
-    // 1) 일정 관리 페이지 렌더링 (모두 접근 가능: 트레이너도, 관리자도)
+    /**
+     * 1) 일정 관리 페이지 렌더링
+     *    - 트레이너도, 관리자도 접근 가능
+     *    - 모델에는 오직 scheduleVO(바인딩용)만 전달
+     *    → 트레이너 목록은 별도 API나 front-end 코드에서 처리해야 함
+     */
     @GetMapping("/page")
-    public String schedulePage() {
-        return "schedule/page"; // /WEB-INF/views/schedule/page.jsp
+    public String schedulePage(Model model) {
+        // 1) “T로 시작하는” 트레이너 목록 조회
+        //    여기서 "T%"를 넘기면 MyBatis 쿼리가 `WHERE username LIKE 'T%'` 로 실행됨
+        List<UserVO> trainerList = userService.getUsersByUsernamePrefix("T%");
+
+        // 2) JSP에서 <c:forEach items="${trainerList}"> 으로 순회할 수 있도록 모델에 담아준다.
+        model.addAttribute("trainerList", trainerList);
+
+        // 3) 폼 바인딩용 빈 ScheduleVO 추가 (선택 사항)
+        model.addAttribute("scheduleVO", new ScheduleVO());
+
+        return "schedule/page";  // /WEB-INF/views/schedule/page.jsp
     }
 
-    // 2) 트레이너 본인 일정 조회 (ROLE_TRAINER 권한 혹은 ROLE_ADMIN 권한 둘 다 가능)
-    //    GET /schedule/my
+    /**
+     * 2) 트레이너 본인 일정 조회 (ROLE_TRAINER 또는 ROLE_ADMIN 권한)
+     *    GET /schedule/my
+     *    → JSON 형태로 반환
+     */
+
+    /**
+     * 2) 트레이너 본인 일정 조회 (ROLE_TRAINER 또는 ROLE_ADMIN 권한)
+     *    GET /schedule/my
+     *    → FullCalendar가 이해할 수 있는 JSON 구조로 반환
+     */
     @GetMapping("/my")
     @ResponseBody
     @PreAuthorize("hasAnyRole('TRAINER','ADMIN')")
-    public List<ScheduleVO> getMySchedules(Principal principal) {
+    public List<Map<String, Object>> getMySchedules(Principal principal) {
         String username = principal.getName();
-        return scheduleService.getScheduleById(username);
+        // ScheduleVO 리스트(원시 데이터)를 가져온다
+        List<ScheduleVO> list = scheduleService.getScheduleById(username);
+
+        // FullCalendar가 이해할 수 있는 형태로 변환
+        List<Map<String, Object>> events = new ArrayList<>();
+        for (ScheduleVO vo : list) {
+            Map<String, Object> evt = new HashMap<>();
+
+            // 1) 이벤트 ID
+            evt.put("id", vo.getScheduleId().toString());
+
+            // 2) title → 시설 ID를 이름으로 바꿔서 표시
+            String facilityName;
+            switch (vo.getFacilityId().intValue()) {
+                case 1: facilityName = "복싱장"; break;
+                case 2: facilityName = "헬스장"; break;
+                case 3: facilityName = "수영장"; break;
+                default: facilityName = "미지정"; break;
+            }
+            evt.put("title", facilityName);
+
+            // 3) start / end (ISO 8601 형식 문자열)
+            LocalDateTime startDT = LocalDateTime.of(vo.getScheduleDate(), vo.getStartTime());
+            evt.put("start", startDT.toString());
+            LocalDateTime endDT = LocalDateTime.of(vo.getScheduleDate(), vo.getEndTime());
+            evt.put("end", endDT.toString());
+
+            // 4) extendedProps → 필요시 트레이너 ID도 같이 넘김
+            Map<String, Object> ext = new HashMap<>();
+            ext.put("username", vo.getUsername());
+            ext.put("facilityId", vo.getFacilityId());
+            evt.put("extendedProps", ext);
+
+            events.add(evt);
+        }
+        return events;
     }
 
-    // 3) 전체 일정 조회 (관리자만)
-    //    GET /schedule/list
+    /**
+     * 3) 전체 일정 조회 (관리자만)
+     *    GET /schedule/list
+     *    → FullCalendar 등에서 쓸 수 있도록 Map 구조로 반환
+     */
     @GetMapping("/list")
     @ResponseBody
     @PreAuthorize("hasRole('ADMIN')")
     public List<Map<String, Object>> getAllSchedules() {
         List<ScheduleVO> list = scheduleService.getAllSchedules();
-        List<Map<String,Object>> events = new ArrayList<>();
+        List<Map<String, Object>> events = new ArrayList<>();
+
         for (ScheduleVO vo : list) {
-            Map<String,Object> evt = new HashMap<>();
+            Map<String, Object> evt = new HashMap<>();
             evt.put("id", vo.getScheduleId().toString());
             evt.put("title", "Facility " + vo.getFacilityId());
             LocalDateTime startDT = LocalDateTime.of(vo.getScheduleDate(), vo.getStartTime());
             evt.put("start", startDT.toString());
             LocalDateTime endDT = LocalDateTime.of(vo.getScheduleDate(), vo.getEndTime());
             evt.put("end", endDT.toString());
+            // FullCalendar 확장 속성으로 트레이너 ID(username)도 보낼 수 있음
             evt.put("extendedProps", Collections.singletonMap("username", vo.getUsername()));
             events.add(evt);
         }
         return events;
     }
 
-
-
-    // 5) 일정 생성 (관리자만)
-    //    POST /schedule/create
+    /**
+     * 5) 일정 생성 (관리자만)
+     *    POST /schedule/create
+     *
+     *    → JSON AJAX 방식으로 데이터를 보낼 경우 @RequestBody 사용 가능
+     *    → 아래는 JSP <form> 전송 시 @ModelAttribute 방식 예시
+     */
     @PostMapping("/create")
     @ResponseBody
     @PreAuthorize("hasRole('ADMIN')")
     public ScheduleVO createSchedule(@RequestBody ScheduleVO vo) {
-        // 생성 시 CREATED_AT은 DB의 NOW()로 자동 설정되므로 VO 세팅만 해 주면 됩니다.
+        // vo.getUsername()에는 폼에서 넘어온 트레이너 아이디가 들어옴
         scheduleService.createSchedule(vo);
-        return vo; // scheduleId가 자동 할당됨
+        return vo; // 생성된 scheduleId가 VO에 설정되어 리턴됨
     }
 
-
-
-    // 7) 일정 삭제 (관리자만)
-    //    DELETE /schedule/delete/{id}
+    /**
+     * 7) 일정 삭제 (관리자만)
+     *    DELETE /schedule/delete/{id}
+     */
     @DeleteMapping("/delete/{id}")
     @ResponseBody
     @PreAuthorize("hasRole('ADMIN')")
