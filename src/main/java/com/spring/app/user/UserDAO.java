@@ -19,6 +19,10 @@ public interface UserDAO {
 	
 	int updateUserState(MemberStateVO memberStateVO) throws Exception;
 	
+	int socialJoinTrainer(MemberStateVO memberStateVO) throws Exception;
+	
+	int socialJoinTrainer2(MemberStateVO memberStateVO) throws Exception;
+	
 	int update(UserVO userVO) throws Exception;
 
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
@@ -55,13 +56,22 @@ public class UserController {
 		return "redirect:/";
 	}
 	
-	@GetMapping("login")
-	String login(@AuthenticationPrincipal UserVO userVO) {
+	@GetMapping("login/login")
+	String memberLogin(@AuthenticationPrincipal UserVO userVO) {
 		if (userVO != null) {
 			return "redirect:/";
 		}
 		
-		return "user/login";
+		return "user/login/login";
+	}
+	
+	@GetMapping("login/trainerLogin")
+	String trainerLogin(@AuthenticationPrincipal UserVO userVO) {
+		if (userVO != null) {
+			return "redirect:/";
+		}
+		
+		return "user/login/trainerLogin";
 	}
 	
 	@GetMapping("logout")

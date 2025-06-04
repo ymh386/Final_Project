@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFilter;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
@@ -16,6 +17,9 @@ import org.springframework.security.web.firewall.HttpFirewall;
 import com.spring.app.security.jwt.JwtAuthenticationFilter;
 import com.spring.app.security.jwt.JwtLoginFilter;
 import com.spring.app.security.jwt.JwtTokenManager;
+import com.spring.app.security.social.RequestResolver;
+import com.spring.app.security.social.SocialLoginSuccessHandler;
+import com.spring.app.security.social.SocialService;
 
 
 @Configuration
@@ -23,10 +27,19 @@ import com.spring.app.security.jwt.JwtTokenManager;
 public class SecurityConfig {
 	
 	@Autowired
+	private ClientRegistrationRepository repo;
+	
+	@Autowired
+	private SocialService socialService;
+	
+	@Autowired
 	private AuthenticationConfiguration authenticationConfiguration;
 	
 	@Autowired
 	private JwtTokenManager jwtTokenManager;
+	
+	@Autowired
+	private SocialLoginSuccessHandler socialLoginSuccessHandler;
 	
 	@Bean
 	HttpFirewall fireWall() {
@@ -57,7 +70,20 @@ public class SecurityConfig {
 		})
 		.httpBasic(httpBasic -> httpBasic.disable())
 		.addFilter(new JwtLoginFilter(jwtTokenManager, authenticationConfiguration.getAuthenticationManager()))
-		.addFilter(new JwtAuthenticationFilter(jwtTokenManager, authenticationConfiguration.getAuthenticationManager()));
+		.addFilter(new JwtAuthenticationFilter(jwtTokenManager, authenticationConfiguration.getAuthenticationManager()))
+		
+		.oauth2Login(oauth->{
+			oauth
+			.authorizationEndpoint(end -> 
+				end.authorizationRequestResolver(new RequestResolver(repo, "/oauth2/authorization"))
+			)
+			.userInfoEndpoint(service->
+				service.userService(socialService)
+				.and()
+				.successHandler(socialLoginSuccessHandler)
+			);
+		})
+		;
 		
 		return security.build();
 		
