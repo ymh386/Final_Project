@@ -14,15 +14,21 @@
 	<h2>전자결재 작성</h2>
 	<form action="./addDocument" method="post">
 		<label>카테고리</label><br>
-			<select id="formSelect" name="categoryId">
-				<option selected>-- 양식 선택 --</option>
-				<c:forEach var="c" items="${ar}">
-					<option value="${c.categoryId}">${c.categoryName}</option>
-				</c:forEach>
-			</select><br><br>
+		<select id="formSelect" name="categoryId">
+			<option selected>-- 양식 선택 --</option>
+			<c:forEach var="c" items="${ar}">
+				<option value="${c.categoryId}">${c.categoryName}</option>
+			</c:forEach>
+		</select><br><br>
 
-		<label>제목</label><br>
-        <input type="text" name="documentTitle"><br><br>
+		
+
+		<label>제목</label>
+        <input type="text" name="documentTitle"></t>
+		<label>요청자</label>
+		<input type="text" name="username" readonly><br><br>
+
+
 
 		<!-- CKEditor 내용 -->
         <label for="editor">내용</label><br>
