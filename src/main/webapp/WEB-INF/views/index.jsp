@@ -24,5 +24,10 @@
 		<sec:authorize access="hasRole('ADMIN')">
 		<a href="admin/main">admin</a>
 	</sec:authorize>
+	
+	<div>
+		<a href="/approval/formRegister">양식등록(관리자)</a>
+		<a href="/approval/addDocument">결재신청</a>
+	</div>
 </body>
 </html>
