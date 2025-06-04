@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import lombok.extern.slf4j.Slf4j;
 
 @Controller
-@RequestMapping("/approval/")
+@RequestMapping("/approval/*")
 @Slf4j
 public class ApprovalController {
 	

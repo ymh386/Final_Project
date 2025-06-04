@@ -65,7 +65,10 @@ public class SecurityConfig {
 		.authorizeHttpRequests(request->{
 			request
 				.requestMatchers("/user/admin/**").hasRole("ADMIN")
-				.requestMatchers("/user/mypage/**").hasAuthority("APPROVE")
+				.requestMatchers("/approval/formRegister").hasRole("ADMIN")
+				.requestMatchers("/user/mypage**").hasAuthority("APPROVE")
+				.requestMatchers("/schedule/**").hasAuthority("APPROVE")
+				.requestMatchers("/approval/**").hasAuthority("APPROVE")
 				.anyRequest().permitAll();
 		})
 		.formLogin(login->login.disable())
