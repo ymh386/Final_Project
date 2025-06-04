@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,12 +46,14 @@ public class UserController {
 	
 	@GetMapping("join/trainerJoin")
 	void trainerJoin(Model model) throws Exception {
-		String trainerId = userService.getTrainerId();
+		String trainerId = "T"+userService.getTrainerCode();
 		model.addAttribute("code", trainerId);
 	}
 	
 	@PostMapping("join/trainerJoin")
 	String trainerJoin(UserVO userVO) throws Exception{
+		Long code = userService.getTrainerCode();
+		userVO.setTrainerCode(code);
 		int result = userService.join(userVO);
 		
 		return "redirect:/";
@@ -66,9 +69,12 @@ public class UserController {
 	}
 	
 	@GetMapping("login/trainerLogin")
-	String trainerLogin(@AuthenticationPrincipal UserVO userVO) {
+	String trainerLogin(@AuthenticationPrincipal UserVO userVO, @RequestParam(value = "error", required = false) String error, Model model) {
 		if (userVO != null) {
 			return "redirect:/";
+		}
+		if (error != null) {
+			model.addAttribute("error", error);
 		}
 		
 		return "user/login/trainerLogin";

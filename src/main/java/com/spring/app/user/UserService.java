@@ -52,10 +52,9 @@ public class UserService implements UserDetailsService {
 	}
 
 	
-	public String getTrainerId() throws Exception {
+	public Long getTrainerCode() throws Exception {
 		Long code = userDAO.getTrainerCode();
-		String trainerId = "T"+code;
-		return trainerId;
+		return code;
 	}
 	
 	public List<UserVO> awaitUserList(UserVO userVO) throws Exception {

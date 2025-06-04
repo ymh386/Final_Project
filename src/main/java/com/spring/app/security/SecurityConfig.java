@@ -18,6 +18,7 @@ import com.spring.app.security.jwt.JwtAuthenticationFilter;
 import com.spring.app.security.jwt.JwtLoginFilter;
 import com.spring.app.security.jwt.JwtTokenManager;
 import com.spring.app.security.social.RequestResolver;
+import com.spring.app.security.social.SocialLoginFailureHandler;
 import com.spring.app.security.social.SocialLoginSuccessHandler;
 import com.spring.app.security.social.SocialService;
 
@@ -25,6 +26,9 @@ import com.spring.app.security.social.SocialService;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+	
+	@Autowired
+	private SocialLoginFailureHandler socialLoginFailureHandler;
 	
 	@Autowired
 	private ClientRegistrationRepository repo;
@@ -49,7 +53,7 @@ public class SecurityConfig {
 	@Bean
 	WebSecurityCustomizer custom() {
 		return (web)->{
-			web.ignoring().requestMatchers("/css/**", "/js/**", "/img/**", "/user/join", "/user/login");
+			web.ignoring().requestMatchers("/css/**", "/js/**", "/img/**");
 		};
 	}
 	
@@ -81,6 +85,7 @@ public class SecurityConfig {
 				service.userService(socialService)
 				.and()
 				.successHandler(socialLoginSuccessHandler)
+				.failureHandler(socialLoginFailureHandler)
 			);
 		})
 		;

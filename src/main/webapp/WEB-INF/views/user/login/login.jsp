@@ -24,6 +24,7 @@
             <input type="text" name="username" id="username">
         </div>
         <input type="password" name="password"><br>
+        <input name="loginType" type="hidden" value="member">
         <input id="autoLogin" type="checkbox"><label>자동 로그인</label>
         <input id="autoFlag" name="auto" type="hidden" value="false">
         <input id="rememberId" type="checkbox"><label>id 저장</label><br>

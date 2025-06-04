@@ -87,8 +87,6 @@ public class JwtTokenManager {
 		
 		UserDetails userDetails = userService.loadUserByUsername(username);
 		
-		log.info("username : {}", userDetails.getUsername());
-		
 		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 		
 		return authentication;

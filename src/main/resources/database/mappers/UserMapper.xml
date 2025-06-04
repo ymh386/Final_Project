@@ -56,14 +56,6 @@
  		UPDATE USER SET PASSWORD=#{password}, NAME=#{name}, EMAIL=#{email}, PHONE=#{phone} WHERE USERNAME=#{username}
  	</update>
  	
- 	<update id="socialJoinTrainer" parameterType="MemberStateVO">
- 		UPDATE MEMBER_STATE SET USERNAME=#{username}, STATE_NUM=2 WHERE USERNAME=#{username}
- 	</update>
- 	
- 	<delete id="socialJoinTrainer2" parameterType="MemberStateVO">
- 		DELETE FROM MEMBER_STATE WHERE USERNAME=#{username} AND STATE_NUM=1
- 	</delete>
- 	
  	<resultMap type="UserVO" id="detailMap">
  		<id column="USERNAME" property="username"/>
  		<result column="PASSWORD" property="password"/>

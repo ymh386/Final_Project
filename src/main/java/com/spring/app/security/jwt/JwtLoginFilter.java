@@ -1,14 +1,18 @@
-package com.spring.app.security.jwt;
+		package com.spring.app.security.jwt;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+import javax.naming.AuthenticationNotSupportedException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.stereotype.Component;
 
 import com.spring.app.user.UserService;
 
@@ -44,12 +48,24 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
+		String loginType = request.getParameter("loginType");
+		
+		System.out.println(loginType);
 		
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 		
 		Authentication authentication = this.authenticationManager.authenticate(token);
 		
+		String role=authentication.getAuthorities().toString();
+		System.out.println("role:"+role);
+		
+		if (loginType.equals("trainer") && !username.contains("T")) {
+			throw new AuthenticationServiceException("트레이너 아이디가 일치하지 않습니다.");
+		}
+		
 		return authentication;
+		
+		
 	}
 
 	@Override
@@ -79,7 +95,9 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 			AuthenticationException failed) throws IOException, ServletException {
 		// TODO Auto-generated method stub
 		
-		response.sendRedirect("/user/login");
+		response.sendRedirect("/user/login/trainerLogin?error=" +
+			    URLEncoder.encode(failed.getMessage(), StandardCharsets.UTF_8));
+
 	}
 
 }

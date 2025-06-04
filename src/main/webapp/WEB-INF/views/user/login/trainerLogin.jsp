@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,11 +25,16 @@
             <input type="text" name="username" id="username">
         </div>
         <input type="password" name="password"><br>
+        <input name="loginType" type="hidden" value="trainer">
         <input id="autoLogin" type="checkbox"><label>자동 로그인</label>
         <input id="autoFlag" name="auto" type="hidden" value="false">
         <input id="rememberId" type="checkbox"><label>id 저장</label><br>
   		<a href="/oauth2/authorization/kakao?redirect=trainer">Kakao로 로그인</a>
         <a href="/oauth2/authorization/google?redirect=trainer">Google로 로그인</a><br>
+        <c:if test="${not empty param.error}">
+            <p>${param.error}</p>
+        </c:if>
+
         <button type="submit">login</button>
     </form>
 
