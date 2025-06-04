@@ -3,6 +3,7 @@ package com.spring.app.user;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface UserDAO {
@@ -19,10 +20,8 @@ public interface UserDAO {
 	
 	int updateUserState(MemberStateVO memberStateVO) throws Exception;
 	
-	int socialJoinTrainer(MemberStateVO memberStateVO) throws Exception;
-	
-	int socialJoinTrainer2(MemberStateVO memberStateVO) throws Exception;
+
+	List<UserVO> selectUsersByUsernamePrefix(@Param("prefix") String prefix);
 	
 	int update(UserVO userVO) throws Exception;
-
 }
