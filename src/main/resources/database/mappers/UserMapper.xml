@@ -19,8 +19,8 @@
   
   	<insert id="join" parameterType="UserVO">
  		INSERT INTO USER
- 		(USERNAME, PASSWORD, NAME, EMAIL, PHONE, BIRTH, FILE_NAME, ORI_NAME, ACCOUNTNONEXPIRED, ACCOUNTNONLOCKED, CREDENTIALSNONEXPIRED, ENABLED, SNS)
- 		 VALUES (#{username}, #{password}, #{name}, #{email}, #{phone}, #{birth}, #{fileName}, #{oriName}, 1, 1, 1, 1, #{sns})
+ 		(USERNAME, PASSWORD, NAME, EMAIL, PHONE, BIRTH, FILE_NAME, ORI_NAME, ACCOUNTNONEXPIRED, ACCOUNTNONLOCKED, CREDENTIALSNONEXPIRED, ENABLED, SNS, TRAINER_CODE)
+ 		 VALUES (#{username}, #{password}, #{name}, #{email}, #{phone}, #{birth}, #{fileName}, #{oriName}, 1, 1, 1, 1, #{sns}, #{trainerCode})
   	</insert>
   	
   	  	<insert id="trainerJoin" parameterType="UserVO">
@@ -63,6 +63,10 @@
  	
  	<update id="updateUserState" parameterType="MemberStateVO">
  		UPDATE MEMBER_STATE SET USERNAME=#{username}, STATE_NUM=1 WHERE USERNAME=#{username}
+ 	</update>
+ 	
+ 	<update id="update" parameterType="UserVO">
+ 		UPDATE USER SET PASSWORD=#{password}, NAME=#{name}, EMAIL=#{email}, PHONE=#{phone} WHERE USERNAME=#{username}
  	</update>
  	
  	<resultMap type="UserVO" id="detailMap">

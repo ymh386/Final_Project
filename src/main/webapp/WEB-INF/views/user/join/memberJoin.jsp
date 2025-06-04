@@ -8,13 +8,13 @@
 </head>
 <body>
 
-	    <form action="" method="post">
-        <input type="text" name="username">
-        <input type="password" name="password">
-        <input type="text" name="name">
-        <input type="email" name="email">
-        <input type="text" name="phone">
-        <input type="date" name="birth">
+	<form action="" method="post">
+        <input type="text" name="username"><br>
+        <input type="password" name="password"><br>
+        <input type="text" name="name"><br>
+        <input type="email" name="email"><br>
+        <input type="text" name="phone"><br>
+        <input type="date" name="birth"><br>
 
         <button type="submit">join</button>
     </form>

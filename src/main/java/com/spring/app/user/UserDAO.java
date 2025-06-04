@@ -20,6 +20,8 @@ public interface UserDAO {
 	
 	int updateUserState(MemberStateVO memberStateVO) throws Exception;
 	
-	List<UserVO> selectUsersByUsernamePrefix(@Param("prefix") String prefix);
 
+	List<UserVO> selectUsersByUsernamePrefix(@Param("prefix") String prefix);
+	
+	int update(UserVO userVO) throws Exception;
 }

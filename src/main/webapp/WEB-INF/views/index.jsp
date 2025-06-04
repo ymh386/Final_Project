@@ -13,13 +13,13 @@
 	
 	<sec:authentication property="principal" var="user"/>
 	<sec:authorize access="isAuthenticated()">
-		<h3>${user.username}</h3>
+		<h3>${user.name}</h3>
 		<a href="/user/mypage">mypage</a>
 		<a href="/user/logout">logout</a>
 	</sec:authorize>
 	<sec:authorize access="!isAuthenticated()">
 		<a href="user/join/join">join</a>
-		<a href="user/login">login</a>
+		<a href="user/login/login">login</a>
 	</sec:authorize>
 		<sec:authorize access="hasRole('ADMIN')">
 		<a href="admin/main">admin</a>
