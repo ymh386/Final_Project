@@ -9,6 +9,7 @@
 </head>
 <body>
     <sec:authentication property="principal" var="user"/>
+		<a href="/">home</a>
     <h1>My Page</h1>
     <sec:authorize access="isAuthenticated()">
 	    <h2>${user.username}</h2>
