@@ -1,5 +1,7 @@
 CKEDITOR.replace('editor');
 const formSelect = document.getElementById("formSelect");
+const content = document.getElementById("content");
+
 
 formSelect.addEventListener("change", ()=>{
     console.log(formSelect.value)
@@ -8,5 +10,6 @@ formSelect.addEventListener("change", ()=>{
     .then(r => {
         console.log(r);
         CKEDITOR.instances['editor'].setData(r.contentHtml);
+        
     })
 })

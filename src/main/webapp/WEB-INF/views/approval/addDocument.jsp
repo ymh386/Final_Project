@@ -26,7 +26,9 @@
 
 		<!-- CKEditor 내용 -->
         <label for="editor">내용</label><br>
-        <textarea name="contentHtml" id="editor"></textarea><br><br>
+		<div id="content">
+			<textarea name="contentHtml" id="editor"></textarea><br><br>
+		</div>
 
 		<button type="submit">결재 요청</button>
 

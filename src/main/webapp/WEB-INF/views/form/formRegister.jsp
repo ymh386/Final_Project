@@ -24,7 +24,9 @@
 	</form>
 	
 	<script>
-        CKEDITOR.replace('editor');
+        CKEDITOR.replace('editor',{
+            extraPlugins: 'forms,tableresize'
+        });
     </script>
 </body>
 </html>
