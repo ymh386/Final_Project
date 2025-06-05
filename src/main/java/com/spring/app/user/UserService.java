@@ -82,7 +82,16 @@ public class UserService implements UserDetailsService {
 		
 		return result;
 	}
+	
+	//트레이너등급 이상 회원들의 부서정보와 함께 조희
+	public List<UserVO> getUsersWithDepartment() throws Exception {
+		return userDAO.getUsersWithDepartment();
+	}
 
+	//부서들 정보 가져오기
+	public List<DepartmentVO> getDepartments() throws Exception {
+		return userDAO.getDepartments();
+	}
 	
 	
 }

@@ -15,13 +15,13 @@ public class ApprovalService {
 	private ApprovalDAO approvalDAO;
 	
 	//카테고리 목록 가져오기
-	public List<CategoryVO> addDocument() throws Exception {
-		return approvalDAO.getCategory();
+	public List<FormVO> getForms() throws Exception {
+		return approvalDAO.getForms();
 	}
 	
 	//결재 작성 시 양식 렌더링
-	public FormVO getForm(CategoryVO categoryVO) throws Exception {
-		return approvalDAO.getForm(categoryVO);
+	public FormVO getForm(FormVO formVO) throws Exception {
+		return approvalDAO.getForm(formVO);
 	}
 	
 	public int formRegister(FormVO formVO) throws Exception {
@@ -38,6 +38,29 @@ public class ApprovalService {
 		}
 		
 		return result;
+	}
+	
+	public void addDocument(DocumentVO documentVO, List<ApprovalVO> approverList) throws Exception {
+		//결재문서 먼저 INSERT
+		int result = approvalDAO.addDocument(documentVO);
+		//결재문서 INSERT가 성공했을 때
+		if(result > 0) {
+			//첫 결재자의 parentId는 null
+			Long parentId = null;
+			//첫 결재자의 상태
+			String approvalStatus = "AS0";
+			for(ApprovalVO vo : approverList) {
+				vo.setDocumentId(documentVO.getDocumentId());
+				vo.setParentId(parentId);
+				vo.setApprovalStatus(approvalStatus);
+				//결재자 INSERT
+				approvalDAO.addApproval(vo);
+				//방금 넣은 결재자의 approvalId parentId에 넣기
+				parentId = vo.getApprovalId();
+				//2번째 결재자부턴 상태 '미도달'
+				approvalStatus = "AS3";
+			}
+		}
 	}
 
 }

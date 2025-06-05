@@ -26,7 +26,9 @@
 	</sec:authorize>
 	
 	<div>
-		<a href="/approval/formRegister">양식등록(관리자)</a>
+		<sec:authorize access="hasRole('ADMIN')">
+			<a href="/approval/formRegister">양식등록(관리자)</a>
+		</sec:authorize>
 		<a href="/approval/addDocument">결재신청</a>
 	</div>
 </body>
