@@ -36,7 +36,8 @@ public class AttendanceController {
 	
 	
 	 @PostMapping("/checkIn")
-	    @PreAuthorize("hasRole('TRAINER')")
+	 @PreAuthorize("hasRole('TRAINER')")
+	 @ResponseBody
 	    public ResponseEntity<?> checkIn(Principal principal) {
 	        String username = principal.getName();
 	        try {
@@ -55,6 +56,7 @@ public class AttendanceController {
 	     */
 	    @PostMapping("/checkOut")
 	    @PreAuthorize("hasRole('TRAINER')")
+	    @ResponseBody
 	    public ResponseEntity<?> checkOut(@RequestParam("attendanceId") Long attendanceId) {
 	        try {
 	            AttendanceVO vo = attendanceService.checkOut(attendanceId);
