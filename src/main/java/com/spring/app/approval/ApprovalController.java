@@ -26,7 +26,7 @@ import com.spring.app.user.UserVO;
 import lombok.extern.slf4j.Slf4j;
 
 @Controller
-@RequestMapping("/approval/")
+@RequestMapping("/approval/*")
 @Slf4j
 public class ApprovalController {
 	

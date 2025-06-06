@@ -10,6 +10,7 @@
 <title>Insert title here</title>
 </head>
 <body>
+        <a href="/">home</a>
 	<sec:authentication property="principal" var="user"/>
              <form:form modelAttribute="userVO" cssClass="user" method="post" enctype="multipart/form-data">
              

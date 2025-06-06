@@ -7,7 +7,7 @@
 <title>Insert title here</title>
 </head>
 <body>
-
+	<a href="/">home</a>
 	<h3>join</h3>
 
 	<a href="memberJoin">memberJoin</a>

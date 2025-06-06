@@ -32,7 +32,11 @@
   	<select id="getTrainerCode" resultType="Long">
   		SELECT AUTO_INCREMENT
 		FROM INFORMATION_SCHEMA.TABLES
+
 		WHERE TABLE_SCHEMA = 'SportCenter'
+
+		WHERE TABLE_SCHEMA = 'final'
+
 		  AND TABLE_NAME = 'USER';
   	</select>
   	

@@ -59,8 +59,8 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		String role=authentication.getAuthorities().toString();
 		System.out.println("role:"+role);
 		
-		if (loginType.equals("trainer") && !username.contains("T")) {
-			throw new AuthenticationServiceException("트레이너 아이디가 일치하지 않습니다.");
+		if (loginType.equals("trainer") && !username.contains("T") && !username.equals("admin")) {
+			throw new AuthenticationServiceException("트레이너 계정이 아닙니다.");
 		}
 		
 		return authentication;
