@@ -32,7 +32,7 @@
   	  <!-- 2) 퇴근 시간 업데이트 -->
   <update id="updateCheckOut" parameterType="AttendanceVO">
     UPDATE ATTENDANCE
-    SET CHECKOUT_TIME = NOW(),
+    SET CHECKOUT_TIME = #{checkoutTime},
         STATUS = '퇴근'
     WHERE ATTENDANCE_ID =#{attendanceId}
   </update>
@@ -40,8 +40,8 @@
   	
   	    <select id="selectById" parameterType="long" resultType="AttendanceVO">
         SELECT *
-          FROM attendance
-         WHERE attendance_id = #{attendanceId}
+          FROM ATTENDANCE
+         WHERE ATTENDANCE_ID = #{attendanceId}
     </select>
   	
   	

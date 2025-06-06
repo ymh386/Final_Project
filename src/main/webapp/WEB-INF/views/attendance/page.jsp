@@ -19,9 +19,18 @@
         }
         #buttons button {
             padding: 10px 20px;
-            margin-right: 10px;
             font-size: 16px;
             cursor: pointer;
+        }
+        /* 비활성화 상태 스타일 */
+        #buttons button.disabled {
+            background-color: #ddd;
+            color: #666;
+            cursor: not-allowed;
+        }
+        /* 숨김 처리 */
+        .hidden {
+            display: none;
         }
         #attendanceList {
             width: 100%;
@@ -35,30 +44,26 @@
         #attendanceList th {
             background-color: #f4f4f4;
         }
-        .disabled {
-            background-color: #ddd;
-            color: #666;
-            cursor: not-allowed;
-        }
     </style>
 </head>
 <body>
-  	<h2>
-		안녕하세요,
-		<c:choose>
-			<c:when test="${not empty pageContext.request.userPrincipal}">
-                ${pageContext.request.userPrincipal.name} 
+    <h2>
+        안녕하세요,
+        <c:choose>
+            <c:when test="${not empty pageContext.request.userPrincipal}">
+                ${pageContext.request.userPrincipal.name}
             </c:when>
-			<c:otherwise>
+            <c:otherwise>
                 손님
             </c:otherwise>
-		</c:choose>
-		님
-	</h2>
+        </c:choose>
+        님
+    </h2>
 
     <div id="buttons">
-        <button id="checkInBtn">출근</button>
-        <button id="checkOutBtn" class="disabled" disabled>퇴근</button>
+        <!-- 출근/퇴근 버튼 (둘 다 준비해 두되, JS에서 보이거나 숨김 처리) -->
+        <button id="checkInBtn" class="hidden">출근</button>
+        <button id="checkOutBtn" class="hidden">퇴근</button>
     </div>
 
     <table id="attendanceList">
@@ -71,22 +76,25 @@
             </tr>
         </thead>
         <tbody>
-            <!-- JS가 채워 넣음 -->
+            <!-- JS가 서버로부터 받은 근태 목록을 여기에 채웁니다 -->
         </tbody>
     </table>
 
     <script>
         (function() {
-            const username = '<sec:authentication property="name"/>';
-            const contextPath = '${pageContext.request.contextPath}';
-            const checkInBtn  = document.getElementById('checkInBtn');
-            const checkOutBtn = document.getElementById('checkOutBtn');
-            const tbody       = document.querySelector('#attendanceList tbody');
+            const username     = '<sec:authentication property="name"/>';
+            const contextPath  = '${pageContext.request.contextPath}';
+            const checkInBtn   = document.getElementById('checkInBtn');
+            const checkOutBtn  = document.getElementById('checkOutBtn');
+            const tbody        = document.querySelector('#attendanceList tbody');
 
+            // 오늘자 가장 최신 ID/상태를 저장할 변수
             let latestAttendanceId = null;
             let latestStatus       = null;
+            // “퇴근” 버튼을 눌러 체크아웃을 한 뒤에는 true로 바꿔서 다시 누르지 못하도록 제어
+            let isCheckedOut      = false;
 
-            // 페이지 로드 시 본인 근태 목록 불러오기 및 버튼 상태 결정
+            // 페이지 로드 시 근태 목록 가져오기
             document.addEventListener('DOMContentLoaded', () => {
                 fetchAttendanceList();
             });
@@ -101,22 +109,27 @@
                     return res.json();
                 })
                 .then(vo => {
-                    // 출근 성공 시
+                    // 서버로부터 응답받은 VO의 attendanceId, status를 갱신
                     latestAttendanceId = vo.attendanceId;
-                    // 서비스에서는 "정상출근", "지각", "결근" 중 하나를 status로 넘겨줍니다.
-                    latestStatus       = vo.status;
-                    toggleButtons();
+                    latestStatus       = vo.status; // 정상출근/지각/결근
+                    isCheckedOut       = false;    // 아직 체크아웃 전이므로 false
+
+                    // 테이블 맨 위에 새로운 출근 기록 추가
                     prependAttendanceRow(vo);
+                    // 버튼 표시/숨김 및 활성화 상태 업데이트
+                    updateButtonVisibility();
                 })
-                .catch(err => {
-                    alert(err.message);
-                });
+                .catch(err => alert(err.message));
             });
 
             // 퇴근 버튼 클릭 이벤트
             checkOutBtn.addEventListener('click', () => {
-                if (checkOutBtn.disabled) return;
+                // 이미 체크아웃한 상태이거나 버튼이 비활성화 상태라면 리턴
+                if (checkOutBtn.disabled || isCheckedOut) return;
                 if (!latestAttendanceId) return;
+
+                // 방어 코드: 지각/결근인 경우에도 요청은 보내지만, 
+                // 클라이언트에서는 상태를 바꾸지 않음 → 서버에서 checkoutTime만 업데이트
                 const url = contextPath + '/attendance/checkOut?attendanceId=' + latestAttendanceId;
                 fetch(url, { method: 'POST' })
                 .then(res => {
@@ -124,17 +137,24 @@
                     return res.json();
                 })
                 .then(vo => {
-                    // 퇴근 성공 시
-                    latestStatus = '퇴근';
-                    toggleButtons();
+                    // 1) isCheckedOut을 true로 바꿔서 더는 퇴근 버튼을 누르지 못하도록
+                    isCheckedOut = true;
+
+                    // 2) “정상출근” 상태에서만 latestStatus를 “퇴근”으로 변경
+                    if (latestStatus === '정상출근') {
+                        latestStatus = '퇴근';
+                    }
+                    // “지각” 또는 “결근”인 경우에는 latestStatus를 그대로 둡니다.
+
+                    // 3) 테이블 최신 행(맨 위)만 퇴근 시간만 업데이트
                     updateLatestRow(vo);
+                    // 4) 버튼 상태 업데이트
+                    updateButtonVisibility();
                 })
-                .catch(err => {
-                    alert(err.message);
-                });
+                .catch(err => alert(err.message));
             });
 
-            // 본인 근태 목록을 불러와 테이블에 표시
+            // 서버에서 내 개인 근태 목록을 조회하여 테이블에 표시
             function fetchAttendanceList() {
                 const url = contextPath + '/attendance/user?username=' + encodeURIComponent(username);
                 fetch(url)
@@ -143,111 +163,175 @@
                     return res.json();
                 })
                 .then(list => {
+                    // 1) 테이블 초기화
                     tbody.innerHTML = '';
+                    // 2) 전체 내역을 순서대로 하단에 append
                     list.forEach(vo => appendAttendanceRow(vo));
-                    determineButtonState(list);
+                    // 3) todayRecords를 찾아서 latestAttendanceId, latestStatus 설정
+                    determineLatestStatus(list);
+                    // 4) 만약 todayRecords 중 마지막 요소(vo)에 checkoutTime이 있다면
+                    //    이미 체크아웃된 상태임을 표시
+                    if (latestStatus === '퇴근' || hadCheckoutTime(list)) {
+                        isCheckedOut = true;
+                    } else {
+                        isCheckedOut = false;
+                    }
+                    // 5) 버튼 표시/숨김 및 활성/비활성 업데이트
+                    updateButtonVisibility();
                 })
                 .catch(err => {
                     console.error(err);
+                    // 오류 시 두 버튼 모두 숨김
+                    checkInBtn.classList.add('hidden');
+                    checkOutBtn.classList.add('hidden');
                 });
             }
 
-            // 테이블에 새로운 행을 앞으로 추가 (출근 직후)
+            // 테이블 최상단 행(맨 위)에 퇴근 시간과 상태를 업데이트
+            function updateLatestRow(vo) {
+                const firstRow = tbody.querySelector('tr');
+                if (!firstRow) return;
+                const cells = firstRow.children;
+                // 3번째 셀(퇴근 시간)만 vo.checkoutTime으로 교체
+                cells[2].textContent = formatTime(vo.checkoutTime);
+                // 4번째 셀(상태)는
+                //   - 최신 상태가 “정상출근”이었으면 “퇴근”으로 바꿔주고
+                //   - “지각”/“결근”인 경우에는 아무 변화 없이 그대로 두기
+                if (latestStatus === '퇴근') {
+                    cells[3].textContent = '퇴근';
+                }
+            }
+
+            // 새로운 VO를 테이블 맨 위에 삽입 (출근 직후)
             function prependAttendanceRow(vo) {
                 const tr = createRow(vo);
                 tbody.insertBefore(tr, tbody.firstChild);
             }
 
-            // 테이블에 행 추가 (기존 리스트 로드)
+            // VO를 테이블 맨 아래에 추가 (초기 로드)
             function appendAttendanceRow(vo) {
                 const tr = createRow(vo);
                 tbody.appendChild(tr);
             }
 
-            // 최신 행(가장 위 행)에서 퇴근 시간과 상태를 업데이트
-            function updateLatestRow(vo) {
-                const firstRow = tbody.querySelector('tr');
-                if (!firstRow) return;
-                const cells = firstRow.children;
-                // 퇴근 시간 칸(3번째 칸, index 2)
-                cells[2].textContent = formatTime(vo.checkoutTime);
-                // 상태 칸(4번째 칸, index 3)
-                cells[3].textContent = '퇴근';
-            }
-
-            // 새로운 AttendanceVO로 테이블 행 생성
+            // AttendanceVO 하나로 <tr>를 만들어 리턴
             function createRow(vo) {
                 const tr = document.createElement('tr');
 
-                // 출근 날짜
-                const tdDate = document.createElement('td');
-                tdDate.textContent = vo.attendanceDate;
-                tr.appendChild(tdDate);
-
-                // 출근 시간
-                const tdIn = document.createElement('td');
-                tdIn.textContent = formatTime(vo.checkinTime);
-                tr.appendChild(tdIn);
-
-                // 퇴근 시간 (퇴근 전이면 빈 칸)
-                const tdOut = document.createElement('td');
-                tdOut.textContent = vo.checkoutTime ? formatTime(vo.checkoutTime) : '';
-                tr.appendChild(tdOut);
-
-                // 상태
+                const tdDate   = document.createElement('td');
+                const tdIn     = document.createElement('td');
+                const tdOut    = document.createElement('td');
                 const tdStatus = document.createElement('td');
+
+                tdDate.textContent   = vo.attendanceDate;
+                tdIn.textContent     = formatTime(vo.checkinTime);
+                tdOut.textContent    = vo.checkoutTime ? formatTime(vo.checkoutTime) : '';
                 tdStatus.textContent = vo.status;
+
+                tr.appendChild(tdDate);
+                tr.appendChild(tdIn);
+                tr.appendChild(tdOut);
                 tr.appendChild(tdStatus);
-
-                // 최신 레코드 정보 갱신
-                const today = getToday();
-                if (!latestAttendanceId && vo.attendanceDate === today) {
-                    latestAttendanceId = vo.attendanceId;
-                    latestStatus       = vo.status;
-                }
-
                 return tr;
             }
 
-            // 버튼 활성화/비활성화 토글
-            function toggleButtons() {
-                // 수정: latestStatus가 "정상출근", "지각", "결근" 중 하나이면 "퇴근" 버튼을 활성화,
-                // 출근("checkIn")은 비활성화. 그 외(= latestStatus가 "퇴근"이거나 null)이면 출근 버튼만 활성화.
-                if (latestStatus === '정상출근' || latestStatus === '지각' || latestStatus === '결근') {
-                    // 이미 출근했거나 지각/결근 상태 → 출근 버튼 비활성, 퇴근 버튼 활성
-                    checkInBtn.classList.add('disabled');
-                    checkInBtn.disabled = true;
-                    checkOutBtn.classList.remove('disabled');
-                    checkOutBtn.disabled = false;
+            // 서버에서 내려온 list(AttendanceVO 배열) 중에서 “오늘자” 레코드만 골라
+            // attendanceId가 가장 큰(=가장 최근) VO를 찾아 latestAttendanceId, latestStatus를 설정
+            function determineLatestStatus(list) {
+                // 오늘 연/월/일을 구함
+                const now    = new Date();
+                const todayY = now.getFullYear();
+                const todayM = now.getMonth();   // 0~11
+                const todayD = now.getDate();
+
+                // 오늘자 기록만 필터
+                const todayRecords = list.filter(vo => {
+                    const voDate = new Date(vo.attendanceDate);
+                    return (
+                        voDate.getFullYear() === todayY &&
+                        voDate.getMonth()    === todayM &&
+                        voDate.getDate()     === todayD
+                    );
+                });
+
+                // 디버그용(콘솔에 오늘자 필터 결과를 찍어봅니다)
+                console.log("▶ todayRecords after Date filter:", todayRecords);
+
+                if (todayRecords.length === 0) {
+                    latestAttendanceId = null;
+                    latestStatus       = null;
                 } else {
-                    // 아직 출근 전이거나, 이미 퇴근한 경우 → 출근 버튼 활성, 퇴근 버튼 비활성
+                    // attendanceId가 가장 큰(=가장 최근) VO를 reduce로 선택
+                    const mostRecent = todayRecords.reduce((prev, curr) => {
+                        return (prev.attendanceId > curr.attendanceId) ? prev : curr;
+                    });
+                    latestAttendanceId = mostRecent.attendanceId;
+                    latestStatus       = mostRecent.status;
+                }
+            }
+
+            // “정상출근”, “지각”, “결근” 상태에서도 체크아웃 시간이 이미 들어왔는지 확인
+            // 오늘자 레코드 중 checkoutTime 프로퍼티가 non-null인 VO가 있으면 true 리턴
+            function hadCheckoutTime(list) {
+                const now = new Date();
+                const todayY = now.getFullYear();
+                const todayM = now.getMonth();
+                const todayD = now.getDate();
+
+                return list.some(vo => {
+                    const voDate = new Date(vo.attendanceDate);
+                    if (
+                        voDate.getFullYear() === todayY &&
+                        voDate.getMonth()    === todayM &&
+                        voDate.getDate()     === todayD
+                    ) {
+                        // 체크아웃 시간이 non-null/빈 문자열이 아니면 이미 체크아웃한 것
+                        return vo.checkoutTime && vo.checkoutTime.trim() !== '';
+                    }
+                    return false;
+                });
+            }
+
+            // 버튼 표시/숨김 및 활성/비활성 상태 결정
+            function updateButtonVisibility() {
+                // 1) 오늘자 기록이 없으면 → “출근” 버튼만 보이게, “퇴근” 숨김
+                if (!latestAttendanceId || latestStatus === null) {
+                    checkInBtn.classList.remove('hidden');
                     checkInBtn.classList.remove('disabled');
                     checkInBtn.disabled = false;
+
+                    checkOutBtn.classList.add('hidden');
+                }
+                // 2) 출근했지만 퇴근 전상태(정상출근/지각/결근)이라면 → “퇴근” 버튼만 보이게
+                //    단, 체크아웃 시간을 이미 찍었으면 “퇴근” 버튼을 비활성화
+                else if (
+                    latestStatus === '정상출근' ||
+                    latestStatus === '지각'    ||
+                    latestStatus === '결근'
+                ) {
+                    checkInBtn.classList.add('hidden');
+
+                    checkOutBtn.classList.remove('hidden');
+                    // 이미 체크아웃 했으면 비활 상태, 아니면 활성화
+                    if (isCheckedOut) {
+                        checkOutBtn.classList.add('disabled');
+                        checkOutBtn.disabled = true;
+                    } else {
+                        checkOutBtn.classList.remove('disabled');
+                        checkOutBtn.disabled = false;
+                    }
+                }
+                // 3) 이미 “퇴근” 상태라면 → “퇴근” 버튼 비활성화 상태로만 보이기
+                else if (latestStatus === '퇴근') {
+                    checkInBtn.classList.add('hidden');
+
+                    checkOutBtn.classList.remove('hidden');
                     checkOutBtn.classList.add('disabled');
                     checkOutBtn.disabled = true;
                 }
             }
 
-            // 초기 상태 결정: 오늘자 최신 레코드가 있는지, 상태가 출근(정상/지각/결근)인지
-            function determineButtonState(list) {
-                const today = getToday();
-                // list 배열에서 오늘자 항목만 필터링
-                const todayRecords = list.filter(vo => vo.attendanceDate === today);
-
-                if (todayRecords.length === 0) {
-                    // 오늘 기록이 없으면 “아직 출근 전” 상태
-                    latestAttendanceId = null;
-                    latestStatus       = null;
-                } else {
-                    // 오늘자 기록이 있으면 가장 최근(첫 번째) 항목을 최신으로 간주
-                    const mostRecent = todayRecords[0];
-                    latestAttendanceId = mostRecent.attendanceId;
-                    latestStatus       = mostRecent.status;
-                }
-                toggleButtons();
-            }
-
-            // 현재 날짜를 "YYYY-MM-DD" 형식으로 반환
+            // 오늘 날짜 “YYYY-MM-DD” 문자열을 반환
             function getToday() {
                 const d = new Date();
                 const yyyy = d.getFullYear();
@@ -256,7 +340,7 @@
                 return `${yyyy}-${mm}-${dd}`;
             }
 
-            // "HH:MM:SS" 또는 "HH:MM" 형식으로 표시
+            // “HH:MM:SS” 또는 “HH:MM” → “HH:MM”만 반환
             function formatTime(timeStr) {
                 if (!timeStr) return '';
                 return timeStr.length > 5 ? timeStr.substring(0,5) : timeStr;
