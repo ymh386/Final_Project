@@ -25,7 +25,8 @@
 	
 	<script>
         CKEDITOR.replace('editor',{
-            extraPlugins: 'forms,tableresize'
+            extraPlugins: 'forms,tableresize',
+            extraAllowedContent: 'td[id, contenteditable];th[id, contenteditable];img[src,style];'
         });
     </script>
 </body>

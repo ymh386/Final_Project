@@ -36,7 +36,7 @@ public class UserVO implements UserDetails, OAuth2User {
 	private Date createdAt;
 	private String position;
 	private String parent;
-	private Long departmentId;
+	private DepartmentVO departmentVO;
 	private Long trainerCode;
 	private Long stateNum;
 	private String state;

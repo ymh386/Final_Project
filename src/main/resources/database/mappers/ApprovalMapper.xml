@@ -13,8 +13,12 @@
   		SELECT * FROM FORM_CATEGORY WHERE CATEGORY_NAME = #{categoryName}
   	</select>
   	
-  	<select id="getForm" resultType="FormVO" parameterType="CategoryVO">
-  		SELECT * FROM FORM WHERE CATEGORY_ID = #{categoryId}
+  	<select id="getForms" resultType="FormVO">
+  		SELECT * FROM FORM;
+  	</select>
+  	
+  	<select id="getForm" resultType="FormVO" parameterType="FormVO">
+  		SELECT * FROM FORM WHERE FORM_ID = #{formId}
   	</select>
   	
   	<insert id="addForm" parameterType="FormVO">
@@ -33,6 +37,33 @@
   		(
   			null,
   			#{categoryName}
+  		)
+  	</insert>
+  	
+  	<!-- useGeneratedKeys="true" keyProperty="documentId" DB에서 생성된 키 사용 -> auto_increment로 생성된 값 자바에서 가져와 사용하기-->
+  	<insert id="addDocument" parameterType="DocumentVO" useGeneratedKeys="true" keyProperty="documentId">
+  		INSERT INTO DOCUMENT VALUES
+  		(
+  			NULL,
+  			#{formId},
+  			#{writerId},
+  			#{documentTitle},
+  			#{contentHtml},
+  			'D0',
+  			CURRENT_TIMESTAMP
+  		)
+  	</insert>
+  	
+  	<insert id="addApproval" parameterType="ApprovalVO" useGeneratedKeys="true" keyProperty="approvalId">
+  		INSERT INTO APPROVAL VALUES
+  		(
+  			NULL,
+  			#{documentId},
+  			#{approverId},
+  			#{parentId},
+  			#{approvalStep},
+  			#{approvalStatus},
+  			CURRENT_TIMESTAMP
   		)
   	</insert>
   	
