@@ -18,6 +18,10 @@
 	    <h2>${user.birth}</h2>
 	    <h2>${user.phone}</h2>
 	    <a href="/user/update">수정</a>
+		<div>
+			<h2>전자결재</h2>
+			<a href="./getDocuments">내 결재함</a>
+		</div>
     </sec:authorize>
 
 </body>
