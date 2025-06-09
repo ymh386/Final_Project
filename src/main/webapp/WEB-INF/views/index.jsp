@@ -16,7 +16,18 @@
 		<h3>${user.name}</h3>
 		<a href="/user/mypage">mypage</a>
 		<a href="/user/logout">logout</a>
-	</sec:authorize>
+		<a href="/schedule/page">schedule</a>
+	
+	  <sec:authorize access="hasRole('TRAINER')">
+    <a href="${pageContext.request.contextPath}/attendance/page">근태관리</a>
+  </sec:authorize>
+  
+    <sec:authorize access="hasRole('MEMBER')">
+    <a href="${pageContext.request.contextPath}/reservation/book">수업예약</a>
+  </sec:authorize>
+</sec:authorize>
+  
+	
 	<sec:authorize access="!isAuthenticated()">
 		<a href="user/join/join">join</a>
 		<a href="user/login/login">login</a>
