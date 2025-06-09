@@ -13,16 +13,18 @@
 	
 	<sec:authentication property="principal" var="user"/>
 	<sec:authorize access="isAuthenticated()">
-		<h3>${user.name}</h3>
-		<a href="/user/mypage">mypage</a>
-		<a href="/user/logout">logout</a>
+		<h2>${user.name}</h2>
+		<h3>구독권 잔여 일자 : ${result} 일</h3>
+		<a href="/user/mypage">내 정보</a>
+		<a href="/subscript/list">구독</a>
+		<a href="/user/logout">로그아웃</a>
 	</sec:authorize>
 	<sec:authorize access="!isAuthenticated()">
-		<a href="user/join/join">join</a>
-		<a href="user/login/login">login</a>
+		<a href="user/join/join">회원가입</a>
+		<a href="user/login/login">로그인</a>
 	</sec:authorize>
 		<sec:authorize access="hasRole('ADMIN')">
-		<a href="admin/main">admin</a>
+		<a href="admin/main">관리자</a>
 	</sec:authorize>
 	
 	<div>

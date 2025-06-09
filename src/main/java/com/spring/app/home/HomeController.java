@@ -3,10 +3,13 @@ package com.spring.app.home;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import com.spring.app.payment.PaymentDAO;
+import com.spring.app.subscript.SubscriptService;
 import com.spring.app.user.UserService;
 import com.spring.app.user.UserVO;
 
@@ -16,11 +19,17 @@ import com.spring.app.user.UserVO;
 public class HomeController {
 	
 	@Autowired
-	private UserService userService;
+	private SubscriptService subscriptService;
 	
 	@GetMapping("/")
-	public String home() throws Exception {
+	public String home(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
 		System.out.println("Home");
+		
+		if (userVO!=null) {
+			String username = userVO.getUsername();
+			int result = subscriptService.getRemainDays(username);
+			model.addAttribute("result", result);
+		}
 		
 		return "index";
 	}

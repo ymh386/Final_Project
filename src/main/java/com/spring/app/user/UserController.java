@@ -1,5 +1,7 @@
 package com.spring.app.user;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,6 +14,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.spring.app.subscript.SubscriptService;
+import com.spring.app.subscript.SubscriptVO;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +33,9 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 	
+	@Autowired
+	private SubscriptService subscriptService;
+	
 	@GetMapping("join/join")
 	void join() {}
 	
@@ -35,7 +43,15 @@ public class UserController {
 	void memberJoin() {}
 	
 	@GetMapping("mypage")
-	void myPage() throws Exception {}
+	void myPage(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
+		
+		if (userVO!=null) {
+			String username = userVO.getUsername();
+			List<SubscriptVO> list = subscriptService.getSubscriptByUser(username);
+			
+			model.addAttribute("list", list);
+		}
+	}
 	
 	@PostMapping("join/memberJoin")
 	String memberJoin(UserVO userVO) throws Exception{

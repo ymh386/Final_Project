@@ -77,12 +77,8 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		Cookie cookie = new Cookie("accessToken", token);
 		
 		boolean isAuto = "true".equals(request.getParameter("auto"));
-		
-		if (isAuto) {
-			cookie.setMaxAge(360000);			
-		} else {
-			cookie.setMaxAge(-1);
-		}
+
+		cookie.setMaxAge(120);
 		cookie.setPath("/");
 		cookie.setHttpOnly(true);
 		
