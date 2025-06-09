@@ -42,7 +42,6 @@ public class UserController {
 	private UserService userService;
 	
 	@Autowired
-
 	private ApprovalService approvalService;
 
 	private SubscriptService subscriptService;

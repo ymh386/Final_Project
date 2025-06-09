@@ -4,9 +4,12 @@ package com.spring.app.board.qna;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Mapper;
+
 /**
  * QnaDAO: MyBatis Mapper를 호출하여 CRUD를 담당하는 계층입니다.
  */
+@Mapper
 public interface QnaDAO {
     /** 원글/답글 삽입 */
     void insertQna(QnaVO vo) throws Exception;
