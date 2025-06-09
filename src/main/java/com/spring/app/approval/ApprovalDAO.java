@@ -39,7 +39,5 @@ public interface ApprovalDAO {
 	
 	//서명/도장 삭제
 	public int deleteSign(UserVO userVO) throws Exception;
-	
-	//로그인한 유저 서명/도장 조회
-	public UserSignatureVO getSignature(UserVO userVO) throws Exception;
+
 }

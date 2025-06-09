@@ -107,8 +107,8 @@ public class UserService implements UserDetailsService {
 	}
 	
 	//서명 or 도장 정보 가져오기
-	public UserSignatureVO getSign(UserSignatureVO userSignatureVO) throws Exception {
-		return userDAO.getSign(userSignatureVO);
+	public UserSignatureVO getSign(UserVO userVO) throws Exception {
+		return userDAO.getSign(userVO);
 	}
 	
 	

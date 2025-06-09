@@ -174,6 +174,7 @@ public class ApprovalController {
 		return tree;
 	}
 	
+	//로그인한 사용자 기준 승인대기중인 결재문서 목록 가져오기
 	@GetMapping("awaitList")
 	public String getAwaitList(@AuthenticationPrincipal UserVO userVO, ApprovalVO approvalVO, Model model) throws Exception {
 		approvalVO.setApproverId(userVO.getUsername());
@@ -184,6 +185,7 @@ public class ApprovalController {
 		return "approval/awaitList";
 	}
 	
+	//로그인한 사용자 기준 승인대기중인 결재문서 정보(디테일) 가져오기
 	@GetMapping("awaitDetail")
 	public String getAwaitDetail(@AuthenticationPrincipal UserVO userVO, ApprovalVO approvalVO, Model model) throws Exception {
 		approvalVO.setApproverId(userVO.getUsername());
@@ -194,14 +196,12 @@ public class ApprovalController {
 		return "approval/awaitDetail";
 	}
 	
+	//서명등록화면
 	@GetMapping("registerSign")
 	public String registerSign(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
 		
 		//로그인한 사용자의 서명등록 여부 확인
-		UserSignatureVO userSignatureVO = new UserSignatureVO();
-		userSignatureVO.setUsername(userVO.getUsername());
-		
-		userSignatureVO = userService.getSign(userSignatureVO);
+		UserSignatureVO userSignatureVO = userService.getSign(userVO);
 		
 		//서명이 없으면 등록하러가기
 		if(userSignatureVO == null) {
@@ -221,23 +221,31 @@ public class ApprovalController {
 	public String saveSign(@AuthenticationPrincipal UserVO userVO, @RequestParam("imageData") String imageData) throws Exception {
 		UserSignatureVO userSignatureVO = new UserSignatureVO();
 		
+		//data:image/png;base64,.... 형식의 문자열에서 base64 부분만 추출
 		String base64Image = imageData.split(",")[1];
+		//Base64로 디코딩하여 이미지로 변환 가능한 byte[] 배열로 만듬
 		byte[] imageBytes = Base64.getDecoder().decode(base64Image);
 		
+		//랜덤 문자열 가져오기
 		String uuid = UUID.randomUUID().toString();
+		//가져온 랜덤 문자열로 파일이름 만들기
 		String fileName = uuid.concat("_signature_").concat(userVO.getUsername()).concat(".png");
 		
+		//해당 경로안에 해당 디렉토리를 생성합니다 (이미 있으면 무시됨).
 		Path uploadDir = Paths.get(path.concat("userSignature"));
 		Files.createDirectories(uploadDir);
 		
+		//최종 파일 경로를 지정하고 디코딩된 이미지를 서버에 저장
 		Path filePath = uploadDir.resolve(fileName);
 		Files.write(filePath, imageBytes);
 		
+		//DB에 넣을 정보 담기
 		userSignatureVO.setUsername(userVO.getUsername());
 		userSignatureVO.setFileName(fileName);
 		userSignatureVO.setOriName(null);
 		userSignatureVO.setSignatureType("ST0");
 		
+		//DB에 INSERT
 		int result = approvalService.addSign(userSignatureVO);
 		
 		return "redirect:/user/mypage";
@@ -246,6 +254,7 @@ public class ApprovalController {
 	@PostMapping("saveStamp")
 	public String saveStamp(@AuthenticationPrincipal UserVO userVO, MultipartFile stampFile, Model model) throws Exception {
 		
+		//파일 지정을 안했을 때 실행안함
 		if (stampFile.isEmpty()) {
 			model.addAttribute("result", "파일을 선택해주세요");
 			model.addAttribute("path", "./registerSign");
@@ -254,9 +263,12 @@ public class ApprovalController {
 			
 		}
 		
+		//원본 파일이름 꺼내기
 		String oriName = stampFile.getOriginalFilename();
+		//원본파일의 확장자만 자르기
 		String extension = oriName.substring(oriName.lastIndexOf(".")).toLowerCase();
 		
+		//지정한 원본파일이 이미지파일(이미지파일의 확장자)가 아닐 시 실행 X
 		if(!ALLOWED_EXTENSIONS.contains(extension)){
 			model.addAttribute("result", "이미지 파일(.png, .jpg, .jpeg, .gif)만 업로드할 수 있습니다.");
 			model.addAttribute("path", "./registerSign");
@@ -266,13 +278,16 @@ public class ApprovalController {
 		
 		UserSignatureVO userSignatureVO = new UserSignatureVO();
 		
+		//해당파일 HDD에 저장
 		String fileName = fileManager.saveFile(path.concat("userSignature"), stampFile);
 		
+		//DB에 넣을 정보 담기
 		userSignatureVO.setUsername(userVO.getUsername());
 		userSignatureVO.setFileName(fileName);
 		userSignatureVO.setOriName(oriName);
 		userSignatureVO.setSignatureType("ST1");
 		
+		//DB에 INSERT
 		int result = approvalService.addSign(userSignatureVO);
 		
 		return "redirect:/user/mypage";
@@ -282,14 +297,18 @@ public class ApprovalController {
 	
 	@GetMapping("deleteSign")
 	public String deleteSign(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
-		UserSignatureVO userSignatureVO = approvalService.getSignature(userVO);
+		//로그인한 유저의 서명/도장 정보 가져오기
+		UserSignatureVO userSignatureVO = userService.getSign(userVO);
+		//서명/도장이 없을 시 실행X
 		if(userSignatureVO == null) {
 			model.addAttribute("result", "삭제할 서명/도장이 없습니다.");
 			model.addAttribute("path", "/user/mypage");
 			return "commons/result";
 		}
+		//먼저 DB에서 지우고
 		int result = approvalService.deleteSign(userVO);
 		
+		//DB에서 지워졌으면 HDD에서도 해당 파일 삭제
 		if(result > 0) {
 			fileManager.deleteFile(path.concat("userSignature"), userSignatureVO.getFileName());
 		}

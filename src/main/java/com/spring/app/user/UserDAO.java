@@ -41,6 +41,6 @@ public interface UserDAO {
 	public DocumentVO getDocument(DocumentVO documentVO) throws Exception;
 	
 	//서명 OR 도장 가져오기
-	public UserSignatureVO getSign(UserSignatureVO userSignatureVO) throws Exception;
+	public UserSignatureVO getSign(UserVO userVO) throws Exception;
 	
 }

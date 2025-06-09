@@ -63,10 +63,6 @@
   		</association>
   	</resultMap>
   	
-  	<select id="getSignature" resultType="UserSignatureVO" parameterType="UserVO">
-  		SELECT * FROM USER_SIGNATURE WHERE USERNAME=#{username}
-  	</select>
-  	
   	<insert id="addForm" parameterType="FormVO">
   		INSERT INTO FORM VALUES
   		(

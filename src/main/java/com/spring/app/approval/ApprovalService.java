@@ -85,9 +85,5 @@ public class ApprovalService {
 		return approvalDAO.deleteSign(userVO);
 	}
 	
-	//로그인한 유저 서명/도장 조회
-	public UserSignatureVO getSignature(UserVO userVO) throws Exception {
-		return approvalDAO.getSignature(userVO);
-	}
 
 }

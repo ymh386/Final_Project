@@ -190,7 +190,7 @@
  		</association>
  	</resultMap>
  	
- 	<select id="getSign" resultType="UserSignatureVO" parameterType="UserSignatureVO">
+ 	<select id="getSign" resultType="UserSignatureVO" parameterType="UserVO">
  		SELECT * FROM USER_SIGNATURE WHERE USERNAME=#{username}
  	</select>
   </mapper>

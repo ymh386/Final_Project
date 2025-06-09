@@ -63,10 +63,7 @@ public class UserController {
 	void myPage(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
 		
 		//로그인한 유저의 서명정보 담기
-		UserSignatureVO userSignatureVO = new UserSignatureVO();
-		userSignatureVO.setUsername(userVO.getUsername());
-		
-		userSignatureVO = userService.getSign(userSignatureVO);
+		UserSignatureVO userSignatureVO = userService.getSign(userVO);
 		
 		//서명이 없으면 프론트로 굳이 안보냄
 		if(userSignatureVO != null) {
