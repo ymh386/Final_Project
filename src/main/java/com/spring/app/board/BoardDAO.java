@@ -2,10 +2,13 @@ package com.spring.app.board;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Mapper;
+
 import com.spring.app.board.comment.CommentVO;
 import com.spring.app.board.interaction.InteractionVO;
 import com.spring.app.home.util.Pager;
 
+@Mapper
 public interface BoardDAO {
 
     // 게시글 전체 개수 조회

@@ -4,10 +4,23 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
   <mapper namespace="com.spring.app.user.UserDAO">
+  
+  
+    <select id="selectUsersByUsernamePrefix"
+          parameterType="map"
+          resultType="UserVO">
+    SELECT USERNAME, NAME
+      FROM USER
+     WHERE BINARY USERNAME LIKE #{prefix}
+  </select>
+  
+  
+  
+  
   	<insert id="join" parameterType="UserVO">
  		INSERT INTO USER
- 		(USERNAME, PASSWORD, NAME, EMAIL, PHONE, BIRTH, FILE_NAME, ORI_NAME, ACCOUNTNONEXPIRED, ACCOUNTNONLOCKED, CREDENTIALSNONEXPIRED, ENABLED, SNS)
- 		 VALUES (#{username}, #{password}, #{name}, #{email}, #{phone}, #{birth}, #{fileName}, #{oriName}, 1, 1, 1, 1, #{sns})
+ 		(USERNAME, PASSWORD, NAME, EMAIL, PHONE, BIRTH, FILE_NAME, ORI_NAME, ACCOUNTNONEXPIRED, ACCOUNTNONLOCKED, CREDENTIALSNONEXPIRED, ENABLED, SNS, TRAINER_CODE)
+ 		 VALUES (#{username}, #{password}, #{name}, #{email}, #{phone}, #{birth}, #{fileName}, #{oriName}, 1, 1, 1, 1, #{sns}, #{trainerCode})
   	</insert>
   	
   	  	<insert id="trainerJoin" parameterType="UserVO">
@@ -19,7 +32,11 @@
   	<select id="getTrainerCode" resultType="Long">
   		SELECT AUTO_INCREMENT
 		FROM INFORMATION_SCHEMA.TABLES
+
+		WHERE TABLE_SCHEMA = 'SportCenter'
+
 		WHERE TABLE_SCHEMA = 'final'
+
 		  AND TABLE_NAME = 'USER';
   	</select>
   	
@@ -49,7 +66,11 @@
  	</select>
  	
  	<update id="updateUserState" parameterType="MemberStateVO">
- 		UPDATE MEMBER_ROLE SET STATE_NUM=#{stateNum} WHERE USERNAME=#{username}
+ 		UPDATE MEMBER_STATE SET USERNAME=#{username}, STATE_NUM=1 WHERE USERNAME=#{username}
+ 	</update>
+ 	
+ 	<update id="update" parameterType="UserVO">
+ 		UPDATE USER SET PASSWORD=#{password}, NAME=#{name}, EMAIL=#{email}, PHONE=#{phone} WHERE USERNAME=#{username}
  	</update>
  	
  	<resultMap type="UserVO" id="detailMap">
@@ -69,7 +90,11 @@
  		<result column="CREATED_AT" property="createdAt"/>
  		<result column="POSITION" property="position"/>
  		<result column="PARENT" property="parent"/>
- 		<result column="DEPARTMENT_ID" property="departmentId"/>
+ 		<association javaType="DepartmentVO" property="departmentVO">
+ 			<id column="DEPARTMENT_ID" property="departmentId"/>
+ 			<result column="DEPARTMENT_NAME" property="departmentName"/>
+ 			<result column="DESCRIPTION" property="description"/>
+ 		</association>
  		
  		<collection property="roleList" javaType="java.util.List" ofType="RoleVO">
  			<result column="ROLE_NAME" property="roleName"/>
@@ -80,4 +105,41 @@
  		</collection>
  		
  	</resultMap>
+ 	
+ 	<select id="getUsersWithDepartment" resultMap="usersWithDepartmentMap">
+ 		SELECT 
+ 			U.USERNAME,
+ 			U.NAME,
+ 			U.POSITION,
+ 			U.PARENT,
+ 			D.DEPARTMENT_ID,
+ 			D.DEPARTMENT_NAME,
+ 			R.ROLE_NUM
+ 		FROM USER U
+ 		INNER JOIN MEMBER_ROLE MR
+ 		ON U.USERNAME=MR.USERNAME
+ 		INNER JOIN ROLE R
+		USING (ROLE_NUM)
+ 		LEFT OUTER JOIN DEPARTMENT D
+ 		ON U.DEPARTMENT_ID=D.DEPARTMENT_ID
+ 		WHERE MR.ROLE_NUM=2
+ 	</select>
+ 	
+ 	<resultMap type="UserVO" id="usersWithDepartmentMap">
+ 		<id column="USERNAME" property="username"/>
+ 		<result column="NAME" property="name"/>
+ 		<result column="POSITION" property="position"/>
+ 		<result column="PARENT" property="parent"/>
+ 		<association javaType="DepartmentVO" property="departmentVO">
+ 			<id column="DEPARTMENT_ID" property="departmentId"/>
+ 			<result column="DEPARTMENT_NAME" property="departmentName"/>
+ 		</association>
+ 		<collection javaType="java.util.List" ofType="RoleVO" property="roleList">
+ 			<id column="ROLE_NUM" property="roleNum"/>
+ 		</collection>
+ 	</resultMap>
+ 	
+ 	<select id="getDepartments" resultType="DepartmentVO">
+ 		SELECT * FROM DEPARTMENT
+ 	</select>
   </mapper>

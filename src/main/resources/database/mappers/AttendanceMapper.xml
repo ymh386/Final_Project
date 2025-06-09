@@ -6,6 +6,18 @@
   <mapper namespace="com.spring.app.attendance.AttendanceDAO">
   	
   	
+  	
+  	
+    <!-- 1) username+attendance_date로 오늘 기록 조회 -->
+    <select id="selectByUserAndDate" parameterType="map" resultType="AttendanceVO">
+        SELECT *
+        FROM ATTENDANCE
+        WHERE USERNAME = #{username}
+          AND ATTENDANCE_DATE=#{attendanceDate}
+    </select>
+  	
+  	
+  	
   	  <!-- 1) 출근 기록 삽입 -->
   <insert id="insertCheckIn" parameterType="AttendanceVO" useGeneratedKeys= "true"
         keyProperty="attendanceId"
@@ -13,17 +25,25 @@
     INSERT INTO ATTENDANCE
       (ATTENDANCE_DATE, CHECKIN_TIME, STATUS, RECORDED_AT, USERNAME)
     VALUES
-      (#{attendanceDate}, #{checkinTime}, '출근', NOW(), #{username})
+      (#{attendanceDate}, #{checkinTime},#{status}, NOW(), #{username})
   </insert>
   	
   	
   	  <!-- 2) 퇴근 시간 업데이트 -->
   <update id="updateCheckOut" parameterType="AttendanceVO">
     UPDATE ATTENDANCE
-    SET CHECKOUT_TIME = NOW(),
+    SET CHECKOUT_TIME = #{checkoutTime},
         STATUS = '퇴근'
-    WHERE ATTENDANCE_ID = #{attendanceId}
+    WHERE ATTENDANCE_ID =#{attendanceId}
   </update>
+  	
+  	
+  	    <select id="selectById" parameterType="long" resultType="AttendanceVO">
+        SELECT *
+          FROM ATTENDANCE
+         WHERE ATTENDANCE_ID = #{attendanceId}
+    </select>
+  	
   	
   	
  <select id="selectByUser" resultType="AttendanceVO" parameterType="string">

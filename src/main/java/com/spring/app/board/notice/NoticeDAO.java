@@ -1,8 +1,12 @@
 package com.spring.app.board.notice;
 
 import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
 import com.spring.app.home.util.Pager;
 
+@Mapper
 public interface NoticeDAO {
     /**
      * 전체 공지글 개수 조회 (페이징 및 검색조건 포함)

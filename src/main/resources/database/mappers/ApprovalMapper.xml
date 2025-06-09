@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.spring.app.approval.ApprovalDAO">
+  	
+  	<select id="getCategory" resultType="CategoryVO">
+  		SELECT * FROM FORM_CATEGORY ORDER BY CATEGORY_ID ASC
+  	</select>
+  	
+  	<select id="getCategoryDetail" resultType="CategoryVO">
+  		SELECT * FROM FORM_CATEGORY WHERE CATEGORY_NAME = #{categoryName}
+  	</select>
+  	
+  	<select id="getForms" resultType="FormVO">
+  		SELECT * FROM FORM;
+  	</select>
+  	
+  	<select id="getForm" resultType="FormVO" parameterType="FormVO">
+  		SELECT * FROM FORM WHERE FORM_ID = #{formId}
+  	</select>
+  	
+  	<insert id="addForm" parameterType="FormVO">
+  		INSERT INTO FORM VALUES
+  		(
+  			null,
+  			#{formTitle},
+  			#{categoryId},
+  			#{contentHtml},
+  			CURRENT_TIMESTAMP
+  		)
+  	</insert>
+  	
+  	<insert id="addCategory" parameterType="CategoryVO">
+  		INSERT INTO FORM_CATEGORY VALUES
+  		(
+  			null,
+  			#{categoryName}
+  		)
+  	</insert>
+  	
+  	<!-- useGeneratedKeys="true" keyProperty="documentId" DB에서 생성된 키 사용 -> auto_increment로 생성된 값 자바에서 가져와 사용하기-->
+  	<insert id="addDocument" parameterType="DocumentVO" useGeneratedKeys="true" keyProperty="documentId">
+  		INSERT INTO DOCUMENT VALUES
+  		(
+  			NULL,
+  			#{formId},
+  			#{writerId},
+  			#{documentTitle},
+  			#{contentHtml},
+  			'D0',
+  			CURRENT_TIMESTAMP
+  		)
+  	</insert>
+  	
+  	<insert id="addApproval" parameterType="ApprovalVO" useGeneratedKeys="true" keyProperty="approvalId">
+  		INSERT INTO APPROVAL VALUES
+  		(
+  			NULL,
+  			#{documentId},
+  			#{approverId},
+  			#{parentId},
+  			#{approvalStep},
+  			#{approvalStatus},
+  			CURRENT_TIMESTAMP
+  		)
+  	</insert>
+  	
+  </mapper>

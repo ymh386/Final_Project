@@ -6,7 +6,7 @@
 <mapper namespace="com.spring.app.board.BoardDAO">
 
   <!-- ★ resultMap: BOARD → BoardVO -->
-  <resultMap id="BoardResultMap" type="com.spring.app.board.BoardVO">
+  <resultMap id="BoardResultMap" type="BoardVO">
     <id     column="BOARD_NUM"       property="boardNum"       jdbcType="BIGINT"/>
     <result column="USERNAME"        property="userName"       jdbcType="VARCHAR"/>
     <result column="BOARD_TITLE"     property="boardTitle"     jdbcType="VARCHAR"/>
@@ -21,7 +21,7 @@
   </resultMap>
 
   <!-- 1) 게시글 전체 개수 조회 (Pager에 searchField, searchWord 포함) -->
-  <select id="getTotalCount" parameterType="com.spring.app.home.util.Pager" resultType="long">
+  <select id="getTotalCount" parameterType="Pager" resultType="long">
     SELECT COUNT(*)
       FROM BOARD
     <where>
@@ -32,7 +32,7 @@
   </select>
 
   <!-- 2) 게시글 목록 조회 (페이징 / 검색 포함) -->
-  <select id="getList" parameterType="com.spring.app.home.util.Pager" resultMap="BoardResultMap">
+  <select id="getList" parameterType="Pager" resultMap="BoardResultMap">
     SELECT
       BOARD_NUM,
       USERNAME,
@@ -79,7 +79,7 @@
   </select>
 
   <!-- 4) 게시글 등록 -->
-  <insert id="add" parameterType="com.spring.app.board.BoardVO"
+  <insert id="add" parameterType="BoardVO"
           useGeneratedKeys="true" keyProperty="boardNum" keyColumn="BOARD_NUM">
     INSERT INTO BOARD
       (USERNAME,
@@ -106,7 +106,7 @@
   </insert>
 
   <!-- 5) 게시글 수정 -->
-  <update id="update" parameterType="com.spring.app.board.BoardVO">
+  <update id="update" parameterType="BoardVO">
     UPDATE BOARD
       SET BOARD_TITLE    = #{boardTitle},
           BOARD_CONTENTS = #{boardContents},
@@ -121,7 +121,7 @@
   </update>
 
   <!-- 6) 게시글 삭제 (작성자 or admin) -->
-  <delete id="delete" parameterType="com.spring.app.board.BoardVO">
+  <delete id="delete" parameterType="BoardVO">
     DELETE FROM BOARD
     WHERE BOARD_NUM = #{boardNum}
       AND (
@@ -131,14 +131,14 @@
   </delete>
 
   <!-- 7) 조회수 증가 -->
-  <update id="hitUpdate" parameterType="com.spring.app.board.BoardVO">
+  <update id="hitUpdate" parameterType="BoardVO">
     UPDATE BOARD
       SET BOARD_HITS = BOARD_HITS + 1
     WHERE BOARD_NUM = #{boardNum}
   </update>
 
   <!-- 8) 첨부파일 등록 -->
-  <insert id="addFile" parameterType="com.spring.app.board.BoardFileVO"
+  <insert id="addFile" parameterType="BoardFileVO"
           useGeneratedKeys="true" keyProperty="fileNum" keyColumn="FILE_NUM">
     INSERT INTO BOARD_FILE
       (BOARD_NUM, FILE_NAME, ORI_NAME)
@@ -147,8 +147,8 @@
   </insert>
 
   <!-- 9) 게시글 첨부파일 목록 조회 -->
-  <select id="getFileList" parameterType="com.spring.app.board.BoardVO"
-          resultType="com.spring.app.board.BoardFileVO">
+  <select id="getFileList" parameterType="BoardVO"
+          resultType="BoardFileVO">
     SELECT
       FILE_NUM,
       BOARD_NUM,
@@ -160,8 +160,8 @@
   </select>
 
   <!-- 10) 첨부파일 상세 조회 -->
-  <select id="getFileDetail" parameterType="com.spring.app.board.BoardFileVO"
-          resultType="com.spring.app.board.BoardFileVO">
+  <select id="getFileDetail" parameterType="BoardFileVO"
+          resultType="BoardFileVO">
     SELECT
       FILE_NUM,
       BOARD_NUM,
@@ -173,7 +173,7 @@
   </select>
 
   <!-- 11) 첨부파일 단건 삭제 -->
-  <delete id="deleteFile" parameterType="com.spring.app.board.BoardFileVO">
+  <delete id="deleteFile" parameterType="BoardFileVO">
     DELETE FROM BOARD_FILE
     WHERE FILE_NUM = #{fileNum}
       AND BOARD_NUM = #{boardNum}
@@ -254,14 +254,14 @@
   </select>
 
   <!-- 20) 비밀글 여부 설정 -->
-  <update id="updateSecret" parameterType="com.spring.app.board.BoardVO">
+  <update id="updateSecret" parameterType="BoardVO">
     UPDATE BOARD
       SET IS_SECRET = #{isSecret}
     WHERE BOARD_NUM = #{boardNum}
   </update>
 
   <!-- 21) 비밀글 여부 확인 -->
-  <select id="checkSecret" parameterType="com.spring.app.board.BoardVO" resultType="boolean">
+  <select id="checkSecret" parameterType="BoardVO" resultType="boolean">
     SELECT CASE WHEN IS_SECRET = 1 THEN TRUE ELSE FALSE END
       FROM BOARD
     WHERE BOARD_NUM = #{boardNum}

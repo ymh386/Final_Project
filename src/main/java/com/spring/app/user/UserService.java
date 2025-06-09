@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Service
 public class UserService implements UserDetailsService {
 	
@@ -35,6 +37,12 @@ public class UserService implements UserDetailsService {
 		return userVO;
 	}
 	
+	public UserVO detail(UserVO userVO) throws Exception {
+		userVO = userDAO.detail(userVO);
+		
+		return userVO;
+	}
+	
 	public int join(UserVO userVO) throws Exception {
 		
 		userVO.setPassword(encoder.encode(userVO.getPassword()));
@@ -44,10 +52,9 @@ public class UserService implements UserDetailsService {
 	}
 
 	
-	public String getTrainerId() throws Exception {
+	public Long getTrainerCode() throws Exception {
 		Long code = userDAO.getTrainerCode();
-		String trainerId = "T"+code;
-		return trainerId;
+		return code;
 	}
 	
 	public List<UserVO> awaitUserList(UserVO userVO) throws Exception {
@@ -60,6 +67,30 @@ public class UserService implements UserDetailsService {
 		int result = userDAO.updateUserState(memberStateVO);
 		
 		return result;
+	}
+	
+
+	// 트레이너 스케쥴 등록 할때 트레이너/일반회원 구분하기 위해
+    public List<UserVO> getUsersByUsernamePrefix(String prefix) {
+        return userDAO.selectUsersByUsernamePrefix(prefix);
+    }
+
+
+
+	public int update(UserVO userVO) throws Exception {
+		int result = userDAO.update(userVO);
+		
+		return result;
+	}
+	
+	//트레이너등급 이상 회원들의 부서정보와 함께 조희
+	public List<UserVO> getUsersWithDepartment() throws Exception {
+		return userDAO.getUsersWithDepartment();
+	}
+
+	//부서들 정보 가져오기
+	public List<DepartmentVO> getDepartments() throws Exception {
+		return userDAO.getDepartments();
 	}
 	
 	

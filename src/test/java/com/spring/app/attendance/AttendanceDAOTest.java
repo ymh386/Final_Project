@@ -34,7 +34,6 @@ class AttendanceDAOTest {
 //    }
     
     
-    
     @Test
     void testCheckOut() {
         // 먼저 출근

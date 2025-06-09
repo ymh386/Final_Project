@@ -24,14 +24,5 @@ public class HomeController {
 		
 		return "index";
 	}
-	
-	@GetMapping("/admin")
-	String admin(Model model, UserVO userVO) throws Exception {
-		
-		List<UserVO> ar = userService.awaitUserList(userVO);
-		
-		model.addAttribute("userList", ar);
-		
-		return "admin";
-	}
+
 }

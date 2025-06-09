@@ -1,143 +1,165 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@ taglib prefix="sec"
-	uri="http://www.springframework.org/security/tags"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>트레이너 일정 관리</title>
+    <meta charset="UTF-8">
+    <title>트레이너 일정 관리</title>
 
-<!-- FullCalendar CSS -->
-<link 
-  href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" 
-  rel="stylesheet" 
-/>
+    <!-- FullCalendar CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css"
+        rel="stylesheet" />
 
-<!-- FullCalendar JS -->
-<script 
-  src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js">
-</script>
-<style>
-body {
-	font-family: Arial, sans-serif;
-	margin: 20px;
-}
+    <!-- FullCalendar JS -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js">
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
 
-#calendar {
-	max-width: 900px;
-	margin: 0 auto;
-}
-/* Modal 스타일 */
-.modal {
-	display: none;
-	position: fixed;
-	z-index: 100;
-	left: 0;
-	top: 0;
-	width: 100%;
-	height: 100%;
-	background-color: rgba(0, 0, 0, 0.4);
-}
+        #calendar {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        /* Modal 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
 
-.modal-content {
-	background-color: #fff;
-	margin: 10% auto;
-	padding: 20px;
-	border-radius: 4px;
-	width: 400px;
-}
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 4px;
+            width: 400px;
+        }
 
-.modal-header {
-	font-size: 18px;
-	margin-bottom: 10px;
-}
+        .modal-header {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
 
-.modal-footer {
-	text-align: right;
-}
+        .modal-footer {
+            text-align: right;
+        }
 
-.modal-footer button {
-	padding: 6px 12px;
-	margin-left: 10px;
-}
+        .modal-footer button {
+            padding: 6px 12px;
+            margin-left: 10px;
+        }
 
-.form-group {
-	margin-bottom: 10px;
-}
+        .form-group {
+            margin-bottom: 10px;
+        }
 
-.form-group label {
-	display: block;
-	font-size: 14px;
-}
+        .form-group label {
+            display: block;
+            font-size: 14px;
+        }
 
-.form-group input {
-	width: 100%;
-	padding: 6px;
-	box-sizing: border-box;
-}
-</style>
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 6px;
+            box-sizing: border-box;
+        }
+    </style>
 </head>
 <body>
-	<!-- 1) 로그인된 사용자 이름 출력: 
-         Principal이 없거나 anonymous면 “손님”으로 표기 -->
-	<h2>
-		안녕하세요,
-		<c:choose>
-			<c:when test="${not empty pageContext.request.userPrincipal}">
-                ${pageContext.request.userPrincipal.name} 
+    <!-- 1) 로그인된 사용자 이름 출력: Principal이 없거나 anonymous면 “손님”으로 표기 -->
+    <h2>
+        안녕하세요,
+        <c:choose>
+            <c:when test="${not empty pageContext.request.userPrincipal}">
+                ${pageContext.request.userPrincipal.name}
             </c:when>
-			<c:otherwise>
-                손님
-            </c:otherwise>
-		</c:choose>
-		님
-	</h2>
+            <c:otherwise>손님</c:otherwise>
+        </c:choose>
+        님
+    </h2>
 
-	<div id="calendar"></div>
+    <div id="calendar"></div>
 
-	<!-- 일정 생성/삭제용 모달 (관리자 전용) -->
-	<div id="scheduleModal" class="modal">
-		<div class="modal-content">
-			<div class="modal-header">
-				<span id="modalTitle">일정 등록</span>
-			</div>
-			<div class="modal-body">
-				<div class="form-group">
-					<label for="facilityId">시설 ID</label> <input type="number"
-						id="facilityId" placeholder="숫자만 입력">
-				</div>
-				<div class="form-group">
-					<label for="scheduleDate">예약 날짜</label> <input type="date"
-						id="scheduleDate">
-				</div>
-				<div class="form-group">
-					<label for="startTime">시작 시간</label> <input type="time"
-						id="startTime">
-				</div>
-				<div class="form-group">
-					<label for="endTime">종료 시간</label> <input type="time" id="endTime">
-				</div>
-			</div>
-			<div class="modal-footer">
-				<button id="btnCancel">취소</button>
-				<button id="btnSave">저장</button>
-				<button id="btnDelete"
-					style="background-color: #e74c3c; color: #fff; display: none;">삭제</button>
-			</div>
-		</div>
-	</div>
 
-	<!-- FullCalendar JS -->
-	<script
-		src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.js"></script>
-	<script>
+    <!-- 일정 생성/삭제용 모달 (관리자 전용) -->
+    <div id="scheduleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="modalTitle">일정 등록</span>
+            </div>
+            <div class="modal-body">
+                <!-- 1) 트레이너 선택 드롭다운 -->
+                <div class="form-group">
+                    <label for="username">트레이너</label>
+                    <select id="username" name="username" class="form-control">
+                        <option value="">-- 트레이너 선택 --</option>
+                        <c:forEach var="trainer" items="${trainerList}">
+                            <option value="${trainer.username}">${trainer.name}</option>
+                        </c:forEach>
+                    </select>
+                </div>
+
+                <!-- 2) 시설 ID -->
+                <div class="form-group">
+                    <label for="facilityId">시설</label>
+                    <select id="facilityId" name="facilityId" class="form-control" required>
+                        <option value="">-- 시설 선택 --</option>
+                        <option value="1">복싱장</option>
+                        <option value="2">헬스장</option>
+                        <option value="3">수영장</option>
+                    </select>
+                </div>
+
+                <!-- 3) 예약 날짜 -->
+                <div class="form-group">
+                    <label for="scheduleDate">예약 날짜</label>
+                    <input type="date" id="scheduleDate" name="scheduleDate" class="form-control" />
+                </div>
+
+                <!-- 4) 시작 시간 -->
+                <div class="form-group">
+                    <label for="startTime">시작 시간</label>
+                    <input type="time" id="startTime" name="startTime" class="form-control" />
+                </div>
+
+                <!-- 5) 종료 시간 -->
+                <div class="form-group">
+                    <label for="endTime">종료 시간</label>
+                    <input type="time" id="endTime" name="endTime" class="form-control" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCancel" class="btn btn-secondary">취소</button>
+                <button id="btnSave" class="btn btn-primary">저장</button>
+                <button id="btnDelete" class="btn"
+                    style="background-color: #e74c3c; color: #fff; display: none;">삭제</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- FullCalendar JS -->
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.js"></script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             // 2) 로그인/권한 정보를 JSP tag로 JS 변수에 할당
             //    pageContext.request.userPrincipal이 null이면 익명(anonymous)
             const isLoggedIn = ${not empty pageContext.request.userPrincipal};
             //    hasRole('ADMIN')일 때만 true, 아니면 false
-            const isAdmin = 
+            const isAdmin =
                 <sec:authorize access="hasRole('ADMIN')">true</sec:authorize>
                 <sec:authorize access="!hasRole('ADMIN')">false</sec:authorize>;
 
@@ -147,7 +169,7 @@ body {
             //    - 비로그인은 이벤트 호출을 하지 않도록 빈 문자열
             let eventsUrl = '';
             if (isLoggedIn) {
-                eventsUrl = isAdmin 
+                eventsUrl = isAdmin
                     ? '${pageContext.request.contextPath}/schedule/list'
                     : '${pageContext.request.contextPath}/schedule/my';
             }
@@ -191,13 +213,7 @@ body {
                             startTime: ev.startStr.substring(11,16),
                             endTime: ev.endStr ? ev.endStr.substring(11,16) : ev.startStr.substring(11,16)
                         });
-                    } else if (isLoggedIn) {
-                        // 로그인된 트레이너: 읽기 전용 알림
-                        alert(`예약 날짜: ${ev.startStr.substring(0,10)}\n시설 ID: ${ev.extendedProps.facilityId}`);
-                    } else {
-                        // 비로그인: 달력 이벤트 클릭 금지 또는 간단 알림
-                        alert('로그인 후 이용 가능합니다.');
-                    }
+                    } 
                 }
             });
             calendar.render();
@@ -205,6 +221,7 @@ body {
             // 7) Modal 관련 요소 및 함수
             const modal = document.getElementById('scheduleModal');
             const modalTitle = document.getElementById('modalTitle');
+            const selectTrainer = document.getElementById('username');   // 트레이너 드롭다운
             const inputFacility = document.getElementById('facilityId');
             const inputDate = document.getElementById('scheduleDate');
             const inputStart = document.getElementById('startTime');
@@ -224,6 +241,7 @@ body {
                 currentMode = mode;
                 if (mode === 'create') {
                     modalTitle.textContent = '일정 등록';
+                    selectTrainer.value = '';          // 트레이너 초기화
                     inputFacility.value = '';
                     inputDate.value = data.start;
                     inputStart.value = '09:00';
@@ -233,6 +251,8 @@ body {
                 } else if (mode === 'edit') {
                     modalTitle.textContent = '일정 삭제';
                     currentScheduleId = data.scheduleId;
+                    // 수정 모드에서는 트레이너 선택 불가하므로 그대로 두거나, 서버에서 트레이너도 내려줘야 합니다.
+                    selectTrainer.value = data.username || '';
                     inputFacility.value = data.facilityId;
                     inputDate.value = data.scheduleDate;
                     inputStart.value = data.startTime;
@@ -246,6 +266,14 @@ body {
             btnSave.onclick = () => {
                 if (!isAdmin) return;
 
+                // (1) 트레이너 아이디 읽기
+                const trainerUsername = selectTrainer.value;
+                if (!trainerUsername) {
+                    alert('트레이너를 선택하세요.');
+                    return;
+                }
+
+                // (2) 나머지 값 읽기
                 const facilityId = parseInt(inputFacility.value);
                 const date = inputDate.value;
                 const start = inputStart.value;
@@ -256,13 +284,16 @@ body {
                     return;
                 }
 
+                // (3) JSON 바디에 username 포함
                 const vo = {
-                    facilityId: facilityId,
+                    username:     trainerUsername,
+                    facilityId:   facilityId,
                     scheduleDate: date,
-                    startTime: start + ":00",
-                    endTime: end + ":00"
+                    startTime:    start + ":00",
+                    endTime:      end   + ":00"
                 };
 
+                // (4) AJAX 요청
                 fetch('${pageContext.request.contextPath}/schedule/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -273,12 +304,16 @@ body {
                     return res.json();
                 })
                 .then(newVo => {
+                    // 달력에 새 이벤트 추가
                     calendar.addEvent({
                         id: newVo.scheduleId,
-                        title: 'Facility ' + newVo.facilityId,
+                        title: newVo.username + ' / Facility ' + newVo.facilityId,
                         start: newVo.scheduleDate + 'T' + newVo.startTime,
-                        end: newVo.scheduleDate + 'T' + newVo.endTime,
-                        extendedProps: { facilityId: newVo.facilityId }
+                        end:   newVo.scheduleDate + 'T' + newVo.endTime,
+                        extendedProps: {
+                            username:   newVo.username,
+                            facilityId: newVo.facilityId
+                        }
                     });
                     modal.style.display = 'none';
                 })

@@ -2,6 +2,9 @@ package com.spring.app.board.comment;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
 public interface CommentDAO {
 
     // 댓글 추가
