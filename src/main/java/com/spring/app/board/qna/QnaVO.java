@@ -19,12 +19,12 @@ public class QnaVO {
     private Date boardDate;
     /** 글 내용 */
     private String boardContents;
-    /** 답글 깊이 */
+    /** 답글 깊이 (0=원글, 1=첫번째 답글, ...) */
     private Long boardDepth;
-    /** 참조 글번호 */
+    /** 참조 글번호 (원글의 boardNum) */
     private Long boardRef;
-    /** 순서 */
+    /** 같은 ref 그룹 내 순서 */
     private Long boardStep;
-    /** 비밀글 여부 (0/1) */
+    /** 비밀글 여부 (0=공개, 1=비밀) */
     private Integer isSecret;
 }
