@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.spring.app.approval.DocumentVO;
+import com.spring.app.approval.UserSignatureVO;
 
 @Mapper
 public interface UserDAO {
@@ -38,4 +39,8 @@ public interface UserDAO {
 	
 	//전자결재 작성 디테일 불러오기
 	public DocumentVO getDocument(DocumentVO documentVO) throws Exception;
+	
+	//서명 OR 도장 가져오기
+	public UserSignatureVO getSign(UserSignatureVO userSignatureVO) throws Exception;
+	
 }

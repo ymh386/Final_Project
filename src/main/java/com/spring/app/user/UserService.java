@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.spring.app.approval.DocumentVO;
+import com.spring.app.approval.UserSignatureVO;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -103,6 +104,11 @@ public class UserService implements UserDetailsService {
 	//작성한 전자결재디테일 불러오기
 	public DocumentVO getDocument(DocumentVO documentVO) throws Exception {
 		return userDAO.getDocument(documentVO);
+	}
+	
+	//서명 or 도장 정보 가져오기
+	public UserSignatureVO getSign(UserSignatureVO userSignatureVO) throws Exception {
+		return userDAO.getSign(userSignatureVO);
 	}
 	
 	

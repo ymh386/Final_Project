@@ -21,6 +21,52 @@
   		SELECT * FROM FORM WHERE FORM_ID = #{formId}
   	</select>
   	
+  	<select id="getAwaitList" resultMap="awaitMap" parameterType="ApprovalVO">
+  		SELECT * FROM APPROVAL A
+  		INNER JOIN DOCUMENT D
+  		ON A.DOCUMENT_ID=D.DOCUMENT_ID
+  		INNER JOIN FORM F
+  		ON D.FORM_ID=F.FORM_ID
+  		WHERE A.APPROVER_ID=#{approverId} AND A.APPROVAL_STATUS='AS0'
+  	</select>
+  	
+  	<select id="getAwaitDetail" resultMap="awaitMap" parameterType="ApprovalVO">
+  		SELECT * FROM APPROVAL A
+  		INNER JOIN DOCUMENT D
+  		ON A.DOCUMENT_ID=D.DOCUMENT_ID
+  		INNER JOIN FORM F
+  		ON D.FORM_ID=F.FORM_ID
+  		WHERE A.DOCUMENT_ID=#{documentId} AND A.APPROVER_ID=#{approverId} AND A.APPROVAL_STATUS='AS0'
+  	</select>
+  	
+  	<resultMap type="ApprovalVO" id="awaitMap">
+  		<id column="APPROVAL_ID" property="approvalId"/>
+  		<result column="DOCUMENT_ID" property="documentId"/>
+  		<result column="APPROVER_ID" property="approverId"/>
+  		<result column="PARENT_ID" property="parentId"/>
+  		<result column="APPROVAL_STEP" property="approvalStep"/>
+  		<result column="APPROVAL_STATUS" property="approvalStatus"/>
+  		<result column="APPROVED_AT" property="approvedAt"/>
+  		<association javaType="DocumentVO" property="documentVO">
+  			<result column="FORM_ID" property="formId"/>
+  			<result column="WRITER_ID" property="writerId"/>
+  			<result column="DOCUMENT_TITLE" property="documentTitle"/>
+  			<result column="CONTENT_HTML" property="contentHtml"/>
+  			<result column="DOCUMENT_STATUS" property="documentStatus"/>
+  			<result column="CREATED_AT" property="createdAt"/>
+  			<association javaType="FormVO" property="formVO">
+  				<result column="FORM_TITLE" property="formTitle"/>
+  				<result column="CATEGORY_ID" property="categoryId"/>
+  				<result column="CONTENT_HTML" property="contentHtml"/>
+  				<result column="CREATED_AT" property="createdAt"/>
+  			</association>
+  		</association>
+  	</resultMap>
+  	
+  	<select id="getSignature" resultType="UserSignatureVO" parameterType="UserVO">
+  		SELECT * FROM USER_SIGNATURE WHERE USERNAME=#{username}
+  	</select>
+  	
   	<insert id="addForm" parameterType="FormVO">
   		INSERT INTO FORM VALUES
   		(
@@ -66,5 +112,22 @@
   			CURRENT_TIMESTAMP
   		)
   	</insert>
+  	
+  	<insert id="addSign" parameterType="UserSignatureVO">
+  		INSERT INTO USER_SIGNATURE VALUES
+  		(
+  			NULL,
+  			#{username},
+  			#{fileName},
+  			#{oriName},
+  			#{signatureType},
+  			CURRENT_TIMESTAMP
+  		)
+  	</insert>
+  	
+  	<delete id="deleteSign" parameterType="UserVO">
+  		DELETE FROM USER_SIGNATURE WHERE USERNAME=#{username}
+  	</delete>
+  	
   	
   </mapper>

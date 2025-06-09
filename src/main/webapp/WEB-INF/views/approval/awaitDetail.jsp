@@ -16,31 +16,49 @@
 </style>
 </head>
 <body>
-    <h2>결재 정보</h2><br>
+    <h2>승인</h2><br>
     <div class="mb-3">
-        <label class="form-label">작성자</label>
-        <input type="text" class="form-control" value="${vo.writerId}" readonly>
+        <label class="form-label">요청자</label>
+        <input type="text" class="form-control" value="${vo.documentVO.writerId}" readonly>
         <label class="form-label">종류</label>
-        <input type="text" class="form-control" value="${vo.formVO.formTitle}" readonly>
+        <input type="text" class="form-control" value="${vo.documentVO.formVO.formTitle}" readonly>
         <label class="form-label">제목</label>
-        <input type="text" class="form-control" value="${vo.documentTitle}" readonly>
-        <label class="form-label">진행 상태</label>
+        <input type="text" class="form-control" value="${vo.documentVO.documentTitle}" readonly>
+        <label class="form-label">문서 상태</label>
         <c:choose>
-            <c:when test="${vo.documentStatus eq 'D1'}">
+            <c:when test="${vo.documentVO.documentStatus eq 'D1'}">
                 <input type="text" class="form-control" value="승인" readonly>
             </c:when>
-            <c:when test="${vo.documentStatus eq 'D2'}">
+            <c:when test="${vo.documentVO.documentStatus eq 'D2'}">
                 <input type="text" class="form-control" value="반려" readonly>
             </c:when>
             <c:otherwise>
                 <input type="text" class="form-control" value="진행중" readonly>
             </c:otherwise>
         </c:choose>
+        <label class="form-label">승인 여부</label>
+        <c:choose>
+            <c:when test="${vo.approvalStatus eq 'AS1'}">
+                <input type="text" class="form-control" value="승인" readonly>
+            </c:when>
+            <c:otherwise>
+                <input type="text" class="form-control" value="미승인" readonly>
+            </c:otherwise>
+        </c:choose>
     </div>
 
     <div>
-        ${vo.contentHtml}
+        ${vo.documentVO.contentHtml}
     </div>
 
+    <div class="mb-3">
+        <div class="row">
+            <a href="./registerSign" class="button">서명/도장 등록</a>
+        </div>
+        <div class="row">
+            <button class="button" id="approve">승인</button>
+            <button class="button" id="rejection">반려</button>
+        </div>
+    </div>
 </body>
 </html>
