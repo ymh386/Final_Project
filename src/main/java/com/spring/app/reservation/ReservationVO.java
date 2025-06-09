@@ -17,6 +17,7 @@ package com.spring.app.reservation;
 	    private LocalDateTime canceledAt;     // 취소 일시
 	    private String canceledReason;        // 취소 사유
 	    private LocalDateTime updatedAt;      // 업데이트 일시
+	 
 
 	
 	

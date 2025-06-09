@@ -38,6 +38,58 @@
     </delete>
     
     
+    <!-- 예약 성공 -->
+  <update id="decrementRemainingSeats" parameterType="long">
+    UPDATE SCHEDULE
+       SET REMAINING_SEATS = REMAINING_SEATS - 1
+     WHERE SCHEDULE_ID = #{scheduleId}
+       AND REMAINING_SEATS > 0
+  </update>
+
+	<!-- 예약 취소 -->
+  <update id="incrementRemainingSeats" parameterType="long">
+    UPDATE SCHEDULE
+       SET REMAINING_SEATS = REMAINING_SEATS + 1
+     WHERE SCHEDULE_ID = #{scheduleId}
+  </update>
+    
+    
+    
+    
+    
+  <!-- 1) 모든 트레이너 계정 조회 (USERNAME 앞에 'T' 붙는 계정, 남은 좌석 있는 것만) -->
+  <select id="selectAllTrainerNames" resultType="String">
+    SELECT DISTINCT USERNAME
+      FROM SCHEDULE
+     WHERE USERNAME LIKE 'T%' 
+       AND REMAINING_SEATS > 0
+     ORDER BY USERNAME
+  </select>
+
+  <!-- 2) 트레이너별 스케줄 조회 -->
+  <select id="selectByTrainerName"
+          parameterType="string"
+          resultType="ScheduleVO">
+    SELECT
+      SCHEDULE_ID     
+      FACILITY_ID      
+      SCHEDULE_DATE    
+      START_TIME      
+      END_TIME         
+      REMAINING_SEATS  
+    FROM SCHEDULE
+    WHERE USERNAME = #{username}
+      AND REMAINING_SEATS > 0
+    ORDER BY SCHEDULE_DATE, START_TIME
+  </select>
+    
+    
+    
+    
+    
+    
+    
+    
     
 </mapper>
  
