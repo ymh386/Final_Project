@@ -1,4 +1,4 @@
-package com.spring.app.board.qna;
+package com.spring.app.board.notice;
 
 import java.sql.Date;
 import lombok.Getter;

@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.spring.app.approval.DocumentVO;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
@@ -91,6 +93,16 @@ public class UserService implements UserDetailsService {
 	//부서들 정보 가져오기
 	public List<DepartmentVO> getDepartments() throws Exception {
 		return userDAO.getDepartments();
+	}
+	
+	//작성한 전자결재목록 불러오기
+	public List<DocumentVO> getDocuments(DocumentVO documentVO) throws Exception {
+		return userDAO.getDocuments(documentVO);
+	}
+	
+	//작성한 전자결재디테일 불러오기
+	public DocumentVO getDocument(DocumentVO documentVO) throws Exception {
+		return userDAO.getDocument(documentVO);
 	}
 	
 	
