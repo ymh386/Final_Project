@@ -25,7 +25,7 @@ public class FileConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // /files/** 요청을 D:/upload/ 로 매핑
-        registry.addResourceHandler(fileUrl + "**")
-                .addResourceLocations("file:" + filePath);
+        registry.addResourceHandler(fileUrl)
+                .addResourceLocations("file:\\" + filePath);
     }
 }

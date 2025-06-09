@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.spring.app.user.UserVO;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -61,6 +63,31 @@ public class ApprovalService {
 				approvalStatus = "AS3";
 			}
 		}
+	}
+	
+	//승인가능 목록 가져오기
+	public List<ApprovalVO> getAwaitList(ApprovalVO approvalVO) throws Exception {
+		return approvalDAO.getAwaitList(approvalVO);
+	}
+	
+	//승인용건 디테일정보 가져오기
+	public ApprovalVO getAwaitDetail(ApprovalVO approvalVO) throws Exception {
+		return approvalDAO.getAwaitDetail(approvalVO);
+	}
+	
+	//서명 or 도장 등록
+	public int addSign(UserSignatureVO userSignatureVO) throws Exception {
+		return approvalDAO.addSign(userSignatureVO);
+	}
+	
+	//서명/도장 삭제
+	public int deleteSign(UserVO userVO) throws Exception {
+		return approvalDAO.deleteSign(userVO);
+	}
+	
+	//로그인한 유저 서명/도장 조회
+	public UserSignatureVO getSignature(UserVO userVO) throws Exception {
+		return approvalDAO.getSignature(userVO);
 	}
 
 }

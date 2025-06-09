@@ -3,6 +3,7 @@ package com.spring.app.user;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.spring.app.approval.ApprovalService;
 import com.spring.app.approval.DocumentVO;
 import com.spring.app.approval.FormVO;
+import com.spring.app.approval.UserSignatureVO;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,6 +41,9 @@ public class UserController {
 	@Autowired
 	private ApprovalService approvalService;
 	
+	@Value("${board.file.path}")
+	private String path;
+	
 	@GetMapping("join/join")
 	void join() {}
 	
@@ -46,7 +51,20 @@ public class UserController {
 	void memberJoin() {}
 	
 	@GetMapping("mypage")
-	void myPage() throws Exception {}
+	void myPage(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
+		
+		//로그인한 유저의 서명정보 담기
+		UserSignatureVO userSignatureVO = new UserSignatureVO();
+		userSignatureVO.setUsername(userVO.getUsername());
+		
+		userSignatureVO = userService.getSign(userSignatureVO);
+		
+		//서명이 없으면 프론트로 굳이 안보냄
+		if(userSignatureVO != null) {
+			model.addAttribute("userSignature", userSignatureVO);
+		}
+		
+	}
 	
 	@PostMapping("join/memberJoin")
 	String memberJoin(UserVO userVO) throws Exception{

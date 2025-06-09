@@ -5,6 +5,8 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 
+import com.spring.app.user.UserVO;
+
 @Mapper
 public interface ApprovalDAO {
 	
@@ -25,5 +27,19 @@ public interface ApprovalDAO {
 	//DB에서 생성된 키 사용 -> auto_increment로 생성된 값 자바에서 가져와 사용하기(본인은 xml에서 처리함)
 //	@Options(useGeneratedKeys = true, keyProperty = "approvalId")
 	public int addApproval(ApprovalVO approvalVO) throws Exception; //결재라인의 결재자 추가
-
+	
+	//승인가능 목록 가져오기
+	public List<ApprovalVO> getAwaitList(ApprovalVO approvalVO) throws Exception;
+	
+	//승인용건 디테일정보 가져오기
+	public ApprovalVO getAwaitDetail(ApprovalVO approvalVO) throws Exception;
+	
+	//서명/도장 등록
+	public int addSign(UserSignatureVO userSignatureVO) throws Exception;
+	
+	//서명/도장 삭제
+	public int deleteSign(UserVO userVO) throws Exception;
+	
+	//로그인한 유저 서명/도장 조회
+	public UserSignatureVO getSignature(UserVO userVO) throws Exception;
 }

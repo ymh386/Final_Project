@@ -1,13 +1,20 @@
 package com.spring.app.approval;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,9 +23,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spring.app.files.FileManager;
 import com.spring.app.user.DepartmentVO;
 import com.spring.app.user.UserService;
 import com.spring.app.user.UserVO;
@@ -30,10 +39,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ApprovalController {
 	
+	//이미지파일 확장자 리스트 -> 도장업로드시 이미지파일만 가능하게 하기위함
+	private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList(".png", ".jpg", ".jpeg", ".gif");
+	
 	@Autowired
 	private ApprovalService approvalService;
 	@Autowired
-	private UserService userService;
+	private UserService userService;  
+	
+	@Autowired
+	private FileManager fileManager;
+	
+	@Value("${board.file.path}")
+	private String path;
 	
 	//결재양식 등록 UI
 	@GetMapping("formRegister")
@@ -154,6 +172,129 @@ public class ApprovalController {
 		}
 		
 		return tree;
+	}
+	
+	@GetMapping("awaitList")
+	public String getAwaitList(@AuthenticationPrincipal UserVO userVO, ApprovalVO approvalVO, Model model) throws Exception {
+		approvalVO.setApproverId(userVO.getUsername());
+		List<ApprovalVO> ar = approvalService.getAwaitList(approvalVO);
+		
+		model.addAttribute("ar", ar);
+		
+		return "approval/awaitList";
+	}
+	
+	@GetMapping("awaitDetail")
+	public String getAwaitDetail(@AuthenticationPrincipal UserVO userVO, ApprovalVO approvalVO, Model model) throws Exception {
+		approvalVO.setApproverId(userVO.getUsername());
+		approvalVO = approvalService.getAwaitDetail(approvalVO);
+		
+		model.addAttribute("vo", approvalVO);
+		
+		return "approval/awaitDetail";
+	}
+	
+	@GetMapping("registerSign")
+	public String registerSign(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
+		
+		//로그인한 사용자의 서명등록 여부 확인
+		UserSignatureVO userSignatureVO = new UserSignatureVO();
+		userSignatureVO.setUsername(userVO.getUsername());
+		
+		userSignatureVO = userService.getSign(userSignatureVO);
+		
+		//서명이 없으면 등록하러가기
+		if(userSignatureVO == null) {
+			return "approval/registerSign";
+			//있으면 등록X
+		}else {
+			model.addAttribute("result", "이미 등록되어있습니다.");
+			model.addAttribute("path", "/user/mypage");
+			return "commons/result";
+		}
+		
+		
+		
+	}
+	
+	@PostMapping("saveSign")
+	public String saveSign(@AuthenticationPrincipal UserVO userVO, @RequestParam("imageData") String imageData) throws Exception {
+		UserSignatureVO userSignatureVO = new UserSignatureVO();
+		
+		String base64Image = imageData.split(",")[1];
+		byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+		
+		String uuid = UUID.randomUUID().toString();
+		String fileName = uuid.concat("_signature_").concat(userVO.getUsername()).concat(".png");
+		
+		Path uploadDir = Paths.get(path.concat("userSignature"));
+		Files.createDirectories(uploadDir);
+		
+		Path filePath = uploadDir.resolve(fileName);
+		Files.write(filePath, imageBytes);
+		
+		userSignatureVO.setUsername(userVO.getUsername());
+		userSignatureVO.setFileName(fileName);
+		userSignatureVO.setOriName(null);
+		userSignatureVO.setSignatureType("ST0");
+		
+		int result = approvalService.addSign(userSignatureVO);
+		
+		return "redirect:/user/mypage";
+	}
+	
+	@PostMapping("saveStamp")
+	public String saveStamp(@AuthenticationPrincipal UserVO userVO, MultipartFile stampFile, Model model) throws Exception {
+		
+		if (stampFile.isEmpty()) {
+			model.addAttribute("result", "파일을 선택해주세요");
+			model.addAttribute("path", "./registerSign");
+			
+			return "commons/result";
+			
+		}
+		
+		String oriName = stampFile.getOriginalFilename();
+		String extension = oriName.substring(oriName.lastIndexOf(".")).toLowerCase();
+		
+		if(!ALLOWED_EXTENSIONS.contains(extension)){
+			model.addAttribute("result", "이미지 파일(.png, .jpg, .jpeg, .gif)만 업로드할 수 있습니다.");
+			model.addAttribute("path", "./registerSign");
+			
+			return "commons/result";
+		}
+		
+		UserSignatureVO userSignatureVO = new UserSignatureVO();
+		
+		String fileName = fileManager.saveFile(path.concat("userSignature"), stampFile);
+		
+		userSignatureVO.setUsername(userVO.getUsername());
+		userSignatureVO.setFileName(fileName);
+		userSignatureVO.setOriName(oriName);
+		userSignatureVO.setSignatureType("ST1");
+		
+		int result = approvalService.addSign(userSignatureVO);
+		
+		return "redirect:/user/mypage";
+		
+		
+	}
+	
+	@GetMapping("deleteSign")
+	public String deleteSign(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
+		UserSignatureVO userSignatureVO = approvalService.getSignature(userVO);
+		if(userSignatureVO == null) {
+			model.addAttribute("result", "삭제할 서명/도장이 없습니다.");
+			model.addAttribute("path", "/user/mypage");
+			return "commons/result";
+		}
+		int result = approvalService.deleteSign(userVO);
+		
+		if(result > 0) {
+			fileManager.deleteFile(path.concat("userSignature"), userSignatureVO.getFileName());
+		}
+		
+		return "redirect:/user/mypage";
 	}
 
 }
