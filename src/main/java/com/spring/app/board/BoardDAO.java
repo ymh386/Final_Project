@@ -65,7 +65,6 @@ public interface BoardDAO {
     // 댓글 삭제
     public int deleteComment(CommentVO commentVO) throws Exception;
 
-
     // 🔒 비밀글 여부 설정
     int updateSecret(BoardVO boardVO) throws Exception;
 
