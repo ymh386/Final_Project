@@ -24,4 +24,10 @@ public interface UserDAO {
 	List<UserVO> selectUsersByUsernamePrefix(@Param("prefix") String prefix);
 	
 	int update(UserVO userVO) throws Exception;
+	
+	//트레이너등급 이상 회원들의 부서정보와 함께 조희
+	List<UserVO> getUsersWithDepartment() throws Exception;
+	
+	//부서등 정보 가져오기
+	List<DepartmentVO> getDepartments() throws Exception;
 }
