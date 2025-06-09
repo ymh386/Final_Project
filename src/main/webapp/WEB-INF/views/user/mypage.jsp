@@ -19,6 +19,12 @@
 	    <h2>${user.birth}</h2>
 	    <h2>${user.phone}</h2>
 	    <a href="/user/update">수정</a>
+
+		<div>
+			<h2>전자결재</h2>
+			<a href="./getDocuments">내 결재함</a>
+		</div>
+
 	    
 	    <h2>잔여 구독권 현황</h2>
       <table border="1" cellpadding="8">
@@ -32,6 +38,7 @@
 	      </tr>
 	    </c:forEach>
 	  </table>
+
     </sec:authorize>
     
     

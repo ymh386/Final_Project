@@ -93,52 +93,63 @@ public class ApprovalController {
 	@ResponseBody
 	public List<Map<String, Object>> getLine() throws Exception {
 		
-		//1. 트레이너등급 이상 회원들의 부서정보와 함께 조희
+		//1. 트레이너등급 이상이며 승인을 받은 회원들을 부서정보와 함께 조희
 		List<UserVO> users = userService.getUsersWithDepartment();
 		
 		//2. 부서 정보 가져오기
 		List<DepartmentVO> depts = userService.getDepartments();
 		
 		//3. 부서별 사용자 그룹핑
-		Map<Long, List<UserVO>> usersByDept = users.stream()
-				.filter(user -> user.getDepartmentVO() != null)
-				.collect(Collectors.groupingBy(user -> user.getDepartmentVO().getDepartmentId(),
-				Collectors.collectingAndThen(Collectors.toList(), list -> {
-		            list.sort(Comparator.comparing(user -> !"DP1".equals(user.getPosition()))); // 부서장 먼저
+		Map<Long, List<UserVO>> usersByDept = users.stream() //list를 stream으로 변환
+				.filter(user -> user.getDepartmentVO() != null) //부서정보가 있는 사용자만 추출
+				.collect(Collectors.groupingBy(user -> user.getDepartmentVO().getDepartmentId(), //부서ID를 기준으로 그룹을 나눔
+				Collectors.collectingAndThen(Collectors.toList(), list -> { //그룹에 속한 사용자 리스트 수집 -> 그룹나눈 후 후처리(정렬)
+		            list.sort(Comparator.comparing(user -> !"DP1".equals(user.getPosition()))); // 부서장 먼저(조건식이 false면 가장 앞으로 옴 -> DP1이 부서장이므로 부서장이면 !true = false)
 		            return list;
 		            })
 				));
 		 
 		
 		
-		//4. 부서 트리 가져오기
+		//4. 부서별로 하위노드에 해당 부서의 유저들을 모아둔 최상위 노드의 리스트(조직도)
 		List<Map<String, Object>> tree = new ArrayList<>();
 		
 		//트리에서 먼저 보여질 부서들 정보 맵에 넣기
-		Map<String, Object> deptNode = null;
-		deptNode = new HashMap<>();
-		deptNode.put("id", "admin");
-		deptNode.put("text", "관리자");
-		deptNode.put("data", Map.of("username", "admin", "name", "admin"));
-		tree.add(deptNode);
+		Map<String, Object> deptMap = null;
+		//관리자는 정해진 부서가 없고 부서와 같은 라인에 서야하므로 반복문 전에 미리 넣어준다.
+		deptMap = new HashMap<>();
+		deptMap.put("id", "admin");
+		deptMap.put("text", "관리자");
+		deptMap.put("data", Map.of("username", "admin", "name", "admin"));
+		//조직도로 사용할 리스트tree에 map을 넣는다.
+		tree.add(deptMap);
+		//부서들중 부서하나씩 꺼내서 반복문 실행
 		for (DepartmentVO dept : depts) {
-			deptNode = new HashMap<>();
-	        deptNode.put("id", "dept-" + dept.getDepartmentId());
-	        deptNode.put("text", dept.getDepartmentName());
-	        deptNode.put("children", new ArrayList<>());
+			deptMap = new HashMap<>();
+			//조직도에서 사용할 해당 부서의 정보들을 넣음
+	        deptMap.put("id", dept.getDepartmentId());
+	        deptMap.put("text", dept.getDepartmentName());
+	        //children은 해당객체 클릭 시 하위 객체들 보여지는것 -> 조직도에서 부서 클릭 시 부서 안에 조직원들이 보여질 때 조직원들의 데이터
+	        deptMap.put("children", new ArrayList<>());
 	        
-	        //부서별 부서원들 해당 부서맵안에 넣기
-	        List<Map<String, Object>> childNodes = new ArrayList<>();
+	        //위에 children에 넣을 값 -> 조직도에서 부서마다의 부서원들의 정보를 담은 Map의 List
+	        List<Map<String, Object>> childMaps = new ArrayList<>();
+	        //그룹핑시킨 Map에서 해당 dept의 departmentId키로 꺼낸 user리스트로 반복문 돌리기, getorDefault는 해당 부서의 유저가 없으면 List.of()로 에러방지
 	        for (UserVO user : usersByDept.getOrDefault(dept.getDepartmentId(), List.of())) {
-	            Map<String, Object> userNode = new HashMap<>();
-	            userNode.put("id", "user-" + user.getUsername());
-	            userNode.put("text", (user.getPosition().equals("DP1") ? "[부서장] " : "") + user.getName());
-	            userNode.put("data", Map.of("username", user.getUsername(), "name", user.getName()));
-	            childNodes.add(userNode);
+	            Map<String, Object> userMap = new HashMap<>();
+	            //부서안에서 꺼낸 유저리스트에서 하나를꺼낸 유저의 정보를 넣음
+	            userMap.put("id", user.getUsername());
+	            //부서장 직책이면 이름앞에 [부서장]으로 강조
+	            userMap.put("text", (user.getPosition().equals("DP1") ? "[부서장] " : "") + user.getName());
+	            //data는 username과 name을 맵형태로 넣은 맵 -> 자바스크립트(프론트)에서 데이터로 사용예정
+	            userMap.put("data", Map.of("username", user.getUsername(), "name", user.getName()));
+	            //한 유저의 정보를 맵에 담음
+	            childMaps.add(userMap);
 	        }
-	        
-	        deptNode.put("children", childNodes);
-	        tree.add(deptNode);
+	        //한 부서의 모든 유저의 정보를 답은 맵을 해당부서의 children(하위노드)로 넣음
+	        deptMap.put("children", childMaps);
+	        //해당부서를 tree(조직도)에 넣음
+	        tree.add(deptMap);
 			
 		}
 		

@@ -15,16 +15,24 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+
+import com.spring.app.approval.ApprovalService;
+import com.spring.app.approval.DocumentVO;
+import com.spring.app.approval.FormVO;
+
 import com.spring.app.subscript.SubscriptService;
 import com.spring.app.subscript.SubscriptVO;
+
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @RequestMapping("/user/*")
+@Slf4j
 public class UserController {
 	
 	@Autowired
@@ -34,7 +42,11 @@ public class UserController {
 	private UserService userService;
 	
 	@Autowired
+
+	private ApprovalService approvalService;
+
 	private SubscriptService subscriptService;
+
 	
 	@GetMapping("join/join")
 	void join() {}
@@ -138,5 +150,35 @@ public class UserController {
 		int result = userService.update(userVO);
 		
 		return "redirect:./mypage";
+	}
+	
+	@GetMapping("getDocuments")
+	public String getDocuments(@AuthenticationPrincipal UserVO userVO, DocumentVO documentVO, Model model) throws Exception {
+		//양식별로 결재문서 불러오기
+		List<FormVO> forms = approvalService.getForms();
+		
+		//작성자에 로그인한 유저 ID넣기
+		documentVO.setWriterId(userVO.getUsername());
+		
+		List<DocumentVO> ar = userService.getDocuments(documentVO);
+		model.addAttribute("ar", ar);
+		model.addAttribute("forms", forms);
+		
+		//양식목록을 바꾸면 해당 목록으로 selected되있게 하기위함
+		model.addAttribute("selectedFormId", documentVO.getFormId());
+		
+		return "user/document/list";
+	}
+	
+	@GetMapping("getDocument")
+	public String getDocument(DocumentVO documentVO, Model model) throws Exception {
+		
+		documentVO = userService.getDocument(documentVO);
+		log.info("documentVO : {}", documentVO);
+		
+		model.addAttribute("vo", documentVO);
+		
+		return "user/document/detail";
+		
 	}
 }

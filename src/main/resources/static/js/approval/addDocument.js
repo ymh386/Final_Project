@@ -1,5 +1,5 @@
 CKEDITOR.replace('editor', {
-    // toolbar: [],               // 툴바 제거
+    toolbar: [],               // 툴바 제거
     removePlugins: 'elementspath', // 하단 요소 경로 제거
     resize_enabled: false,         // 크기 조절 막기
     height: 1000,
@@ -32,11 +32,11 @@ formSelect.addEventListener("change", ()=>{
 document.addEventListener('DOMContentLoaded', () => {
     fetch('/approval/getLine')
         .then(r => r.json())
-        .then(data => {
+        .then(r => {
             //id가 line인 div태그에 트리형식 리스트 뿌리기
             $('#line').jstree({
                 core: {
-                    data: data //어떤 데이터를
+                    data: r //어떤 데이터를
                 },
                 plugins: ['checkbox'] //체크박스 형식으로
             });

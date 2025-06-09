@@ -33,7 +33,7 @@
   		SELECT AUTO_INCREMENT
 		FROM INFORMATION_SCHEMA.TABLES
 
-		WHERE TABLE_SCHEMA = 'final'
+		WHERE TABLE_SCHEMA = 'SportCenter'
 
 		  AND TABLE_NAME = 'USER';
   	</select>
@@ -112,15 +112,20 @@
  			U.PARENT,
  			D.DEPARTMENT_ID,
  			D.DEPARTMENT_NAME,
- 			R.ROLE_NUM
+ 			R.ROLE_NUM,
+ 			S.STATE_NUM
  		FROM USER U
  		INNER JOIN MEMBER_ROLE MR
  		ON U.USERNAME=MR.USERNAME
  		INNER JOIN ROLE R
 		USING (ROLE_NUM)
+		INNER JOIN MEMBER_STATE MS
+		ON U.USERNAME=MS.USERNAME
+		INNER JOIN STATE S
+		USING (STATE_NUM)
  		LEFT OUTER JOIN DEPARTMENT D
  		ON U.DEPARTMENT_ID=D.DEPARTMENT_ID
- 		WHERE MR.ROLE_NUM=2
+ 		WHERE MR.ROLE_NUM=2 AND MS.STATE_NUM=1
  	</select>
  	
  	<resultMap type="UserVO" id="usersWithDepartmentMap">
@@ -135,10 +140,53 @@
  		<collection javaType="java.util.List" ofType="RoleVO" property="roleList">
  			<id column="ROLE_NUM" property="roleNum"/>
  		</collection>
+ 		<collection javaType="java.util.List" ofType="StateVO" property="stateList">
+ 			<id column="STATE_NUM" property="stateNum"/>
+ 		</collection>
  	</resultMap>
  	
  	<select id="getDepartments" resultType="DepartmentVO">
  		SELECT * FROM DEPARTMENT
  	</select>
  	
+ 	<select id="getDocuments" resultMap="getDocumentsMap" parameterType="DocumentVO">
+ 		SELECT *
+ 		FROM DOCUMENT D
+ 		INNER JOIN FORM F
+ 		ON D.FORM_ID=F.FORM_ID
+ 		WHERE
+ 		<choose>
+ 			<when test="formId != null">
+ 				D.WRITER_ID=#{writerId} AND D.FORM_ID=#{formId}
+ 			</when>
+ 			<otherwise>
+ 				D.WRITER_ID=#{writerId}
+ 			</otherwise>
+ 		</choose>
+ 	</select>
+ 	
+ 	<select id="getDocument" resultMap="getDocumentsMap" parameterType="DocumentVO">
+ 		SELECT *
+ 		FROM DOCUMENT D
+ 		INNER JOIN FORM F
+ 		ON D.FORM_ID=F.FORM_ID
+ 		WHERE D.DOCUMENT_ID=#{documentId}
+ 	</select>
+ 	
+ 	<resultMap type="DocumentVO" id="getDocumentsMap">
+ 		<id column="DOCUMENT_ID" property="documentId"/>
+ 		<result column="FORM_ID" property="formId"/>
+ 		<result column="WRITER_ID" property="writerId"/>
+ 		<result column="DOCUMENT_TITLE" property="documentTitle"/>
+ 		<result column="CONTENT_HTML" property="contentHtml"/>
+ 		<result column="DOCUMENT_STATUS" property="documentStatus"/>
+ 		<result column="CREATED_AT" property="createdAt"/>
+ 		<association javaType="FormVO" property="formVO">
+ 			<id column="FORM_ID" property="formId"/>
+ 			<result column="FORM_TITLE" property="formTitle"/>
+ 			<result column="CATEGORY_ID" property="categoryId"/>
+ 			<result column="CONTENT_HTML" property="contentHtml"/>
+ 			<result column="CREATED_AT" property="createdAt"/>
+ 		</association>
+ 	</resultMap>
   </mapper>
