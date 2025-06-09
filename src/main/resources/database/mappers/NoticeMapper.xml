@@ -3,16 +3,16 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.spring.app.board.qna.NoticeDAO">
+<mapper namespace="com.spring.app.board.notice.NoticeDAO">
 
   <!-- ▶ resultMap: NOTICE 테이블 컬럼 → NoticeVO 필드 매핑 -->
-  <resultMap id="NoticeResultMap" type="com.spring.app.board.qna.NoticeVO">
+  <resultMap id="NoticeResultMap" type="com.spring.app.board.notice.NoticeVO">
     <id     column="BOARD_NUM"      property="boardNum"      jdbcType="BIGINT"/>
     <result column="USERNAME"       property="userName"      jdbcType="VARCHAR"/>
     <result column="BOARD_TITLE"    property="boardTitle"    jdbcType="VARCHAR"/>
-    <result column="BOARD_DATE"     property="boardDate"     jdbcType="DATE"/>
+    <result column="BOARD_DATE"     property="boardDate"     jdbcType="TIMESTAMP"/>
     <result column="BOARD_CONTENTS" property="boardContents" jdbcType="LONGVARCHAR"/>
-    <result column="UPDATE_AT"      property="updateAt"      jdbcType="DATE"/>
+    <result column="UPDATE_AT"      property="updateAt"      jdbcType="TIMESTAMP"/>
     <result column="BOARD_HITS"     property="boardHits"     jdbcType="BIGINT"/>
   </resultMap>
 
@@ -48,7 +48,7 @@
   </select>
 
   <!-- 3) 공지글 상세 조회 -->
-  <select id="getDetail" parameterType="com.spring.app.board.qna.NoticeVO" resultMap="NoticeResultMap">
+  <select id="getDetail" parameterType="com.spring.app.board.notice.NoticeVO" resultMap="NoticeResultMap">
     SELECT
       BOARD_NUM,
       USERNAME,
@@ -62,41 +62,32 @@
   </select>
 
   <!-- 4) 공지글 등록 -->
-  <insert id="add" parameterType="com.spring.app.board.qna.NoticeVO" useGeneratedKeys="true" keyProperty="boardNum" keyColumn="BOARD_NUM">
+  <insert id="add" parameterType="com.spring.app.board.notice.NoticeVO" useGeneratedKeys="true" keyProperty="boardNum" keyColumn="BOARD_NUM">
     INSERT INTO NOTICE
-      (USERNAME,
-       BOARD_TITLE,
-       BOARD_DATE,
-       BOARD_CONTENTS,
-       UPDATE_AT,
-       BOARD_HITS)
+      (USERNAME, BOARD_TITLE, BOARD_DATE, BOARD_CONTENTS, UPDATE_AT, BOARD_HITS)
     VALUES
-      (#{userName},
-       #{boardTitle},
-       #{boardDate},
-       #{boardContents},
-       #{updateAt},
-       #{boardHits})
+      (#{userName}, #{boardTitle}, CURRENT_TIMESTAMP, #{boardContents}, CURRENT_TIMESTAMP, 0)
   </insert>
 
-  <!-- 5) 공지글 수정 -->
-  <update id="update" parameterType="com.spring.app.board.qna.NoticeVO">
+  <!-- 5) 공지글 수정 (관리자만 가능) -->
+  <update id="update" parameterType="com.spring.app.board.notice.NoticeVO">
     UPDATE NOTICE
       SET BOARD_TITLE    = #{boardTitle},
           BOARD_CONTENTS = #{boardContents},
-          UPDATE_AT      = #{updateAt}
+          UPDATE_AT      = CURRENT_TIMESTAMP
     WHERE BOARD_NUM = #{boardNum}
+      AND #{userName} = 'admin'
   </update>
 
   <!-- 6) 공지글 삭제 (관리자만 삭제 가능) -->
-  <delete id="delete" parameterType="com.spring.app.board.qna.NoticeVO">
+  <delete id="delete" parameterType="com.spring.app.board.notice.NoticeVO">
     DELETE FROM NOTICE
     WHERE BOARD_NUM = #{boardNum}
       AND #{userName} = 'admin'
   </delete>
 
   <!-- 7) 조회수 증가 -->
-  <update id="hitUpdate" parameterType="com.spring.app.board.qna.NoticeVO">
+  <update id="hitUpdate" parameterType="com.spring.app.board.notice.NoticeVO">
     UPDATE NOTICE
       SET BOARD_HITS = BOARD_HITS + 1
     WHERE BOARD_NUM = #{boardNum}
