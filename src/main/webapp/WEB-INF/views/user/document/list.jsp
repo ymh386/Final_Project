@@ -39,7 +39,7 @@
 	            <c:forEach var="a" items="${ar}">
 	                <tr>
 	                    <th scope="row">${a.documentId}</th>
-                        <td><a href="./getDocument?documentId=${a.documentId}">"${a.formVO.formTitle}</a></td>
+                        <td><a href="./getDocument?documentId=${a.documentId}">${a.formVO.formTitle}</a></td>
 	                    <td>${a.writerId}</td>
 	                    <td>${a.documentTitle}</td>
 	                    <c:choose>
