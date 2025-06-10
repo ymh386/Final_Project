@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.spring.app.payment.PaymentDAO">
+  	<insert id="newPayment" parameterType="PaymentVO">
+  		INSERT INTO PAYMENT VALUES 
+  		(#{paymentKey}, #{username}, #{subscriptId}, #{billingKey}, #{method}, #{amount}, #{paymentStatus}, #{requestedAt},  #{approvedAt}, #{failReason}, NOW())
+  	</insert>
+  	
+  	<insert id="newBilling" parameterType="BillingVO">
+  		INSERT INTO BILLING VALUES
+  		(#{billingId}, #{username}, #{billingKey}, #{cardname}, #{cardNumberMasked}, #{isActive}, NOW())
+  	</insert>
+  	
+  	<select id="getBilling" resultType="BillingVO">
+  		SELECT * FROM BILLING WHERE USERNAME=#{username} AND IS_ACTIVE=1
+  	</select>
+  	
+  	<select id="getBillingByCard" resultType="BillingVO">
+  		SELECT * FROM BILLING WHERE USERNAME=#{username} AND CARD_NUMBER_MASKED=#{cardNumberMasked} AND IS_ACTIVE=1
+  	</select>
+  	
+  	<update id="updateBilling" parameterType="BillingVO">
+  		UPDATE BILLING SET BILLING_KEY=#{billingKey}, CREATED_AT=#{createdAt} WHERE BILLING_ID=#{billingId}
+  	</update>
+  	
+  </mapper>

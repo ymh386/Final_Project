@@ -18,6 +18,11 @@ public class ScheduleService {
         return scheduleDAO.selectAll();
     }
     
+    public List<ScheduleVO> getSchedule(Long scheduleId){
+    	return scheduleDAO.getSchedule(scheduleId);
+    	
+    }
+    
     
     public List<ScheduleVO> getScheduleById(String nsername) {
     	return scheduleDAO.selectById(nsername);
@@ -34,6 +39,14 @@ public class ScheduleService {
     public void deleteSchedule(Long scheduleId) {
         scheduleDAO.deleteSchedule(scheduleId);
     }
+    
+    
+    public List<String> getAllTrainerNames() {
+        return scheduleDAO.selectAllTrainerNames();
+    }
+
+
+    
     
 	
 }

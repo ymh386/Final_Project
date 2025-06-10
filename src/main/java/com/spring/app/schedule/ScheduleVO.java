@@ -20,6 +20,7 @@ public class ScheduleVO {
     private LocalTime startTime;   // 시작 시간
     private LocalTime endTime;     // 종료 시간
     private LocalDateTime createdAt; // 생성 일시
+    private Long remainingSeats; // 남은 좌석 수 
 	
 	
 }

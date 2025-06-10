@@ -4,9 +4,11 @@ import java.sql.Date;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class ApprovalVO {
 	
 	private Long approvalId;
@@ -16,5 +18,7 @@ public class ApprovalVO {
 	private Long approvalStep;
 	private String approvalStatus;
 	private Date approvedAt;
+	
+	private DocumentVO documentVO;
 
 }
