@@ -21,7 +21,7 @@ import com.spring.app.approval.ApprovalService;
 import com.spring.app.approval.DocumentVO;
 import com.spring.app.approval.FormVO;
 import com.spring.app.approval.UserSignatureVO;
-
+import com.spring.app.payment.PaymentService;
 import com.spring.app.subscript.SubscriptService;
 import com.spring.app.subscript.SubscriptVO;
 
@@ -36,6 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/user/*")
 @Slf4j
 public class UserController {
+
+    private final PaymentService paymentService;
 	
 	@Autowired
 	private PasswordEncoder encoder;
@@ -52,6 +54,10 @@ public class UserController {
 	
 	@Value("${board.file.path}")
 	private String path;
+
+    UserController(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
 	
 	@GetMapping("join/join")
 	void join() {}
@@ -74,7 +80,6 @@ public class UserController {
 			String username = userVO.getUsername();
 			System.out.println(username);
 			List<SubscriptVO> list = subscriptService.getSubscriptByUser(username);
-			
 			model.addAttribute("list", list);
 		}
 	}

@@ -72,6 +72,30 @@ public class UserService implements UserDetailsService {
 		return result;
 	}
 	
+	public MemberStateVO checkSubscript(String username) throws Exception {
+		MemberStateVO memberStateVO = userDAO.checkSubscript(username);
+		
+		return memberStateVO;
+	}
+	
+	public int startSubscript(MemberStateVO memberStateVO) throws Exception {
+		int result = userDAO.startSubscript(memberStateVO);
+		
+		return result;
+	}
+	
+	public int cancelSubscript(MemberStateVO memberStateVO) throws Exception {
+		int result = userDAO.cancelSubscript(memberStateVO);
+		
+		return result;
+	}
+	
+	public int stopSubscript(MemberStateVO memberStateVO) throws Exception {
+		int result = userDAO.stopSubscript(memberStateVO);
+		
+		return result;
+	}
+	
 
 	// 트레이너 스케쥴 등록 할때 트레이너/일반회원 구분하기 위해
     public List<UserVO> getUsersByUsernamePrefix(String prefix) {

@@ -9,6 +9,41 @@
 <title>Insert title here</title>
 </head>
 <body>
+		    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        #buttons {
+            margin-bottom: 20px;
+        }
+        #buttons button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #subList {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #subList th, #subList td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        #subList th {
+            background-color: #f4f4f4;
+        }
+        .disabled {
+            background-color: #ddd;
+            color: #666;
+            cursor: not-allowed;
+        }
+    </style>
     <sec:authentication property="principal" var="user"/>
 		<a href="/">home</a>
     <h1>My Page</h1>
@@ -39,18 +74,20 @@
 		</div>
 
 	    
-	    <h2>잔여 구독권 현황</h2>
-      <table border="1" cellpadding="8">
-	    <tr><th>상품명</th><th>시작날짜</th><th>종료날짜</th><th>가격</th></tr>
-	    <c:forEach var="l" items="${list}">
-	      <tr>
-	        <td>${l.subscriptionVO.subscriptionName}</td>
-	        <td>${l.startDate}</td>
-	        <td>${l.endDate}</td>
-	        <td>${l.subscriptionVO.price}</td>
-	      </tr>
-	    </c:forEach>
-	  </table>
+	    <h2>구독 내역</h2>
+		<table id="subList" border="1" cellpadding="8">
+			<tr><th>상품명</th><th>시작날짜</th><th>종료날짜</th><th>가격</th></tr>
+			<c:forEach var="l" items="${list}">
+				<tr>
+					<form action="/subscript/cancel?subscriptId=${l.subscriptId}" method="post">
+			        <td>${l.subscriptionVO.subscriptionName}</td>
+			        <td>${l.startDate}</td>
+			        <td>${l.endDate}</td>
+			        <td>${l.subscriptionVO.price}</td>
+					</form>
+			      </tr>
+			    </c:forEach>
+		</table>
 
     </sec:authorize>
     

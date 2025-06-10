@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.spring.app.payment.PaymentResultVO;
 import com.spring.app.payment.PaymentService;
+import com.spring.app.user.MemberStateVO;
+import com.spring.app.user.UserService;
+import com.spring.app.user.UserVO;
 
 @Controller
 @RequestMapping("/subscript/*")
@@ -26,6 +30,9 @@ public class SubscriptController {
 	
 	@Autowired
 	private PaymentService paymentService;
+	
+	@Autowired
+	private UserService userService;
 	
 	@GetMapping("list")
 	public void planList(Model model) throws Exception {
@@ -63,5 +70,19 @@ public class SubscriptController {
 		model.addAttribute("payment", result);
 		
 		return "payment/result";
+	}
+	
+	@GetMapping("cancel")
+	public void cancel(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception{
+		model.addAttribute("user", userVO);
+	}
+	
+	@PostMapping("cancel")
+	public String cancel(@RequestParam String username) throws Exception {
+		MemberStateVO memberStateVO=userService.checkSubscript(username);
+		
+		userService.cancelSubscript(memberStateVO);
+		
+		return "redirect:/";
 	}
 }

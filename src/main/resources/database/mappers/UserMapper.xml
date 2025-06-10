@@ -33,7 +33,7 @@
   		SELECT AUTO_INCREMENT
 		FROM INFORMATION_SCHEMA.TABLES
 
-		WHERE TABLE_SCHEMA = 'SportCenter'
+		WHERE TABLE_SCHEMA = 'final'
 
 		  AND TABLE_NAME = 'USER';
   	</select>
@@ -65,6 +65,22 @@
  	
  	<update id="updateUserState" parameterType="MemberStateVO">
  		UPDATE MEMBER_STATE SET USERNAME=#{username}, STATE_NUM=1 WHERE USERNAME=#{username}
+ 	</update>
+ 	
+ 	<select id="checkSubscript" resultType="MemberStateVO">
+ 		SELECT * FROM MEMBER_STATE WHERE USERNAME=#{username}
+ 	</select>
+ 	
+ 	<update id="startSubscript" parameterType="MemberStateVO">
+ 		UPDATE MEMBER_STATE SET STATE_NUM=1 WHERE USERNAME=#{username}
+ 	</update>
+ 	
+ 	<update id="cancelSubscript" parameterType="MemberStateVO">
+ 		UPDATE MEMBER_STATE SET STATE_NUM=3 WHERE USERNAME=#{username}
+ 	</update>
+ 	
+ 	<update id="stopSubscript" parameterType="MemberStateVO">
+ 		UPDATE MEMBER_STATE SET STATE_NUM=4 WHERE USERNAME=#{username}
  	</update>
  	
  	<update id="update" parameterType="UserVO">

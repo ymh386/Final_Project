@@ -23,6 +23,13 @@ public interface UserDAO {
 	
 	int updateUserState(MemberStateVO memberStateVO) throws Exception;
 	
+	MemberStateVO checkSubscript(@Param("username") String username) throws Exception;
+	
+	int startSubscript(MemberStateVO memberStateVO) throws Exception;
+	
+	int cancelSubscript(MemberStateVO memberStateVO) throws Exception;
+	
+	int stopSubscript(MemberStateVO memberStateVO) throws Exception;
 
 	List<UserVO> selectUsersByUsernamePrefix(@Param("prefix") String prefix);
 	

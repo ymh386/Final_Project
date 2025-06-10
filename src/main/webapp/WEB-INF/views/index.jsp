@@ -10,16 +10,26 @@
 </head>
 <body>
 	<h3>home</h3>
+	<sec:authorize access="isAuthenticated()">
+		<sec:authorize access="!hasRole('TRAINER')">
+		<h3>구독권 잔여 일자 : ${result} 일</h3>
+		<c:if test="${result ne 0}">
+			<a href="/subscript/cancel">구독 취소</a>		
+		</c:if>
+		<c:if test="${result eq 0}">
+			<a href="/subscript/list">구독</a>
+		</c:if>
+		</sec:authorize>
+	</sec:authorize>
 	
 	<sec:authentication property="principal" var="user"/>
 	
 	<sec:authorize access="isAuthenticated()">
 		<h2>${user.name}</h2>
-		<h3>구독권 잔여 일자 : ${result} 일</h3>
 		<a href="/user/mypage">내 정보</a>
-		<a href="/subscript/list">구독</a>
 		<a href="/user/logout">로그아웃</a>
 		<a href="/schedule/page">일정관리</a>
+		</sec:authorize>
 	  <sec:authorize access="hasRole('TRAINER')">
     <a href="${pageContext.request.contextPath}/attendance/page">근태관리</a>
   </sec:authorize>
@@ -27,7 +37,6 @@
     <sec:authorize access="hasRole('MEMBER')">
     <a href="${pageContext.request.contextPath}/reservation/book">수업예약</a>
   </sec:authorize>
-	</sec:authorize>
 
 	<sec:authorize access="!isAuthenticated()">
 		<a href="user/join/join">회원가입</a>

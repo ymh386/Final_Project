@@ -21,6 +21,7 @@ public interface PaymentDAO {
 	public BillingVO getBillingByCard(@Param("username") String username,
 									  @Param("cardNumberMasked") String cardNumberMasked) throws Exception;
 	
-	
+	public int updatePayment(@Param("username") String username,
+							 @Param("subscriptId") Long subscriptId) throws Exception;
 
 }
