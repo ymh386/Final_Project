@@ -33,7 +33,7 @@
 		<a href="user/join/join">회원가입</a>
 		<a href="user/login/login">로그인</a>
 	</sec:authorize>
-		<sec:authorize access="hasRole('ADMIN')">
+	<sec:authorize access="hasRole('ADMIN')">
 		<a href="admin/main">관리자</a>
 	</sec:authorize>
 	
@@ -41,7 +41,15 @@
 		<sec:authorize access="hasRole('ADMIN')">
 			<a href="/approval/formRegister">양식등록(관리자)</a>
 		</sec:authorize>
-		<a href="/approval/addDocument">결재신청</a>
+		<sec:authorize access="hasAnyRole('ADMIN', 'TRAINER')">
+			<a href="/approval/addDocument">결재신청</a>
+		</sec:authorize>
 	</div>
+
+	<sec:authorize access="hasRole('ADMIN')">
+		<div>
+			<a href="/user/department/list">부서 관리(관리자)</a>
+		</div>
+	</sec:authorize>
 </body>
 </html>

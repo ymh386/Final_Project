@@ -64,9 +64,13 @@ public class SecurityConfig {
 		.csrf(csrf->csrf.disable())
 		.authorizeHttpRequests(request->{
 			request
+				.requestMatchers("/user/getDocuments", "/user/getDocument").hasAnyRole("ADMIN", "TRAINER")
 				.requestMatchers("/user/admin/**").hasRole("ADMIN")
+				.requestMatchers("/approval/**").hasAnyRole("ADMIN", "TRAINER")
 				.requestMatchers("/approval/formRegister").hasRole("ADMIN")
 				.requestMatchers("/user/mypage**").hasAuthority("APPROVE")
+				.requestMatchers("/user/getDocuments", "/user/getDocument").hasAuthority("APPROVE")
+				.requestMatchers("/user/department/**").hasRole("ADMIN")
 				.requestMatchers("/schedule/**").hasAuthority("APPROVE")
 				.requestMatchers("/approval/**").hasAuthority("APPROVE")
 				.anyRequest().permitAll();
