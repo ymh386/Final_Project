@@ -44,6 +44,7 @@ public class UserController {
 	@Autowired
 	private ApprovalService approvalService;
 
+	@Autowired
 	private SubscriptService subscriptService;
 
 	
@@ -58,6 +59,7 @@ public class UserController {
 		
 		if (userVO!=null) {
 			String username = userVO.getUsername();
+			System.out.println(username);
 			List<SubscriptVO> list = subscriptService.getSubscriptByUser(username);
 			
 			model.addAttribute("list", list);

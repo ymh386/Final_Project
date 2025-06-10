@@ -29,7 +29,7 @@
 </sec:authorize>
   
 	
-
+	<sec:authorize access="isAuthenticated()">
 		<h2>${user.name}</h2>
 		<h3>구독권 잔여 일자 : ${result} 일</h3>
 		<a href="/user/mypage">내 정보</a>
