@@ -12,22 +12,6 @@
 	<h3>home</h3>
 	
 	<sec:authentication property="principal" var="user"/>
-	<sec:authorize access="isAuthenticated()">
-
-		<h3>${user.name}</h3>
-		<a href="/user/mypage">mypage</a>
-		<a href="/user/logout">logout</a>
-		<a href="/schedule/page">schedule</a>
-	
-	  <sec:authorize access="hasRole('TRAINER')">
-    <a href="${pageContext.request.contextPath}/attendance/page">근태관리</a>
-  </sec:authorize>
-  
-    <sec:authorize access="hasRole('MEMBER')">
-    <a href="${pageContext.request.contextPath}/reservation/book">수업예약</a>
-  </sec:authorize>
-</sec:authorize>
-  
 	
 	<sec:authorize access="isAuthenticated()">
 		<h2>${user.name}</h2>
@@ -35,6 +19,14 @@
 		<a href="/user/mypage">내 정보</a>
 		<a href="/subscript/list">구독</a>
 		<a href="/user/logout">로그아웃</a>
+		<a href="/schedule/page">일정관리</a>
+	  <sec:authorize access="hasRole('TRAINER')">
+    <a href="${pageContext.request.contextPath}/attendance/page">근태관리</a>
+  </sec:authorize>
+  
+    <sec:authorize access="hasRole('MEMBER')">
+    <a href="${pageContext.request.contextPath}/reservation/book">수업예약</a>
+  </sec:authorize>
 	</sec:authorize>
 
 	<sec:authorize access="!isAuthenticated()">
