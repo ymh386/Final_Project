@@ -32,7 +32,7 @@
       <th>예약 일시</th>
       <th>취소 일시</th>
       <th>취소 사유</th>
-      <th>동작</th>
+      <th>-</th>
     </tr>
     <c:forEach var="r" items="${list}">
       <tr>
@@ -70,8 +70,8 @@
     </c:forEach>
   </table>
 
-  <a class="button" href="${pageContext.request.contextPath}/reservation/my">
-    내 예약 목록으로 이동
+  <a class="button" href="${pageContext.request.contextPath}/schedule/page">
+    내 예약 목록
   </a>
 </body>
 </html>

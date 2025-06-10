@@ -1,9 +1,12 @@
 package com.spring.app.reservation;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.spring.app.schedule.ScheduleVO;
 
@@ -23,4 +26,15 @@ public interface ReservationDAO {
 
     /** 4) 예약 취소 처리 */
     void cancelReservation(ReservationVO vo);
+    
+    List<Map<String,Object>> selectMember(@Param ("username")String username);
+    
+    int countByUserAndSchedule(
+            @Param("username")   String username,
+            @Param("scheduleId") Long scheduleId
+        );
+    
+    
+    
+    
 }
