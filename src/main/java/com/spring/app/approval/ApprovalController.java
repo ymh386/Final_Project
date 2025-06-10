@@ -1,13 +1,20 @@
 package com.spring.app.approval;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,9 +23,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spring.app.files.FileManager;
 import com.spring.app.user.DepartmentVO;
 import com.spring.app.user.UserService;
 import com.spring.app.user.UserVO;
@@ -30,10 +39,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ApprovalController {
 	
+	//이미지파일 확장자 리스트 -> 도장업로드시 이미지파일만 가능하게 하기위함
+	private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList(".png", ".jpg", ".jpeg", ".gif");
+	
 	@Autowired
 	private ApprovalService approvalService;
 	@Autowired
-	private UserService userService;
+	private UserService userService;  
+	
+	@Autowired
+	private FileManager fileManager;
+	
+	@Value("${board.file.path}")
+	private String path;
 	
 	//결재양식 등록 UI
 	@GetMapping("formRegister")
@@ -154,6 +172,148 @@ public class ApprovalController {
 		}
 		
 		return tree;
+	}
+	
+	//로그인한 사용자 기준 승인대기중인 결재문서 목록 가져오기
+	@GetMapping("awaitList")
+	public String getAwaitList(@AuthenticationPrincipal UserVO userVO, ApprovalVO approvalVO, Model model) throws Exception {
+		approvalVO.setApproverId(userVO.getUsername());
+		List<ApprovalVO> ar = approvalService.getAwaitList(approvalVO);
+		
+		model.addAttribute("ar", ar);
+		
+		return "approval/awaitList";
+	}
+	
+	//로그인한 사용자 기준 승인대기중인 결재문서 정보(디테일) 가져오기
+	@GetMapping("awaitDetail")
+	public String getAwaitDetail(@AuthenticationPrincipal UserVO userVO, ApprovalVO approvalVO, Model model) throws Exception {
+		approvalVO.setApproverId(userVO.getUsername());
+		approvalVO = approvalService.getAwaitDetail(approvalVO);
+		
+		model.addAttribute("vo", approvalVO);
+		
+		return "approval/awaitDetail";
+	}
+	
+	//서명등록화면
+	@GetMapping("registerSign")
+	public String registerSign(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
+		
+		//로그인한 사용자의 서명등록 여부 확인
+		UserSignatureVO userSignatureVO = userService.getSign(userVO);
+		
+		//서명이 없으면 등록하러가기
+		if(userSignatureVO == null) {
+			return "approval/registerSign";
+			//있으면 등록X
+		}else {
+			model.addAttribute("result", "이미 등록되어있습니다.");
+			model.addAttribute("path", "/user/mypage");
+			return "commons/result";
+		}
+		
+		
+		
+	}
+	
+	@PostMapping("saveSign")
+	public String saveSign(@AuthenticationPrincipal UserVO userVO, @RequestParam("imageData") String imageData) throws Exception {
+		UserSignatureVO userSignatureVO = new UserSignatureVO();
+		
+		//data:image/png;base64,.... 형식의 문자열에서 base64 부분만 추출
+		String base64Image = imageData.split(",")[1];
+		//Base64로 디코딩하여 이미지로 변환 가능한 byte[] 배열로 만듬
+		byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+		
+		//랜덤 문자열 가져오기
+		String uuid = UUID.randomUUID().toString();
+		//가져온 랜덤 문자열로 파일이름 만들기
+		String fileName = uuid.concat("_signature_").concat(userVO.getUsername()).concat(".png");
+		
+		//해당 경로안에 해당 디렉토리를 생성합니다 (이미 있으면 무시됨).
+		Path uploadDir = Paths.get(path.concat("userSignature"));
+		Files.createDirectories(uploadDir);
+		
+		//최종 파일 경로를 지정하고 디코딩된 이미지를 서버에 저장
+		Path filePath = uploadDir.resolve(fileName);
+		Files.write(filePath, imageBytes);
+		
+		//DB에 넣을 정보 담기
+		userSignatureVO.setUsername(userVO.getUsername());
+		userSignatureVO.setFileName(fileName);
+		userSignatureVO.setOriName(null);
+		userSignatureVO.setSignatureType("ST0");
+		
+		//DB에 INSERT
+		int result = approvalService.addSign(userSignatureVO);
+		
+		return "redirect:/user/mypage";
+	}
+	
+	@PostMapping("saveStamp")
+	public String saveStamp(@AuthenticationPrincipal UserVO userVO, MultipartFile stampFile, Model model) throws Exception {
+		
+		//파일 지정을 안했을 때 실행안함
+		if (stampFile.isEmpty()) {
+			model.addAttribute("result", "파일을 선택해주세요");
+			model.addAttribute("path", "./registerSign");
+			
+			return "commons/result";
+			
+		}
+		
+		//원본 파일이름 꺼내기
+		String oriName = stampFile.getOriginalFilename();
+		//원본파일의 확장자만 자르기
+		String extension = oriName.substring(oriName.lastIndexOf(".")).toLowerCase();
+		
+		//지정한 원본파일이 이미지파일(이미지파일의 확장자)가 아닐 시 실행 X
+		if(!ALLOWED_EXTENSIONS.contains(extension)){
+			model.addAttribute("result", "이미지 파일(.png, .jpg, .jpeg, .gif)만 업로드할 수 있습니다.");
+			model.addAttribute("path", "./registerSign");
+			
+			return "commons/result";
+		}
+		
+		UserSignatureVO userSignatureVO = new UserSignatureVO();
+		
+		//해당파일 HDD에 저장
+		String fileName = fileManager.saveFile(path.concat("userSignature"), stampFile);
+		
+		//DB에 넣을 정보 담기
+		userSignatureVO.setUsername(userVO.getUsername());
+		userSignatureVO.setFileName(fileName);
+		userSignatureVO.setOriName(oriName);
+		userSignatureVO.setSignatureType("ST1");
+		
+		//DB에 INSERT
+		int result = approvalService.addSign(userSignatureVO);
+		
+		return "redirect:/user/mypage";
+		
+		
+	}
+	
+	@GetMapping("deleteSign")
+	public String deleteSign(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
+		//로그인한 유저의 서명/도장 정보 가져오기
+		UserSignatureVO userSignatureVO = userService.getSign(userVO);
+		//서명/도장이 없을 시 실행X
+		if(userSignatureVO == null) {
+			model.addAttribute("result", "삭제할 서명/도장이 없습니다.");
+			model.addAttribute("path", "/user/mypage");
+			return "commons/result";
+		}
+		//먼저 DB에서 지우고
+		int result = approvalService.deleteSign(userVO);
+		
+		//DB에서 지워졌으면 HDD에서도 해당 파일 삭제
+		if(result > 0) {
+			fileManager.deleteFile(path.concat("userSignature"), userSignatureVO.getFileName());
+		}
+		
+		return "redirect:/user/mypage";
 	}
 
 }

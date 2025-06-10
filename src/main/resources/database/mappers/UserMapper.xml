@@ -189,4 +189,8 @@
  			<result column="CREATED_AT" property="createdAt"/>
  		</association>
  	</resultMap>
+ 	
+ 	<select id="getSign" resultType="UserSignatureVO" parameterType="UserVO">
+ 		SELECT * FROM USER_SIGNATURE WHERE USERNAME=#{username}
+ 	</select>
   </mapper>
