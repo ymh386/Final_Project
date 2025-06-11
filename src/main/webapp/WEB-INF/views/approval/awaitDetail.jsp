@@ -18,8 +18,10 @@
 <body>
     <h2>승인</h2><br>
     <div class="mb-3">
+        <input id="approvalId" type="hidden" value="${vo.approvalId}">
+        <input id="documentId" type="hidden" value="${vo.documentId}">
         <label class="form-label">요청자</label>
-        <input type="text" class="form-control" value="${vo.documentVO.writerId}" readonly>
+        <input id="writerId" type="text" class="form-control" value="${vo.documentVO.writerId}" readonly>
         <label class="form-label">종류</label>
         <input type="text" class="form-control" value="${vo.documentVO.formVO.formTitle}" readonly>
         <label class="form-label">제목</label>
@@ -47,18 +49,20 @@
         </c:choose>
     </div>
 
-    <div>
+    <div id="contentHtml">
         ${vo.documentVO.contentHtml}
     </div>
 
     <div class="mb-3">
         <div class="row">
-            <a href="./registerSign" class="button">서명/도장 등록</a>
+            <button class="btn" id="uploadSign">서명/도장 기입</button>
+            <a class="btn" href="./registerSign" class="button">서명/도장 등록</a>
         </div>
-        <div class="row">
-            <button class="button" id="approve">승인</button>
-            <button class="button" id="rejection">반려</button>
+        <div id="appOrRej" class="row">
+            <button class="btn" id="rejection">반려</button>
         </div>
     </div>
+
+    <script src="/js/approval/awaitDetail.js"></script>
 </body>
 </html>

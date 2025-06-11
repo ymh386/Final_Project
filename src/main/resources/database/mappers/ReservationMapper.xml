@@ -58,10 +58,45 @@
   </select>
   
   
+  <select id="selectMember" resultType="map">
+    SELECT
+      R.RESERVATION_ID   AS reservationId,
+      R.SCHEDULE_ID      AS scheduleId,
+      F.NAME             AS facilityName,
+      S.SCHEDULE_DATE    AS scheduleDate,
+      S.START_TIME       AS startTime,
+      S.END_TIME         AS endTime
+    FROM RESERVATION R
+      JOIN SCHEDULE  S ON R.SCHEDULE_ID = S.SCHEDULE_ID
+      JOIN FACILITY  F ON S.FACILITY_ID = F.FACILITY_ID
+    WHERE R.USERNAME    = #{username}
+      AND R.CANCELED_AT IS NULL
+  </select>
   
-  
-  
-  
+
+ 	<!--같은회원이 같은 일정 예약 못하게 방지 -->
+  <select id="countByUserAndSchedule" resultType="int">
+    SELECT COUNT(*)
+    FROM RESERVATION
+    WHERE USERNAME      = #{username}
+      AND SCHEDULE_ID   = #{scheduleId}
+      AND CANCELED_AT IS NULL
+  </select>
+
+
+	<!--  -->
+	<select id="countByUsernameAndMonth" resultType="int">
+		SELECT COUNT(*)
+		FROM RESERVATION
+		WHERE USERNAME =#{username}
+		AND YEAR(CREATED_AT) =#{year}
+		AND MONTH(CREATED_AT) =#{month}
+		AND CANCELED_AT IS NULL 
+	</select>
+
+
+
+
   
   
   
