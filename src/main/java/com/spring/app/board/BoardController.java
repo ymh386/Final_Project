@@ -21,15 +21,14 @@ public class BoardController {
 
     @Autowired
     private BoardService boardService;
-    
-    // 목록 매핑: /board/ 또는 /board/index
+
+    /** 1) 목록 + 페이징 + 검색 (/board/, /board/index) */
     @GetMapping({"/", "/index"})
     public String index(
             @ModelAttribute Pager pager,
             @RequestParam(value="searchField", required=false) String searchField,
             @RequestParam(value="searchWord",  required=false) String searchWord,
             Model m) throws Exception {
-        // 페이징·검색 로직 동일
         pager.setSearchField(searchField);
         pager.setSearchWord(searchWord);
         pager.makeRow();
@@ -39,11 +38,9 @@ public class BoardController {
 
         m.addAttribute("boards", boardService.getList(pager));
         m.addAttribute("pager",  pager);
-        return "board/index";  // 뷰 파일명: /WEB-INF/views/board/index.jsp
+        return "board/index";
     }
-
     
-    /** 1) 목록 + 페이징 + 검색 */
     @GetMapping("/list")
     public String list(
             @ModelAttribute Pager pager,
@@ -63,21 +60,21 @@ public class BoardController {
         m.addAttribute("pager",  pager);
         return "board/list";
     }
+    
 
-    /** 2) 상세 */
+    /** 2) 상세 (/board/detail) */
     @GetMapping("/detail")
     public String detail(
-            BoardVO boardVO,
+            @RequestParam("boardNum") Long boardNum,
             Model m,
             @AuthenticationPrincipal User user) throws Exception {
 
-        BoardVO detail = boardService.getDetail(boardVO);
-
+        BoardVO detail = boardService.getDetail(new BoardVO(boardNum));
         long likeCount = 0;
         boolean isLiked = false;
         if (detail != null) {
             InteractionVO iq = new InteractionVO();
-            iq.setBoardNum(detail.getBoardNum());
+            iq.setBoardNum(boardNum);
             iq.setType("LIKE");
             likeCount = boardService.getInteractionCount(iq);
             if (user != null) {
@@ -87,129 +84,134 @@ public class BoardController {
         }
 
         m.addAttribute("detail",    detail);
-        m.addAttribute("files",     boardService.getFileList(boardVO));
-        m.addAttribute("comments",  boardService.getCommentList(boardVO));
+        m.addAttribute("files",     boardService.getFileList(new BoardVO(boardNum)));
+        m.addAttribute("comments",  boardService.getCommentList(new BoardVO(boardNum)));
         m.addAttribute("likeCount", likeCount);
         m.addAttribute("isLiked",   isLiked);
         return "board/detail";
     }
 
-    /** 3) 등록 폼 (로그인 체크 포함) */
+    /** 3) 등록 폼 (/board/add) */
     @GetMapping("/add")
     public String addForm(
             @AuthenticationPrincipal User user,
-            Model model) {
+            Model m) {
 
-        if (user == null) {
-         //   model.addAttribute("msg",  "글 작성은 로그인 후에 가능합니다.");
-         //   model.addAttribute("path", "/board/login");   // ← 수정
-         //   return "commons/result";                       // 폴더명도 common으로
-        }
-        model.addAttribute("boardVO", new BoardVO());
+        // 로그인 안 된 경우에만 메시지
+//        if (user == null) {
+//            m.addAttribute("msg",  "글 작성은 로그인 후에 가능합니다.");
+//            m.addAttribute("path", "/user/login");
+//            return "commons/result";
+//        }
+
+        // 로그인 된 경우만 등록 폼으로
+        m.addAttribute("boardVO", new BoardVO());
         return "board/add";
     }
 
-    /** 4) 등록 처리 */
+    /** 4) 등록 처리 (POST /board/add) */
     @PostMapping("/add")
     public String add(
             @ModelAttribute BoardVO vo,
             @RequestParam(value="files", required=false) MultipartFile[] files,
             @AuthenticationPrincipal User user,
             Model m) throws Exception {
-
+//
+//        // 로그인 안 된 경우에만 메시지
 //        if (user == null) {
 //            m.addAttribute("msg",  "글 작성은 로그인 후에 가능합니다.");
-//            m.addAttribute("path", "/board/login");     // ← 수정
+//            m.addAttribute("path", "/user/login");
 //            return "commons/result";
 //        }
+
+        // 첨부파일 개수 제한
         if (files != null && files.length > 5) {
             m.addAttribute("msg",  "첨부파일은 최대 5개까지 가능합니다.");
             m.addAttribute("path", "/board/add");
             return "commons/result";
         }
+
+        // 로그인된 사용자명 세팅 후 저장
         vo.setUserName(user.getUsername());
         boardService.add(vo, files != null ? files : new MultipartFile[0]);
-        return "redirect:/board/index";  // 목록 URL도 index로 바꿨다면 이렇게
+        return "redirect:/board/index";
     }
 
-    /** 5) /board/login → user/login.jsp 포워딩 */
+    /** 5) 로그인 폼 포워딩 (/board/login) */
     @GetMapping("/login")
     public String loginFromBoard() {
         return "user/login";
     }
 
-    /** 5) 수정 처리 */
+    /** 6) 수정 처리 (POST /board/update) */
     @PostMapping("/update")
     public String update(BoardVO vo) throws Exception {
         boardService.update(vo);
         return "redirect:/board/detail?boardNum=" + vo.getBoardNum();
     }
 
-    /** 6) 삭제 처리 */
+    /** 7) 삭제 처리 (POST /board/delete) */
     @PostMapping("/delete")
     public String delete(BoardVO vo) throws Exception {
         boardService.delete(vo);
         return "redirect:/board/index";
     }
 
-    /** 7) 파일 다운로드 */
+    /** 8) 파일 다운로드 (/board/fileDown) */
     @GetMapping("/fileDown")
     public String fileDown(BoardFileVO fileVO, Model m) throws Exception {
         m.addAttribute("fileVO", boardService.getFileDetail(fileVO));
         return "fileDownView";
     }
 
-    /** 8) 좋아요 등록(Ajax) */
+    /** 9) 좋아요 등록 (Ajax POST /board/like) */
     @PostMapping("/like")
     @ResponseBody
     public Long addLike(
             @RequestBody InteractionVO vo,
             @AuthenticationPrincipal User user) throws Exception {
 
+        if (user == null) throw new RuntimeException("로그인이 필요합니다.");
         vo.setUserName(user.getUsername());
         vo.setType("LIKE");
         boardService.addInteraction(vo);
         return boardService.getInteractionCount(vo);
     }
 
-    /** 9) 좋아요 취소(Ajax) */
+    /** 10) 좋아요 취소 (Ajax POST /board/unlike) */
     @PostMapping("/unlike")
     @ResponseBody
     public Long removeLike(
             @RequestBody InteractionVO vo,
             @AuthenticationPrincipal User user) throws Exception {
 
+        if (user == null) throw new RuntimeException("로그인이 필요합니다.");
         vo.setUserName(user.getUsername());
         vo.setType("LIKE");
         boardService.removeInteraction(vo);
         return boardService.getInteractionCount(vo);
     }
 
-    /** 10) 댓글 등록(Ajax) */
+    /** 11) 댓글 등록 (Ajax POST /board/commentAdd) */
     @PostMapping("/commentAdd")
     @ResponseBody
     public List<CommentVO> commentAdd(
             @RequestBody CommentVO vo,
             @AuthenticationPrincipal User user) throws Exception {
 
+        if (user == null) throw new RuntimeException("로그인이 필요합니다.");
         vo.setUserName(user.getUsername());
         boardService.addComment(vo);
-
-        BoardVO bvo = new BoardVO();
-        bvo.setBoardNum(vo.getBoardNum());
+        BoardVO bvo = new BoardVO(vo.getBoardNum());
         return boardService.getCommentList(bvo);
     }
 
-    /** 11) 댓글 삭제(Ajax) */
+    /** 12) 댓글 삭제 (Ajax POST /board/commentDelete) */
     @PostMapping("/commentDelete")
     @ResponseBody
-    public List<CommentVO> commentDelete(
-            @RequestBody CommentVO vo) throws Exception {
-
+    public List<CommentVO> commentDelete(@RequestBody CommentVO vo) throws Exception {
         boardService.deleteComment(vo);
-
-        BoardVO bvo = new BoardVO();
-        bvo.setBoardNum(vo.getBoardNum());
+        BoardVO bvo = new BoardVO(vo.getBoardNum());
         return boardService.getCommentList(bvo);
     }
 }
