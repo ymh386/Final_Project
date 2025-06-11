@@ -1,10 +1,14 @@
 package com.spring.app.subscript;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import com.spring.app.payment.PaymentService;
 
 import jakarta.transaction.Transactional;
 
@@ -20,11 +24,18 @@ public class SubscriptService {
 		return list;
 	}
 	
+	public LocalDate getEndDate(String username) throws Exception {
+		LocalDate endDate = subscriptDAO.getEndDate(username);
+		
+		return endDate;
+	}
+	
 	public SubscriptionVO getPlansDetail(Long id) throws Exception {
 		SubscriptionVO subscriptionVO = subscriptDAO.getPlansDetail(id);
 		
 		return subscriptionVO;
 	}
+	
 	
 	public List<SubscriptVO> getSubscriptByUser(String username) throws Exception {
 		List<SubscriptVO> list = subscriptDAO.getSubscriptByUser(username);
@@ -46,9 +57,8 @@ public class SubscriptService {
 		return subscriptVO;
 	}
 	
-	@Transactional
-	public void cancelSubscript(Long subscriptId, String newStatus) throws Exception {
-		subscriptDAO.updateSubscript(subscriptId, newStatus);
+	public void cancelSubscript(SubscriptVO subscriptVO) throws Exception {
+		subscriptDAO.updateSubscript(subscriptVO);
 	}
 	
 }

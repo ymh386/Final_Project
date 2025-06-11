@@ -1,3 +1,4 @@
+// src/main/java/com/spring/app/board/BoardDAO.java
 package com.spring.app.board;
 
 import java.util.List;
@@ -11,63 +12,66 @@ import com.spring.app.home.util.Pager;
 @Mapper
 public interface BoardDAO {
 
-    // 게시글 전체 개수 조회
-    public Long getTotalCount(Pager pager) throws Exception;
+    /** 1) 전체 게시글 수 조회 */
+    long getTotalCount(Pager pager) throws Exception;
 
-    // 게시글 목록 조회 (페이징 처리)
-    public List<BoardVO> getList(Pager pager) throws Exception;
+    /** 2) 페이징된 게시글 목록 조회 */
+    List<BoardVO> getList(Pager pager) throws Exception;
 
-    // 게시글 상세 조회
-    public BoardVO getDetail(BoardVO boardVO) throws Exception;
+    /** 3) 게시글 상세 조회 */
+    BoardVO getDetail(BoardVO boardVO) throws Exception;
 
-    // 게시글 등록
-    public int add(BoardVO boardVO) throws Exception;
+    /** 4) 게시글 등록 */
+    int add(BoardVO boardVO) throws Exception;
 
-    // 게시글 수정
-    public int update(BoardVO boardVO) throws Exception;
+    /** 5) 게시글 수정 */
+    int update(BoardVO boardVO) throws Exception;
 
-    // 게시글 삭제(작성자 혹은 관리자가 Service에서 검증 후 호출)
-    public int delete(BoardVO boardVO) throws Exception;
+    /** 6) 게시글 삭제 */
+    int delete(BoardVO boardVO) throws Exception;
 
-    // 조회수 증가
-    public int hitUpdate(BoardVO boardVO) throws Exception;
+    /** 7) 조회수 증가 */
+    int hitUpdate(BoardVO boardVO) throws Exception;
 
-    // 첨부파일 등록
-    public int addFile(BoardFileVO boardFileVO) throws Exception;
+    /** 8) 첨부파일 등록 */
+    int addFile(BoardFileVO boardFileVO) throws Exception;
 
-    // 게시글 첨부파일 목록 조회
-    public List<BoardFileVO> getFileList(BoardVO boardVO) throws Exception;
+    /** 9) 첨부파일 목록 조회 */
+    List<BoardFileVO> getFileList(BoardVO boardVO) throws Exception;
 
-    // 첨부파일 상세 조회
-    public BoardFileVO getFileDetail(BoardFileVO boardFileVO) throws Exception;
+    /** 10) 첨부파일 상세 조회 */
+    BoardFileVO getFileDetail(BoardFileVO boardFileVO) throws Exception;
 
-    // 첨부파일 삭제
-    public int deleteFile(BoardFileVO boardFileVO) throws Exception;
+    /** 11) 첨부파일 삭제 */
+    int deleteFile(BoardFileVO boardFileVO) throws Exception;
 
-    // 좋아요 추가
-    public int addInteraction(InteractionVO interactionVO) throws Exception;
+    /** 12) 첨부파일 개수 조회 */
+    int getFileCount(Long boardNum) throws Exception;
 
-    // 좋아요 삭제
-    public int removeInteraction(InteractionVO interactionVO) throws Exception;
+    /** 13) 좋아요 추가 */
+    int addInteraction(InteractionVO interactionVO) throws Exception;
 
-    // 좋아요 개수 조회
-    public Long getInteractionCount(BoardVO boardVO) throws Exception;
-    
-    // ⭐️ 좋아요 중복 여부 확인 (추가!)
+    /** 14) 좋아요 삭제 */
+    int removeInteraction(InteractionVO interactionVO) throws Exception;
+
+    /** 15) 좋아요 개수 조회 */
+    long getInteractionCount(InteractionVO interactionVO) throws Exception;
+
+    /** 16) 좋아요 중복 여부 확인 */
     int isLiked(InteractionVO interactionVO) throws Exception;
-    
-    // 댓글 추가
-    public int addComment(CommentVO commentVO) throws Exception;
 
-    // 댓글 목록 조회
-    public List<CommentVO> getCommentList(BoardVO boardVO) throws Exception;
+    /** 17) 댓글 추가 */
+    int addComment(CommentVO commentVO) throws Exception;
 
-    // 댓글 삭제
-    public int deleteComment(CommentVO commentVO) throws Exception;
+    /** 18) 댓글 목록 조회 */
+    List<CommentVO> getCommentList(BoardVO boardVO) throws Exception;
 
-    // 🔒 비밀글 여부 설정
+    /** 19) 댓글 삭제 */
+    int deleteComment(CommentVO commentVO) throws Exception;
+
+    /** 20) 비밀글 설정(업데이트) */
     int updateSecret(BoardVO boardVO) throws Exception;
 
-    // 🔒 비밀글 여부 확인 (상세 조회시 활용)
+    /** 21) 비밀글 여부 확인 */
     boolean checkSecret(BoardVO boardVO) throws Exception;
 }

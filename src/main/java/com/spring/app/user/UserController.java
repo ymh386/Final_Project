@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,7 +25,7 @@ import com.spring.app.approval.ApprovalService;
 import com.spring.app.approval.DocumentVO;
 import com.spring.app.approval.FormVO;
 import com.spring.app.approval.UserSignatureVO;
-
+import com.spring.app.payment.PaymentService;
 import com.spring.app.subscript.SubscriptService;
 import com.spring.app.subscript.SubscriptVO;
 
@@ -39,12 +40,19 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/user/*")
 @Slf4j
 public class UserController {
+
+    private final WebSecurityCustomizer custom;
+
+    private final PaymentService paymentService;
 	
 	@Autowired
 	private PasswordEncoder encoder;
 	
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private FindInfoService findInfoService;
 	
 	@Autowired
 	private ApprovalService approvalService;
@@ -55,6 +63,11 @@ public class UserController {
 	
 	@Value("${board.file.path}")
 	private String path;
+
+    UserController(PaymentService paymentService, WebSecurityCustomizer custom) {
+        this.paymentService = paymentService;
+        this.custom = custom;
+    }
 	
 	@GetMapping("join/join")
 	void join() {}
@@ -77,7 +90,6 @@ public class UserController {
 			String username = userVO.getUsername();
 			System.out.println(username);
 			List<SubscriptVO> list = subscriptService.getSubscriptByUser(username);
-			
 			model.addAttribute("list", list);
 		}
 	}
@@ -105,9 +117,12 @@ public class UserController {
 	}
 	
 	@GetMapping("login/login")
-	String memberLogin(@AuthenticationPrincipal UserVO userVO) {
+	String memberLogin(@AuthenticationPrincipal UserVO userVO, @RequestParam(value = "error", required = false) String error, Model model) {
 		if (userVO != null) {
 			return "redirect:/";
+		}
+		if (error != null) {
+			model.addAttribute("error", error);
 		}
 		
 		return "user/login/login";
@@ -123,6 +138,91 @@ public class UserController {
 		}
 		
 		return "user/login/trainerLogin";
+	}
+	
+	@GetMapping("findId")
+	void findId() throws Exception{}
+	
+	@PostMapping("findId")
+	String findId(@RequestParam("email") String email, UserVO userVO, Model model) throws Exception {
+		
+		userVO=findInfoService.getUserByEmail(email);
+		
+		if (email!=null) {
+			String username = userVO.getUsername();
+			username=findInfoService.maskEmail(username, 3, 6);
+			System.out.println(username);
+			
+			model.addAttribute("result", "아이디는 "+username+"입니다");
+			model.addAttribute("path", "/user/login/login");
+		}
+		return "commons/result";
+	}
+	
+	@GetMapping("findPwByEmail")
+	void findPwByEmail() throws Exception{}
+	
+	@PostMapping("findPwByEmail")
+	String findPwEmail(@RequestParam("email") String email, Model model, UserVO userVO) throws Exception{
+		
+		userVO = findInfoService.getUserByEmail(email);
+		
+		
+		System.out.println(userVO.getUsername());
+		
+		String newPassword=findInfoService.randomPassword(12);
+		userVO.setPassword(encoder.encode(newPassword));
+		findInfoService.changePw(userVO);
+		findInfoService.findPwByEmail(email, newPassword);
+		
+		model.addAttribute("result", "입력하신 이메일로 임시 비밀번호를 발송했습니다.");
+		
+		List<MemberRoleVO> list = userService.getRole(userVO.getUsername());
+		
+		for(MemberRoleVO memberRoleVO : list) {
+			if (memberRoleVO.equals("TRAINER")) {
+				model.addAttribute("path", "/user/login/trainerLogin");
+			}else {
+				model.addAttribute("path", "/user/login/login");				
+			}
+		}
+		
+		
+		return "commons/result";
+	}
+	
+	@GetMapping("findPwByPhone")
+	void findPwByPhone() throws Exception{}
+	
+	@PostMapping("findPwByPhone")
+	String findPwByPhone(@RequestParam("phone") String phone, Model model, UserVO userVO) throws Exception {
+		
+		userVO=findInfoService.getUserByPhone(phone);
+		
+		String newPassword=findInfoService.randomPassword(12);
+		userVO.setPassword(encoder.encode(newPassword));
+		findInfoService.changePw(userVO);
+		
+		if (phone.startsWith("0")) {
+			phone = "+82"+phone.substring(1);
+			System.out.println(phone);
+		}
+		
+		findInfoService.findPwByPhone(phone, newPassword);
+		
+		model.addAttribute("result", "입력하신 전화번호로 임시 비밀번호를 발송했습니다.");
+		
+		List<MemberRoleVO> list = userService.getRole(userVO.getUsername());
+		
+		for(MemberRoleVO memberRoleVO : list) {
+			if (memberRoleVO.equals("TRAINER")) {
+				model.addAttribute("path", "/user/login/trainerLogin");
+			}else {
+				model.addAttribute("path", "/user/login/login");				
+			}
+		}
+		
+		return "commons/result";
 	}
 	
 	@GetMapping("logout")
