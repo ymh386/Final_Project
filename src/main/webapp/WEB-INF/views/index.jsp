@@ -12,9 +12,7 @@
 		<c:import url="/WEB-INF/views/templates/topbar.jsp"></c:import>
 		<div id="layoutSidenav">
 		<c:import url="/WEB-INF/views/templates/sidebar.jsp"></c:import>
-	
-	
-	
+
 	
 	
 		<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>

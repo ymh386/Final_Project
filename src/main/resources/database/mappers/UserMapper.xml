@@ -133,6 +133,21 @@
  		
  	</resultMap>
  	
+ 	<select id="getUsersNoDepartment" resultMap="usersWithDepartmentMap">
+ 		SELECT * FROM USER U
+ 		INNER JOIN MEMBER_ROLE MR
+ 		ON U.USERNAME=MR.USERNAME
+ 		INNER JOIN ROLE R
+		USING (ROLE_NUM)
+		INNER JOIN MEMBER_STATE MS
+		ON U.USERNAME=MS.USERNAME
+		INNER JOIN STATE S
+		USING (STATE_NUM)
+		LEFT OUTER JOIN DEPARTMENT D
+ 		ON U.DEPARTMENT_ID=D.DEPARTMENT_ID
+		WHERE MR.ROLE_NUM=2 AND MS.STATE_NUM=1 AND U.DEPARTMENT_ID IS NULL
+ 	</select>
+ 	
  	<select id="getUsersWithDepartment" resultMap="usersWithDepartmentMap">
  		SELECT 
  			U.USERNAME,
@@ -154,7 +169,7 @@
 		USING (STATE_NUM)
  		LEFT OUTER JOIN DEPARTMENT D
  		ON U.DEPARTMENT_ID=D.DEPARTMENT_ID
- 		WHERE MR.ROLE_NUM=2 AND MS.STATE_NUM=1
+ 		WHERE MR.ROLE_NUM=2 AND MS.STATE_NUM=1 AND U.DEPARTMENT_ID IS NOT NULL
  	</select>
  	
  	<resultMap type="UserVO" id="usersWithDepartmentMap">
@@ -176,6 +191,10 @@
  	
  	<select id="getDepartments" resultType="DepartmentVO">
  		SELECT * FROM DEPARTMENT
+ 	</select>
+ 	
+ 	<select id="getDepartment" resultType="DepartmentVO" parameterType="DepartmentVO">
+ 		SELECT * FROM DEPARTMENT WHERE DEPARTMENT_ID=#{departmentId}
  	</select>
  	
  	<select id="getDocuments" resultMap="getDocumentsMap" parameterType="DocumentVO">
@@ -222,4 +241,44 @@
  	<select id="getSign" resultType="UserSignatureVO" parameterType="UserVO">
  		SELECT * FROM USER_SIGNATURE WHERE USERNAME=#{username}
  	</select>
+ 	
+ 	<insert id="addDepartment" parameterType="DepartmentVO">
+ 		INSERT INTO DEPARTMENT VALUES
+ 		(
+ 			NULL, #{departmentName}, #{description}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+ 		)
+ 	</insert>
+ 	
+ 	<update id="updateDepartment" parameterType="DepartmentVO">
+ 		UPDATE DEPARTMENT SET DEPARTMENT_NAME=#{departmentName}, DESCRIPTION=#{description}
+ 		WHERE DEPARTMENT_ID=#{departmentId}
+ 	</update>
+ 	
+ 	<delete id="deleteDepartment" parameterType="DepartmentVO">
+ 		DELETE FROM DEPARTMENT WHERE DEPARTMENT_ID=#{departmentId} 
+ 	</delete>
+ 	
+ 	<select id="getParent" resultType="UserVO" parameterType="DepartmentVO">
+ 		SELECT * FROM USER WHERE DEPARTMENT_ID=#{departmentId} AND POSITION='DP1'
+ 	</select>
+ 	
+ 	<update id="updateDeptByUser" parameterType="java.util.Map">
+ 		UPDATE USER SET POSITION=#{position}, PARENT=#{parent}, DEPARTMENT_ID=#{departmentId}
+ 		WHERE USERNAME=#{username}
+ 	</update>
+ 	
+ 	<update id="deleteHead" parameterType="DepartmentVO">
+ 		UPDATE USER SET POSITION='DP0', PARENT=NULL
+ 		WHERE DEPARTMENT_ID=#{departmentId} AND POSITION='DP1'
+ 	</update>
+ 	
+ 	<update id="addHead" parameterType="UserVO">
+ 		UPDATE USER SET POSITION='DP1', PARENT='admin'
+ 		WHERE USERNAME=#{username}
+ 	</update>
+ 	
+ 	<update id="updateParent" parameterType="java.util.Map">
+ 		UPDATE USER SET PARENT=#{username}
+ 		WHERE DEPARTMENT_ID=#{departmentId} AND POSITION='DP0'
+ 	</update>
   </mapper>

@@ -315,5 +315,30 @@ public class ApprovalController {
 		
 		return "redirect:/user/mypage";
 	}
+	
+	@PostMapping("approve")
+	@ResponseBody
+	public int approve(@AuthenticationPrincipal UserVO userVO, ApprovalVO approvalVO) throws Exception {
+		DocumentVO documentVO = new DocumentVO();
+		documentVO.setDocumentId(approvalVO.getDocumentId());
+		
+		int result = approvalService.approve(approvalVO, documentVO);
+		
+		return result;
+	}
+	
+	@GetMapping("getSign")
+	@ResponseBody
+	public UserSignatureVO getSign(@AuthenticationPrincipal UserVO userVO) throws Exception {
+		UserSignatureVO userSignatureVO = new UserSignatureVO();
+		userSignatureVO = userService.getSign(userVO);
+		
+		return userSignatureVO;
+	}
+	
+	@PostMapping("updateContent")
+	public void updateContent(DocumentVO documentVO) throws Exception {
+		approvalService.updateContent(documentVO);
+	}
 
 }
