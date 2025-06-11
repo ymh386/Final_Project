@@ -26,4 +26,10 @@
   		UPDATE BILLING SET BILLING_KEY=#{billingKey}, CREATED_AT=#{createdAt} WHERE BILLING_ID=#{billingId}
   	</update>
   	
+  	<update id="updatePayment" parameterType="PaymentVO">
+  		UPDATE PAYMENT SET 
+  			PAYMENT_STATUS=#{paymentStatus}, REQUESTED_AT=#{requestedAt}, APPROVED_AT=#{approvedAt}
+  		WHERE USERNAME=#{username} AND SUBSCRIPT_ID=#{subscriptId}
+  	</update>
+  	
   </mapper>
