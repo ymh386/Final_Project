@@ -1,6 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+
+<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
@@ -19,25 +22,52 @@
 </head>
 <body>
   <h2>내 예약 목록</h2>
+  
+  <sec:authorize access="isAuthenticated()">
+    <p>안녕하세요, <sec:authentication property="name"/>님</p>
+  </sec:authorize>
 
   <c:if test="${not empty msg}">
     <div class="msg">${msg}</div>
   </c:if>
 
+  <!-- 예약 리스트 테이블 -->
   <table>
     <tr>
       <th>예약 ID</th>
       <th>일정 ID</th>
-      <th>장소</th>       
+      <th>수업 시간</th>
+      <th>트레이너</th>
+      <th>장소</th>
       <th>예약 일시</th>
       <th>취소 일시</th>
       <th>취소 사유</th>
-      <th>동작</th>
+      <th>-</th>
     </tr>
     <c:forEach var="r" items="${list}">
       <tr>
         <td>${r.reservationId}</td>
         <td>${r.scheduleId}</td>
+        <!-- 일정에 맞는 수업 시간 표시 -->
+        <td>
+          <c:forEach var="sch" items="${schedules}">
+            <c:if test="${sch.scheduleId == r.scheduleId}">
+              ${sch.scheduleDate} ${sch.startTime} ~ ${sch.endTime}
+            </c:if>
+          </c:forEach>
+        </td>
+        <!-- 일정 목록에서 scheduleId로 매칭한 schedule의 username을 찾아, trainerList에서 name 뽑아내기 -->
+        <td>
+          <c:forEach var="sch" items="${schedules}">
+            <c:if test="${sch.scheduleId == r.scheduleId}">
+              <c:forEach var="t" items="${trainerList}">
+                <c:if test="${t.username == sch.username}">
+                  ${t.name}
+                </c:if>
+              </c:forEach>
+            </c:if>
+          </c:forEach>
+        </td>
         <!-- 시설ID에 따라 장소명 매핑 -->
         <td>
           <c:choose>
@@ -70,8 +100,6 @@
     </c:forEach>
   </table>
 
-  <a class="button" href="${pageContext.request.contextPath}/reservation/my">
-    내 예약 목록으로 이동
-  </a>
+  <a class="button" href="${pageContext.request.contextPath}/reservation/book">예약하기</a>
 </body>
 </html>
