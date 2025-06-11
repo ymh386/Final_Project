@@ -71,7 +71,7 @@ public interface UserDAO {
 	//새로운 부서장 임명
 	public int addHead(UserVO userVO) throws Exception;
 	
-	//해당 부서의 나머지 부서원들 상급자 새로운 부서장으로 변경
+	//해당 부서의 나머지 부서원들의 상급자를 새로운 부서장으로 변경
 	public int updateParent(Map<String, Object> map) throws Exception;
 	
 }
