@@ -1,0 +1,114 @@
+const uploadSign = document.getElementById("uploadSign");
+const appOrRej = document.getElementById("appOrRej");
+const rejection = document.getElementById("rejection");
+
+const documentId = document.getElementById("documentId");
+const writerId = document.getElementById("writerId");
+const approvalId = document.getElementById("approvalId");
+
+let result = 0;
+
+uploadSign.addEventListener("click", ()=>{
+
+    //버튼 중복 클릭 방지
+    if(uploadSign.disabled) return;
+    uploadSign.disabled = true; // 버튼 비활성화
+
+    fetch("./getSign")
+    .then(r => r.json()).catch(e => {
+        alert("서명 또는 도장을 등록해주세요.")
+        location.href="./registerSign"
+    })
+    .then(r => {
+        let sign1 = document.getElementById("sign_1");
+        let sign2 = document.getElementById("sign_2");
+        let sign3 = document.getElementById("sign_3");
+        let signatureUrl = "/files/userSignature/" + r.fileName
+
+        const signImg = makeSign(signatureUrl);
+
+        if(r != null) {
+            if(!sign1.querySelector("img")) {
+                sign1.append(signImg);
+                result = 1
+            }else if(!sign2.querySelector("img")){
+                sign2.append(signImg);
+                result = 1
+            }else if(!sign3.querySelector("img")){
+                sign3.append(signImg);
+                result = 1
+            }
+        }else {
+            alert("서명 또는 도장을 등록해주세요.")
+            location.href="./registerSign"
+        }
+
+        if(result > 0) {
+            approve = document.createElement("button");
+            approve.classList.add("btn");
+            approve.setAttribute("id", "approve");
+            approve.innerHTML = "승인";
+            appOrRej.append(approve);
+            rejection.remove();
+
+            approve.addEventListener('click', ()=>{
+                //현재 approvalId의 진행상태를 'AS1'로 변경 후 
+                //approvalId를 parent로 하는 데이터의 진행상태를 'AS0'
+                //승인 완료 시 해당 문서 html 결재란에 서명렌더링
+                //모든 해당 documentId를 갖는 approval의 진행상태가 'AS1'이된 경우 해당document의 진행상태도 'D1'
+                if(r != null) {
+                    const f = new FormData();
+                    f.append("documentId", documentId.value)
+                    f.append("approvalId", approvalId.value)
+
+                    fetch("./approve", {
+                        method : "POST",
+                        body : f
+                    })
+                    .then(r2 => r2.json())
+                    .then(r2 => {
+
+                        const f2 = new FormData();
+                        f2.append("documentId", documentId.value)
+                        f2.append("contentHtml", document.getElementById("contentHtml").innerHTML)
+
+                        fetch("./updateContent", {
+                            method : "POST",
+                            body : f2
+                        })
+
+                        if(r && r2 > 0){
+                            alert("승인완료")
+                            location.href="./approvedList"
+                        } else{
+                            alert("승인실패")
+                            location.reload();
+                        }
+                    }).catch(e => {
+                        console.log(e)
+                        alert("오류발생")
+                    })
+                }else {
+                    alert("서명/도장을 기입해주세요")
+                }
+            })
+        }
+
+        
+    })
+
+    
+})
+
+
+
+
+//서명 또는 도장 이미지태그 만들기
+function makeSign(signatureUrl) {
+    const signImg = document.createElement("img");
+    signImg.setAttribute("src", signatureUrl);
+    signImg.setAttribute("width", "50");
+    signImg.setAttribute("height", "50");
+
+    return signImg;
+}

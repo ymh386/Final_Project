@@ -1,6 +1,7 @@
 package com.spring.app.approval;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -85,5 +86,45 @@ public class ApprovalService {
 		return approvalDAO.deleteSign(userVO);
 	}
 	
+	//결재 승인 처리
+	public int approve(ApprovalVO approvalVO, DocumentVO documentVO) throws Exception {
+
+		//1. 현재 승인정보의 상태를 승인으로 변경
+		approvalVO.setApprovalStatus("AS1");
+		int result = approvalDAO.updateApprovalStatus(approvalVO);
+		
+		//1번 성공 시
+		if(result > 0) {
+			//2. 다음 승인정보를 진행중으로 변경
+			approvalVO.setApprovalStatus("AS0");
+			result = approvalDAO.updateChildStatus(approvalVO);
+			
+			//2번 실패 시 -> 다음결재자가 없음(최종승인 됨)
+			if(result <= 0) {
+				//3. 해당 결재문서의 모든 승인정보 조회
+				List<ApprovalVO> ar = approvalDAO.getListByDocument(approvalVO);
+				//3번에서 조회한 리스트에서 상태가 승인인 정보를 제외한 정보들만 가져옴
+				List<ApprovalVO> ar2 =  ar.stream()
+						.filter(a -> !a.getApprovalStatus().equals("AS1"))
+						.collect(Collectors.toList());
+				//3번에서 최종으로 가져온 리스트가 NULL 즉, 모두가 승인상태라면 결재문서의 상태를 승인으로 변경
+				if(ar2.size() < 1) {
+					documentVO.setDocumentStatus("D1");
+					log.info("documentVO {}", documentVO);
+					result = approvalDAO.updateDocumentStatus(documentVO);
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	public ApprovalVO getApprovalDetail(ApprovalVO approvalVO) throws Exception {
+		return approvalDAO.getApprovalDetail(approvalVO);
+	}
+	
+	public int updateContent(DocumentVO documentVO) throws Exception {
+		return approvalDAO.updateContent(documentVO);
+	}
 
 }

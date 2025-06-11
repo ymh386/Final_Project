@@ -28,6 +28,7 @@
             extraPlugins: 'forms,tableresize',
             extraAllowedContent: 'td[id, contenteditable];th[id, contenteditable];img[src,style];'
         });
+        CKEDITOR.instances['editor'].setData('*결재란은 최대3개까지</br>*결재란의 결재자이름칸에 id속성을 name_1, name_2, name_3 형식으로 넣기!</br>*결재란의 서명칸에 id속성을 sign_1, sign_2, sign_3 형식으로 넣기!')
     </script>
 </body>
 </html>
