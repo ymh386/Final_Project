@@ -15,6 +15,10 @@ public interface UserDAO {
 	
 	int trainerJoin(UserVO userVO) throws Exception;
 	
+	int changePw(UserVO userVO) throws Exception;
+	
+	UserVO getUserByEmail(String email) throws Exception;
+	
 	Long getTrainerCode() throws Exception;
 	
 	UserVO detail(UserVO userVO) throws Exception;
@@ -22,6 +26,8 @@ public interface UserDAO {
 	List<UserVO> awaitUserList(UserVO userVO) throws Exception;
 	
 	int updateUserState(MemberStateVO memberStateVO) throws Exception;
+	
+	List<MemberRoleVO> getRole(@Param("username") String username) throws Exception;
 	
 	MemberStateVO checkSubscript(@Param("username") String username) throws Exception;
 	

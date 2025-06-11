@@ -1,5 +1,6 @@
 package com.spring.app.subscript;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class SubscriptController {
 	@GetMapping("success")
 	public String success(@RequestParam String authKey,
 						@RequestParam String customerKey,
-						@RequestParam Long subscriptionId, Model model) throws Exception{
+						@RequestParam Long subscriptionId, Model model) throws Exception {
 		
 		paymentService.registerCard(customerKey, authKey);
 		
@@ -82,6 +83,23 @@ public class SubscriptController {
 		MemberStateVO memberStateVO=userService.checkSubscript(username);
 		
 		userService.cancelSubscript(memberStateVO);
+		
+		return "redirect:/";
+	}
+	
+	@GetMapping("restart")
+	public void reStart(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
+		LocalDate endDate = subscriptService.getEndDate(userVO.getUsername());
+		
+		model.addAttribute("endDate", endDate);
+		model.addAttribute("user", userVO);
+	}
+	
+	@PostMapping("restart")
+	public String reStart(@RequestParam String username) throws Exception {
+		MemberStateVO memberStateVO=userService.checkSubscript(username);
+		
+		userService.startSubscript(memberStateVO);
 		
 		return "redirect:/";
 	}

@@ -88,7 +88,7 @@ public class PaymentService {
 		memberStateVO=userService.checkSubscript(customerKey);
 		
 		if (memberStateVO.getStateNum()!=1) {
-			userService.startSubscript(memberStateVO);
+			userService.startSubscript(memberStateVO);	
 		}
 		
 		BillingVO billingVO = paymentDAO.getBilling(customerKey);

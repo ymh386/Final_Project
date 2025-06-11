@@ -46,6 +46,9 @@ public class UserController {
 	private UserService userService;
 	
 	@Autowired
+	private FindInfoService findInfoService;
+	
+	@Autowired
 	private ApprovalService approvalService;
 
 	@Autowired
@@ -107,9 +110,12 @@ public class UserController {
 	}
 	
 	@GetMapping("login/login")
-	String memberLogin(@AuthenticationPrincipal UserVO userVO) {
+	String memberLogin(@AuthenticationPrincipal UserVO userVO, @RequestParam(value = "error", required = false) String error, Model model) {
 		if (userVO != null) {
 			return "redirect:/";
+		}
+		if (error != null) {
+			model.addAttribute("error", error);
 		}
 		
 		return "user/login/login";
@@ -125,6 +131,27 @@ public class UserController {
 		}
 		
 		return "user/login/trainerLogin";
+	}
+	
+	@GetMapping("findPw")
+	void findPw() throws Exception{}
+	
+	@PostMapping("findPw")
+	String findPw(@RequestParam("email") String email, Model model, UserVO userVO) throws Exception{
+		
+		userVO = findInfoService.getUserByEmail(email);
+		
+		System.out.println(userVO.getUsername());
+		
+		String newPassword=findInfoService.randomPassword(12);
+		userVO.setPassword(encoder.encode(newPassword));
+		findInfoService.changePw(userVO);
+		findInfoService.findId(email, newPassword);
+		
+		model.addAttribute("result", "입력하신 이메일로 임시 비밀번호를 발송했습니다.");
+		model.addAttribute("path", "/user/login/login");
+		
+		return "commons/result";
 	}
 	
 	@GetMapping("logout")

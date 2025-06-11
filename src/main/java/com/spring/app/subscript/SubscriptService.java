@@ -1,5 +1,6 @@
 package com.spring.app.subscript;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,6 +22,12 @@ public class SubscriptService {
 		List<SubscriptionVO> list = subscriptDAO.getPlans();
 		
 		return list;
+	}
+	
+	public LocalDate getEndDate(String username) throws Exception {
+		LocalDate endDate = subscriptDAO.getEndDate(username);
+		
+		return endDate;
 	}
 	
 	public SubscriptionVO getPlansDetail(Long id) throws Exception {
