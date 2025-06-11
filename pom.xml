@@ -33,14 +33,13 @@
     <java.version>17</java.version>
 </properties>
 	<dependencies>		
-	
-	<!-- https://mvnrepository.com/artifact/com.twilio.sdk/twilio -->
+
 		<dependency>
-		  <groupId>com.twilio.sdk</groupId>
-		  <artifactId>twilio</artifactId>
-		  <version>8.31.1</version>
+			<groupId>net.nurigo</groupId>
+			<artifactId>sdk</artifactId>
+			<version>4.3.2</version>
 		</dependency>
-				
+					 		
 		<dependency>
 		    <groupId>org.apache.commons</groupId>
 		    <artifactId>commons-lang3</artifactId>

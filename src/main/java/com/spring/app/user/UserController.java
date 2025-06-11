@@ -203,11 +203,6 @@ public class UserController {
 		userVO.setPassword(encoder.encode(newPassword));
 		findInfoService.changePw(userVO);
 		
-		if (phone.startsWith("0")) {
-			phone = "+82"+phone.substring(1);
-			System.out.println(phone);
-		}
-		
 		findInfoService.findPwByPhone(phone, newPassword);
 		
 		model.addAttribute("result", "입력하신 전화번호로 임시 비밀번호를 발송했습니다.");
