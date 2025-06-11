@@ -21,7 +21,7 @@ import com.spring.app.approval.ApprovalService;
 import com.spring.app.approval.DocumentVO;
 import com.spring.app.approval.FormVO;
 import com.spring.app.approval.UserSignatureVO;
-
+import com.spring.app.payment.PaymentService;
 import com.spring.app.subscript.SubscriptService;
 import com.spring.app.subscript.SubscriptVO;
 
@@ -36,12 +36,17 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/user/*")
 @Slf4j
 public class UserController {
+
+    private final PaymentService paymentService;
 	
 	@Autowired
 	private PasswordEncoder encoder;
 	
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private FindInfoService findInfoService;
 	
 	@Autowired
 	private ApprovalService approvalService;
@@ -52,6 +57,10 @@ public class UserController {
 	
 	@Value("${board.file.path}")
 	private String path;
+
+    UserController(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
 	
 	@GetMapping("join/join")
 	void join() {}
@@ -74,7 +83,6 @@ public class UserController {
 			String username = userVO.getUsername();
 			System.out.println(username);
 			List<SubscriptVO> list = subscriptService.getSubscriptByUser(username);
-			
 			model.addAttribute("list", list);
 		}
 	}
@@ -102,9 +110,12 @@ public class UserController {
 	}
 	
 	@GetMapping("login/login")
-	String memberLogin(@AuthenticationPrincipal UserVO userVO) {
+	String memberLogin(@AuthenticationPrincipal UserVO userVO, @RequestParam(value = "error", required = false) String error, Model model) {
 		if (userVO != null) {
 			return "redirect:/";
+		}
+		if (error != null) {
+			model.addAttribute("error", error);
 		}
 		
 		return "user/login/login";
@@ -120,6 +131,27 @@ public class UserController {
 		}
 		
 		return "user/login/trainerLogin";
+	}
+	
+	@GetMapping("findPw")
+	void findPw() throws Exception{}
+	
+	@PostMapping("findPw")
+	String findPw(@RequestParam("email") String email, Model model, UserVO userVO) throws Exception{
+		
+		userVO = findInfoService.getUserByEmail(email);
+		
+		System.out.println(userVO.getUsername());
+		
+		String newPassword=findInfoService.randomPassword(12);
+		userVO.setPassword(encoder.encode(newPassword));
+		findInfoService.changePw(userVO);
+		findInfoService.findId(email, newPassword);
+		
+		model.addAttribute("result", "입력하신 이메일로 임시 비밀번호를 발송했습니다.");
+		model.addAttribute("path", "/user/login/login");
+		
+		return "commons/result";
 	}
 	
 	@GetMapping("logout")

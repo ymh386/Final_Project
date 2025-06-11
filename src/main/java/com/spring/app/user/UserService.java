@@ -2,7 +2,11 @@ package com.spring.app.user;
 
 import java.util.List;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,6 +26,21 @@ public class UserService implements UserDetailsService {
 	
 	@Autowired
 	private UserDAO userDAO;
+	
+	@Autowired
+	private JavaMailSender mailSender;
+	
+	@Value("${spring.mail.username}")
+	private String from;
+	
+	@Value("${twilio.account.sid}")
+	private String sid;
+	
+	@Value("${twilio.auth.token}")
+	private String token;
+	
+	@Value("${twilio.from.number}")
+	private String fromNum;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -39,6 +58,7 @@ public class UserService implements UserDetailsService {
 		
 		return userVO;
 	}
+
 	
 	public UserVO detail(UserVO userVO) throws Exception {
 		userVO = userDAO.detail(userVO);
@@ -68,6 +88,36 @@ public class UserService implements UserDetailsService {
 	
 	public int updateUserState(MemberStateVO memberStateVO) throws Exception {
 		int result = userDAO.updateUserState(memberStateVO);
+		
+		return result;
+	}
+	
+	public List<MemberRoleVO> getRole(String username) throws Exception {
+		List<MemberRoleVO> list = userDAO.getRole(username);
+		
+		return list;
+	}
+	
+	public MemberStateVO checkSubscript(String username) throws Exception {
+		MemberStateVO memberStateVO = userDAO.checkSubscript(username);
+		
+		return memberStateVO;
+	}
+	
+	public int startSubscript(MemberStateVO memberStateVO) throws Exception {
+		int result = userDAO.startSubscript(memberStateVO);
+		
+		return result;
+	}
+	
+	public int cancelSubscript(MemberStateVO memberStateVO) throws Exception {
+		int result = userDAO.cancelSubscript(memberStateVO);
+		
+		return result;
+	}
+	
+	public int stopSubscript(MemberStateVO memberStateVO) throws Exception {
+		int result = userDAO.stopSubscript(memberStateVO);
 		
 		return result;
 	}
