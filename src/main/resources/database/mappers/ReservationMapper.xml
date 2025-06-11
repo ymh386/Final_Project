@@ -86,7 +86,6 @@
 
 	<!--  -->
 	<select id="countByUsernameAndMonth" resultType="int">
-	
 		SELECT COUNT(*)
 		FROM RESERVATION
 		WHERE USERNAME =#{username}

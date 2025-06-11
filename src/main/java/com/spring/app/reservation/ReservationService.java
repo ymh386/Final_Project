@@ -58,10 +58,6 @@ public class ReservationService {
 			 
 		 }
 		 
-		 
-		 
-		 	
-		
 		vo.setCreatedAt(LocalDateTime.now());
 		reservationDAO.insertReservation(vo);
 
