@@ -36,15 +36,6 @@ public class UserService implements UserDetailsService {
 	
 	@Value("${spring.mail.username}")
 	private String from;
-	
-	@Value("${twilio.account.sid}")
-	private String sid;
-	
-	@Value("${twilio.auth.token}")
-	private String token;
-	
-	@Value("${twilio.from.number}")
-	private String fromNum;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

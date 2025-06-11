@@ -8,10 +8,11 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import com.twilio.Twilio;
-import com.twilio.rest.api.v2010.account.Message;
 
 import jakarta.annotation.PostConstruct;
+import net.nurigo.sdk.NurigoApp;
+import net.nurigo.sdk.message.model.Message;
+import net.nurigo.sdk.message.service.DefaultMessageService;
 
 @Service
 public class FindInfoService {
@@ -25,14 +26,15 @@ public class FindInfoService {
 	@Value("${spring.mail.username}")
 	private String from;
 	
-	@Value("${twilio.account.sid}")
-	private String sid;
+	@Value("${nurigo.api.key}")
+	private String apiKey;
 	
-	@Value("${twilio.auth.token}")
-	private String token;
+	@Value("${nurigo.api.secret.key}")
+	private String secretKey;
 	
-	@Value("${twilio.from.number}")
-	private String fromNum;
+	@Value("${nurigo.send.phone.number}")
+	private String sendPhone;
+
 	
 	public String randomPassword(int length) throws Exception {
 		return RandomStringUtils.randomAlphanumeric(12);
@@ -75,18 +77,17 @@ public class FindInfoService {
 		mailSender.send(msg);
 	}
 	
-	@PostConstruct
-	public void init() {
-		Twilio.init(sid, token);
-	}
-	
 	public void findPwByPhone(String phone, String newPassword) throws Exception {
-		String body="[FINAL] 임시 비밀번호 : "+newPassword;
-		Message
-		.creator(
-				new com.twilio.type.PhoneNumber(phone), new com.twilio.type.PhoneNumber(fromNum), body
-				)
-		.create();
+		DefaultMessageService defaultMessageService = NurigoApp.INSTANCE.initialize(apiKey, secretKey, "https://api.solapi.com");
+		Message message = new Message();
+		
+		message.setFrom(sendPhone);
+		message.setTo(phone);
+		message.setText("임시 비밀번호는 "+newPassword+"입니다.\n\n"
+				+"로그인 후 비밀번호를 변경해주세요.");
+		
+		defaultMessageService.send(message);
+		
 	}
 
 }
