@@ -316,13 +316,20 @@ public class ApprovalController {
 		return "redirect:/user/mypage";
 	}
 	
-	@PostMapping("approve")
+	@PostMapping("appOrRej")
 	@ResponseBody
-	public int approve(@AuthenticationPrincipal UserVO userVO, ApprovalVO approvalVO) throws Exception {
+	public int approve(ApprovalVO approvalVO, int type) throws Exception {
 		DocumentVO documentVO = new DocumentVO();
 		documentVO.setDocumentId(approvalVO.getDocumentId());
 		
-		int result = approvalService.approve(approvalVO, documentVO);
+		int result = 0;
+		
+		if(type == 1) {
+			result = approvalService.approve(approvalVO, documentVO);
+		}else {
+			result = approvalService.rejection(approvalVO, documentVO);
+		}
+		
 		
 		return result;
 	}

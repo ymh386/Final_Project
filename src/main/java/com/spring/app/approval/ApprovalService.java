@@ -105,12 +105,11 @@ public class ApprovalService {
 				List<ApprovalVO> ar = approvalDAO.getListByDocument(approvalVO);
 				//3번에서 조회한 리스트에서 상태가 승인인 정보를 제외한 정보들만 가져옴
 				List<ApprovalVO> ar2 =  ar.stream()
-						.filter(a -> !a.getApprovalStatus().equals("AS1"))
+						.filter(a -> !"AS1".equals(a.getApprovalStatus()))
 						.collect(Collectors.toList());
 				//3번에서 최종으로 가져온 리스트가 NULL 즉, 모두가 승인상태라면 결재문서의 상태를 승인으로 변경
 				if(ar2.size() < 1) {
 					documentVO.setDocumentStatus("D1");
-					log.info("documentVO {}", documentVO);
 					result = approvalDAO.updateDocumentStatus(documentVO);
 				}
 			}
@@ -126,5 +125,30 @@ public class ApprovalService {
 	public int updateContent(DocumentVO documentVO) throws Exception {
 		return approvalDAO.updateContent(documentVO);
 	}
+	
+	public int rejection(ApprovalVO approvalVO, DocumentVO documentVO) throws Exception {
+		
+		//1. 현재 승인정보의 상태를 반려로 변경
+		approvalVO.setApprovalStatus("AS2");
+		int result = approvalDAO.updateApprovalStatus(approvalVO);
+		
+		if(result > 0) {
+			//2. 해당 결재문서의 모든 승인정보 조회
+			List<ApprovalVO> ar = approvalDAO.getListByDocument(approvalVO);
+			//2번에서 조회한 리스트에서 상태가 반려인 정보를 제외한 정보들만 가져옴
+			List<ApprovalVO> ar2 =  ar.stream()
+					.filter(a -> "AS2".equals(a.getApprovalStatus()))
+					.collect(Collectors.toList());
+			
+			//32에서 최종으로 가져온 리스트가 NOT NULL 즉, 하나라도 반려상태라면 결재문서의 상태를 반려로 변경
+			if(ar2.size() > 0) {
+				documentVO.setDocumentStatus("D2");
+				result = approvalDAO.updateDocumentStatus(documentVO);
+			}
+		}
+		
+		return result;
+	}
+	
 
 }

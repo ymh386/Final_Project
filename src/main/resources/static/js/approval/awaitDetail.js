@@ -60,8 +60,11 @@ uploadSign.addEventListener("click", ()=>{
                     const f = new FormData();
                     f.append("documentId", documentId.value)
                     f.append("approvalId", approvalId.value)
+                    //승인인지 반려인지 구분용(1 이면 승인)
+                    f.append("type", 1)
 
-                    fetch("./approve", {
+
+                    fetch("./appOrRej", {
                         method : "POST",
                         body : f
                     })
@@ -77,7 +80,7 @@ uploadSign.addEventListener("click", ()=>{
                             body : f2
                         })
 
-                        if(r && r2 > 0){
+                        if(r != null && r2 > 0){
                             alert("승인완료")
                             location.href="./approvedList"
                         } else{
@@ -92,12 +95,37 @@ uploadSign.addEventListener("click", ()=>{
                     alert("서명/도장을 기입해주세요")
                 }
             })
-        }
+        }  
+    })
+})
 
-        
+rejection.addEventListener('click', ()=>{
+    //현재 approvalId의 진행상태를 'AS2'로 변경 후 
+    //approver에 하나라도 상태가 'AS2'이면 document의 상태를 'D2'로 변경
+    const f = new FormData();
+    f.append("documentId", documentId.value)
+    f.append("approvalId", approvalId.value)
+    //승인인지 반려인지 구분(0 이면 반려)
+    f.append("type", 0)
+
+    fetch('./appOrRej', {
+        method : "POST",
+        body : f
+    })
+    .then(r => r.json())
+    .then(r=>{
+
+        if(r > 0) {
+            alert("반려완료")
+            location.href="./approvedList"
+        }else {
+            alert("반려실패")
+            location.reload()
+        }
+    }).catch(e => {
+        alert("오류발생")
     })
 
-    
 })
 
 
