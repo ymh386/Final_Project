@@ -101,9 +101,9 @@ public class BoardController {
             Model model) {
 
         if (user == null) {
-            model.addAttribute("msg",  "글 작성은 로그인 후에 가능합니다.");
-            model.addAttribute("path", "/board/login");   // ← 수정
-            return "commons/result";                       // 폴더명도 common으로
+         //   model.addAttribute("msg",  "글 작성은 로그인 후에 가능합니다.");
+         //   model.addAttribute("path", "/board/login");   // ← 수정
+         //   return "commons/result";                       // 폴더명도 common으로
         }
         model.addAttribute("boardVO", new BoardVO());
         return "board/add";
@@ -117,11 +117,11 @@ public class BoardController {
             @AuthenticationPrincipal User user,
             Model m) throws Exception {
 
-        if (user == null) {
-            m.addAttribute("msg",  "글 작성은 로그인 후에 가능합니다.");
-            m.addAttribute("path", "/board/login");     // ← 수정
-            return "commons/result";
-        }
+//        if (user == null) {
+//            m.addAttribute("msg",  "글 작성은 로그인 후에 가능합니다.");
+//            m.addAttribute("path", "/board/login");     // ← 수정
+//            return "commons/result";
+//        }
         if (files != null && files.length > 5) {
             m.addAttribute("msg",  "첨부파일은 최대 5개까지 가능합니다.");
             m.addAttribute("path", "/board/add");
