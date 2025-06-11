@@ -13,6 +13,15 @@
 		SELECT * FROM SUBSCRIPTION WHERE SUBSCRIPTION_ID=#{subscriptionId}
 	</select>
 	
+	<select id="getEndingPlan" resultType="SubscriptVO">
+		SELECT * FROM MEMBER_SUBSCRIPT 
+		WHERE END_DATE=CURDATE()
+	</select>
+	
+	<select id="getEndDate" resultType="java.time.LocalDate">
+		SELECT MAX(END_DATE) FROM MEMBER_SUBSCRIPT WHERE USERNAME=#{username}
+	</select>
+	
 	<select id="getSubscriptById" resultType="SubscriptVO">
 		SELECT * FROM MEMBER_SUBSCRIPT WHERE SUBSCRIPTION_ID=#{subscriptionId} AND USERNAME=#{username}
 	</select>
@@ -21,7 +30,7 @@
 		SELECT * FROM MEMBER_SUBSCRIPT MS
 		INNER JOIN SUBSCRIPTION
 		USING (SUBSCRIPTION_ID)
-		WHERE USERNAME=#{username}
+		WHERE USERNAME=#{username} AND SUBSCRIPT_STATUS='ACTIVE'
 	</select>
 	
 	<resultMap type="SubscriptVO" id="subscript">
@@ -63,8 +72,12 @@
 	</insert>
 	
 	<update id="updateSubscript" parameterType="SubscriptVO">
-		UPDATE MEMBER_SUBSCRIPT SET SUBSCRIPT_STATUS=#{subscriptStatus} WHERE SUBSCRIPT_ID=#{subscriptId}
+		UPDATE MEMBER_SUBSCRIPT SET SUBSCRIPT_STATUS='CANCEL' WHERE USERNAME=#{username}
 	</update>
+	
+	<delete id="deleteSubscript">
+		DELETE FROM MEMBER_SUBSCRIPT WHERE SUBSCRIPT_ID=#{subscriptId}
+	</delete>
 	
 
   	

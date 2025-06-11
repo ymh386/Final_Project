@@ -21,61 +21,85 @@
   <!-- 1) Q&A 원글 작성 -->
   <insert id="insertQna" parameterType="com.spring.app.board.qna.QnaVO" useGeneratedKeys="true" keyProperty="boardNum" keyColumn="BOARD_NUM">
     INSERT INTO QNA
-      (USERNAME, BOARD_TITLE, BOARD_DATE, BOARD_CONTENTS,
-       BOARD_DEPTH, BOARD_REF, BOARD_STEP, IS_SECRET)
+      (USERNAME,
+       BOARD_TITLE,
+       BOARD_DATE,
+       BOARD_CONTENTS,
+       BOARD_DEPTH,
+       BOARD_REF,
+       BOARD_STEP,
+       IS_SECRET)
     VALUES
-      (#{userName}, #{boardTitle}, CURRENT_TIMESTAMP, #{boardContents},
-       #{boardDepth}, #{boardRef}, #{boardStep}, #{isSecret})
+      (#{userName},
+       #{boardTitle},
+       CURRENT_TIMESTAMP,
+       #{boardContents},
+       #{boardDepth},
+       #{boardRef},
+       #{boardStep},
+       #{isSecret})
   </insert>
 
-  <!-- 2) Q&A 답글 작성 -->
-  <insert id="insertReply" parameterType="com.spring.app.board.qna.QnaVO" useGeneratedKeys="true" keyProperty="boardNum" keyColumn="BOARD_NUM">
-    INSERT INTO QNA
-      (USERNAME, BOARD_TITLE, BOARD_DATE, BOARD_CONTENTS,
-       BOARD_DEPTH, BOARD_REF, BOARD_STEP, IS_SECRET)
-    VALUES
-      (#{userName}, #{boardTitle}, CURRENT_TIMESTAMP, #{boardContents},
-       #{boardDepth}, #{boardRef}, #{boardStep}, #{isSecret})
-  </insert>
+  <!-- 2) 답글 작성 전 같은 그룹 내 step 밀어내기 -->
+  <update id="updateStepForReply" parameterType="com.spring.app.board.qna.QnaVO">
+    UPDATE QNA
+      SET BOARD_STEP = BOARD_STEP + 1
+    WHERE BOARD_REF = #{boardRef}
+      AND BOARD_STEP > #{boardStep}
+  </update>
 
-  <!-- 3) 특정 Q&A 글 상세 조회 -->
-  <select id="getDetail" parameterType="com.spring.app.board.qna.QnaVO" resultMap="QnaResultMap">
-    SELECT BOARD_NUM, USERNAME, BOARD_TITLE, BOARD_DATE,
-           BOARD_CONTENTS, BOARD_DEPTH, BOARD_REF, BOARD_STEP, IS_SECRET
+  <!-- 3) 전체 게시물 수 조회 -->
+  <select id="selectQnaCount" resultType="int">
+    SELECT COUNT(*)
+      FROM QNA
+  </select>
+
+  <!-- 4) 페이징 처리된 게시물 목록 조회 -->
+  <select id="selectQnaList" parameterType="map" resultMap="QnaResultMap">
+    SELECT
+      BOARD_NUM,
+      USERNAME,
+      BOARD_TITLE,
+      BOARD_DATE,
+      BOARD_CONTENTS,
+      BOARD_DEPTH,
+      BOARD_REF,
+      BOARD_STEP,
+      IS_SECRET
+    FROM QNA
+    ORDER BY BOARD_REF DESC, BOARD_STEP ASC
+    LIMIT #{offset}, #{limit}
+  </select>
+
+  <!-- 5) 특정 글 상세 조회 -->
+  <select id="selectQnaById" parameterType="long" resultMap="QnaResultMap">
+    SELECT
+      BOARD_NUM,
+      USERNAME,
+      BOARD_TITLE,
+      BOARD_DATE,
+      BOARD_CONTENTS,
+      BOARD_DEPTH,
+      BOARD_REF,
+      BOARD_STEP,
+      IS_SECRET
     FROM QNA
     WHERE BOARD_NUM = #{boardNum}
   </select>
 
-  <!-- 4) Q&A 목록 조회 -->
-  <select id="getList" parameterType="com.spring.app.home.util.Pager" resultMap="QnaResultMap">
-    SELECT BOARD_NUM, USERNAME, BOARD_TITLE, BOARD_DATE,
-           BOARD_CONTENTS, BOARD_DEPTH, BOARD_REF, BOARD_STEP, IS_SECRET
-    FROM QNA
-    ORDER BY BOARD_REF DESC, BOARD_STEP ASC
-    LIMIT #{startRow}, #{pageSize}
-  </select>
-
-  <!-- 5) Q&A 수정 -->
-  <update id="update" parameterType="com.spring.app.board.qna.QnaVO">
+  <!-- 6) 글 수정 -->
+  <update id="updateQna" parameterType="com.spring.app.board.qna.QnaVO">
     UPDATE QNA
       SET BOARD_TITLE    = #{boardTitle},
           BOARD_CONTENTS = #{boardContents},
           IS_SECRET      = #{isSecret}
     WHERE BOARD_NUM = #{boardNum}
-      AND (
-           #{userName} = 'admin'
-           OR USERNAME = #{userName}
-          )
   </update>
 
-  <!-- 6) Q&A 삭제 -->
-  <delete id="delete" parameterType="com.spring.app.board.qna.QnaVO">
+  <!-- 7) 글 삭제 -->
+  <delete id="deleteQna" parameterType="long">
     DELETE FROM QNA
     WHERE BOARD_NUM = #{boardNum}
-      AND (
-           #{userName} = 'admin'
-           OR USERNAME = #{userName}
-          )
   </delete>
 
 </mapper>

@@ -16,6 +16,12 @@ public interface UserDAO {
 	
 	int trainerJoin(UserVO userVO) throws Exception;
 	
+	int changePw(UserVO userVO) throws Exception;
+	
+	UserVO getUserByEmail(String email) throws Exception;
+	
+	UserVO getUserByPhone(String phone) throws Exception;
+	
 	Long getTrainerCode() throws Exception;
 	
 	UserVO detail(UserVO userVO) throws Exception;
@@ -24,6 +30,15 @@ public interface UserDAO {
 	
 	int updateUserState(MemberStateVO memberStateVO) throws Exception;
 	
+	List<MemberRoleVO> getRole(@Param("username") String username) throws Exception;
+	
+	MemberStateVO checkSubscript(@Param("username") String username) throws Exception;
+	
+	int startSubscript(MemberStateVO memberStateVO) throws Exception;
+	
+	int cancelSubscript(MemberStateVO memberStateVO) throws Exception;
+	
+	int stopSubscript(MemberStateVO memberStateVO) throws Exception;
 
 	List<UserVO> selectUsersByUsernamePrefix(@Param("prefix") String prefix);
 	

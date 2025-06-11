@@ -50,7 +50,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		String password = request.getParameter("password");
 		String loginType = request.getParameter("loginType");
 		
-		System.out.println(loginType);
+		System.out.println("loginType"+loginType);
 		
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 		
@@ -90,6 +90,16 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException failed) throws IOException, ServletException {
 		// TODO Auto-generated method stub
+		
+		String loginType = request.getParameter("loginType");
+		
+		System.out.println("왜 안되지"+loginType);
+		
+		if (loginType.equals("member")) {
+			response.sendRedirect("/user/login/login?error=" +
+				    URLEncoder.encode(failed.getMessage(), StandardCharsets.UTF_8));
+			return;
+		}
 		
 		response.sendRedirect("/user/login/trainerLogin?error=" +
 			    URLEncoder.encode(failed.getMessage(), StandardCharsets.UTF_8));

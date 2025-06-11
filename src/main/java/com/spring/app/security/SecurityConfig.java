@@ -3,6 +3,7 @@ package com.spring.app.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authorization.AuthorityAuthorizationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.DefaultSecurityFilterChain;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.authentication.AuthenticationFilter;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
@@ -59,6 +61,7 @@ public class SecurityConfig {
 	
 	@Bean
 	DefaultSecurityFilterChain filterChain(HttpSecurity security) throws Exception {
+		
 		security
 		.cors(cors->cors.disable())
 		.csrf(csrf->csrf.disable())
@@ -68,11 +71,14 @@ public class SecurityConfig {
 				.requestMatchers("/user/admin/**").hasRole("ADMIN")
 				.requestMatchers("/approval/**").hasAnyRole("ADMIN", "TRAINER")
 				.requestMatchers("/approval/formRegister").hasRole("ADMIN")
-				.requestMatchers("/user/mypage**").hasAuthority("APPROVE")
 				.requestMatchers("/user/getDocuments", "/user/getDocument").hasAuthority("APPROVE")
 				.requestMatchers("/user/department/**").hasRole("ADMIN")
 				.requestMatchers("/schedule/**").hasAuthority("APPROVE")
 				.requestMatchers("/approval/**").hasAuthority("APPROVE")
+				.requestMatchers("/user/mypage**").hasRole("MEMBER")
+				.requestMatchers("/schedule/**").hasAnyAuthority("APPROVE", "CANCEL")
+				.requestMatchers("/approval/**").hasAnyAuthority("APPROVE", "CANCEL")
+				.requestMatchers("/subscript/list").access(new WebExpressionAuthorizationManager("!hasRole('TRAINER')"))
 				.anyRequest().permitAll();
 		})
 		.formLogin(login->login.disable())

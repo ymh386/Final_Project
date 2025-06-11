@@ -9,15 +9,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.spring.app.home.util.Pager;
 import com.spring.app.board.comment.CommentVO;
 import com.spring.app.board.interaction.InteractionVO;
+import com.spring.app.home.util.Pager;
 import com.spring.app.files.FileManager;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class BoardServiceImpl implements BoardService {
 
+	  private static final long QNA_CATEGORY_ID = 2L;
+	
     @Autowired
     private BoardDAO boardDAO;
 
@@ -26,6 +28,11 @@ public class BoardServiceImpl implements BoardService {
 
     @Value("${board.file.path:/upload}")
     private String filePath;
+
+    @Override
+    public long getTotalCount(Pager pager) throws Exception {
+        return boardDAO.getTotalCount(pager);
+    }
 
     @Override
     public List<BoardVO> getList(Pager pager) throws Exception {
@@ -38,8 +45,11 @@ public class BoardServiceImpl implements BoardService {
         if (vo != null) {
             vo.setBoardFileVOs(boardDAO.getFileList(boardVO));
             vo.setCommentVOs(boardDAO.getCommentList(boardVO));
-            vo.setLikeCount(boardDAO.getInteractionCount(boardVO));
-            
+
+            InteractionVO likeQuery = new InteractionVO();
+            likeQuery.setBoardNum(boardVO.getBoardNum());
+            likeQuery.setType("LIKE");
+            vo.setLikeCount(boardDAO.getInteractionCount(likeQuery));
         }
         return vo;
     }
@@ -94,7 +104,6 @@ public class BoardServiceImpl implements BoardService {
         return boardDAO.deleteFile(fileVO);
     }
 
-    // 좋아요 기능
     @Override
     public int addInteraction(InteractionVO vo) throws Exception {
         if (boardDAO.isLiked(vo) > 0) return 0;
@@ -107,19 +116,15 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public Long getInteractionCount(BoardVO boardVO) throws Exception {
-        return boardDAO.getInteractionCount(boardVO);
+    public long getInteractionCount(InteractionVO vo) throws Exception {
+        return boardDAO.getInteractionCount(vo);
     }
 
     @Override
-    public boolean isLiked(Long boardNum, String userName) throws Exception {
-        InteractionVO vo = new InteractionVO();
-        vo.setBoardNum(boardNum);
-        vo.setUserName(userName);
+    public boolean isLiked(InteractionVO vo) throws Exception {
         return boardDAO.isLiked(vo) > 0;
     }
 
-    // 댓글 기능
     @Override
     public int addComment(CommentVO vo) throws Exception {
         return boardDAO.addComment(vo);
@@ -135,9 +140,6 @@ public class BoardServiceImpl implements BoardService {
         return boardDAO.deleteComment(vo);
     }
 
-
-
-    // 비밀글 기능
     @Override
     public int updateSecret(BoardVO boardVO) throws Exception {
         return boardDAO.updateSecret(boardVO);
@@ -147,12 +149,11 @@ public class BoardServiceImpl implements BoardService {
     public boolean checkSecret(BoardVO boardVO) throws Exception {
         return boardDAO.checkSecret(boardVO);
     }
+
     @Override
     public boolean validateSecret(BoardVO boardVO) throws Exception {
-        // DB에서 원본 비밀번호 가져오기
         BoardVO stored = boardDAO.getDetail(boardVO);
         if (stored == null || stored.getSecretPassword() == null) return false;
-        // VO에 담긴 secretPassword 필드와 비교
         return stored.getSecretPassword().equals(boardVO.getSecretPassword());
     }
 }

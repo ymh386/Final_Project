@@ -20,6 +20,8 @@ import com.spring.app.subscript.SubscriptDAO;
 import com.spring.app.subscript.SubscriptService;
 import com.spring.app.subscript.SubscriptVO;
 import com.spring.app.subscript.SubscriptionVO;
+import com.spring.app.user.MemberStateVO;
+import com.spring.app.user.UserService;
 
 import jakarta.transaction.Transactional;
 
@@ -34,6 +36,9 @@ public class PaymentService {
 	
 	@Autowired
 	private SubscriptService subscriptService;
+	
+	@Autowired
+	private UserService userService;
 	
 	@Value("${toss.secret.key}")
 	private String secretKey;
@@ -78,6 +83,14 @@ public class PaymentService {
 		header.setBasicAuth(secretKey, "");
 		header.setContentType(MediaType.APPLICATION_JSON);
 		
+		MemberStateVO memberStateVO = new MemberStateVO();
+		
+		memberStateVO=userService.checkSubscript(customerKey);
+		
+		if (memberStateVO.getStateNum()!=1) {
+			userService.startSubscript(memberStateVO);	
+		}
+		
 		BillingVO billingVO = paymentDAO.getBilling(customerKey);
 		SubscriptionVO subscriptionVO = subscriptDAO.getPlansDetail(subscriptionId);
 		
@@ -98,20 +111,28 @@ public class PaymentService {
 		System.out.println("res : "+res);
 		
 		String t = res.get("requestedAt").toString();
-		
 		OffsetDateTime t2 = OffsetDateTime.parse(t);
-		
 		LocalDateTime time = t2.toLocalDateTime();
 		
-		SubscriptVO subscriptVO = new SubscriptVO();
+		LocalDate lastEndDate = subscriptDAO.getEndDate(customerKey);
+		LocalDate now = LocalDate.now();
+		Long day = subscriptDAO.getPlansDetail(subscriptionId).getDays();
+		System.out.println("day : "+day);
+		LocalDate startDate = (lastEndDate!=null&&lastEndDate.isAfter(now.minusDays(1))) ? lastEndDate : now;
 		
-		Long days = subscriptDAO.getPlansDetail(subscriptionId).getDays();
+		System.out.println("startDate : "+startDate);
+		LocalDate endDate = startDate.plusDays(day);
+		
+		System.out.println("endDate : "+endDate);
+	
+		SubscriptVO subscriptVO = new SubscriptVO();
+
 		subscriptVO.setSubscriptionId(subscriptionId);
 		subscriptVO.setSubscriptId(subscriptDAO.getNextId());
 		subscriptVO.setUsername(customerKey);
 		subscriptVO.setSubscriptStatus("ACTIVE");
-		subscriptVO.setStartDate(LocalDateTime.now());
-		subscriptVO.setEndDate(LocalDateTime.now().plusDays(days));
+		subscriptVO.setStartDate(startDate);
+		subscriptVO.setEndDate(endDate);
 		subscriptVO.setCreatedAt(LocalDateTime.now());
 		
 		subscriptService.createSubscription(subscriptVO);
@@ -130,6 +151,8 @@ public class PaymentService {
 		
 		PaymentResultVO paymentResultVO = new PaymentResultVO();
 		
+		paymentResultVO.setUsername(customerKey);
+		paymentResultVO.setSubscriptionId(subscriptVO.getSubscriptionId());
 		paymentResultVO.setPaymentKey(paymentVO.getPaymentKey());
 		paymentResultVO.setMethod(paymentVO.getMethod());
 		paymentResultVO.setAmount(paymentVO.getAmount());
@@ -140,5 +163,7 @@ public class PaymentService {
 		
 		return paymentResultVO;
 	}
+	
+	
 
 }
