@@ -23,7 +23,7 @@
   <form action="${pageContext.request.contextPath}/reservation/book" method="post">
     <!-- 0) 시설 선택 -->
     <label for="facilitySelect">시설</label>
-    <select id="facilitySelect" name="facilityChoice">
+    <select id="facilitySelect">
       <option value="">── 시설을 먼저 선택하세요 ──</option>
       <option value="1">복싱장</option>
       <option value="2">헬스장</option>
@@ -32,11 +32,8 @@
 
     <!-- 1) 트레이너 선택 -->
     <label for="trainerSelect">트레이너</label>
-    <select id="trainerSelect" name="trainerName" disabled>
+    <select id="trainerSelect" name="username" disabled>
       <option value="">── 시설을 먼저 선택하세요 ──</option>
-      <c:forEach var="trainer" items="${trainers}">
-        <option value="${trainer.username}">${trainer.name}</option>
-      </c:forEach>
     </select>
 
     <!-- 2) 일정 선택 -->
@@ -80,6 +77,13 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // username -> 실제 이름 매핑 (trainerList에서 가져옴)
+      const trainerNameMap = {
+        <c:forEach var="t" items="${trainerList}" varStatus="loop">
+          '${t.username}': '${t.name}'<c:if test="${!loop.last}">,</c:if>
+        </c:forEach>
+      };
+
       const facilitySelect = document.getElementById('facilitySelect');
       const trainerSelect  = document.getElementById('trainerSelect');
       const scheduleSelect = document.getElementById('scheduleSelect');
@@ -96,14 +100,13 @@
       scheduleSelect.disabled = true;
 
       // placeholder HTML for schedules
-      const schedulePlaceholder =
-        '<option value=\"\">── 일정 선택 ──</option>';
+      const schedulePlaceholder = '<option value="">── 일정 선택 ──</option>';
 
       // 3) 시설 선택 → 트레이너 필터링
       facilitySelect.addEventListener('change', () => {
         const fac = facilitySelect.value;
         // 리셋
-        trainerSelect.innerHTML  = '<option value=\"\">── 트레이너 선택 ──</option>';
+        trainerSelect.innerHTML  = '<option value="">── 트레이너 선택 ──</option>';
         scheduleSelect.innerHTML = schedulePlaceholder;
         remainingInfo.textContent = '남은 좌석: –';
         facilityInput.value      = '';
@@ -120,9 +123,10 @@
             .filter(opt => opt.dataset.facilityId === fac)
             .map(opt => opt.dataset.trainer)
         );
-        trainers.forEach(name => {
+        trainers.forEach(id => {
           const o = document.createElement('option');
-          o.value = o.textContent = name;
+          o.value       = id;
+          o.textContent = trainerNameMap[id] || id;
           trainerSelect.appendChild(o);
         });
         trainerSelect.disabled = false;

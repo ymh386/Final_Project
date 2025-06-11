@@ -50,7 +50,7 @@ public class ReservationController {
     @GetMapping("/book")
     public String showBookingForm(Model model) {
         List<UserVO> trainers = userService.getUsersByUsernamePrefix("T%");
-        model.addAttribute("trainers", trainers);
+        model.addAttribute("trainerList", trainers);
         
         List<ScheduleVO> schedules = scheduleService.getAllSchedules();
         model.addAttribute("schedules", schedules);
@@ -86,7 +86,7 @@ public class ReservationController {
             // 예외 메시지를 모델에 담아서 폼으로 포워드
             model.addAttribute("err", ex.getMessage());
 
-            model.addAttribute("trainers",  userService.getUsersByUsernamePrefix("T%"));
+            model.addAttribute("trainerList",  userService.getUsersByUsernamePrefix("T%"));
             model.addAttribute("schedules", scheduleService.getAllSchedules());
             
             
@@ -111,6 +111,13 @@ public class ReservationController {
                               .getName();
         List<ReservationVO> list = reservationService.getReservationsByUsername(username);
         model.addAttribute("list", list);
+        model.addAttribute("trainerList",  userService.getUsersByUsernamePrefix("T%"));
+   
+        // 4) 전체 스케줄 목록 (scheduleId → username 매핑용)
+        List<ScheduleVO> schedules = scheduleService.getAllSchedules();
+        model.addAttribute("schedules", schedules);
+        
+        
         return "reservation/myList";
     }
     

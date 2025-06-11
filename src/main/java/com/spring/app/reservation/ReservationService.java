@@ -38,11 +38,29 @@ public class ReservationService {
 
 	@Transactional
 	public void reserve(ReservationVO vo) {
+		String username = vo.getUsername();
+		
 		
 		 if (reservationDAO.countByUserAndSchedule(vo.getUsername(), vo.getScheduleId()) > 0) {
 	            throw new IllegalStateException("이미 이 일정에 예약하셨습니다.");
 	        }		
-		
+		 
+		 
+		 LocalDateTime now = LocalDateTime.now();
+		 int year = now.getYear();
+		 int month = now.getMonthValue();
+		 int monthlyCount = reservationDAO.countByUsernameAndMonth(username, year, month);
+		 if (monthlyCount >= 15) {
+			 
+			 throw new IllegalStateException(
+					 "한 달 최대 15회까지 예약 가능 (현재 "+ monthlyCount + "회 예약됨)"
+					 );
+			 
+		 }
+		 
+		 
+		 
+		 	
 		
 		vo.setCreatedAt(LocalDateTime.now());
 		reservationDAO.insertReservation(vo);
@@ -78,5 +96,6 @@ public class ReservationService {
 		}).collect(Collectors.toList());
 
 	}
+	
 
 }

@@ -34,6 +34,12 @@ public interface ReservationDAO {
             @Param("scheduleId") Long scheduleId
         );
     
+    // 한 달 동안 user가 한 예약 수 
+    int countByUsernameAndMonth(@Param ("username") String username,
+    							@Param ("year") int year,
+    							@Param ("month") int month);
+    
+    
     
     
     

@@ -84,6 +84,19 @@
   </select>
 
 
+	<!--  -->
+	<select id="countByUsernameAndMonth" resultType="int">
+	
+		SELECT COUNT(*)
+		FROM RESERVATION
+		WHERE USERNAME =#{username}
+		AND YEAR(CREATED_AT) =#{year}
+		AND MONTH(CREATED_AT) =#{month}
+		AND CANCELED_AT IS NULL 
+	</select>
+
+
+
 
   
   
