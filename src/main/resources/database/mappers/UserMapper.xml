@@ -24,6 +24,10 @@
   		SELECT * FROM USER WHERE EMAIL=#{email}
   	</select>
   	
+  	  <select id="getUserByPhone" resultType="UserVO">
+  		SELECT * FROM USER WHERE PHONE=#{phone}
+  	</select>
+  	
   	<update id="changePw" parameterType="UserVO">
   		UPDATE USER SET PASSWORD=#{password} WHERE USERNAME=#{username}
   	</update>

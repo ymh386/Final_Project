@@ -46,7 +46,7 @@
 											<input id="rememberId" type="checkbox"><label> id 저장</label>
 											<div class="d-flex justify-content-center gap-3 mb-3">
 											<a class="nav-link p-0" href="/user/findId">아이디 찾기</a>
-											<a class="nav-link p-0" href="/user/findPw">비밀번호 찾기</a>
+											<a class="nav-link p-0" href="/user/findPwByEmail">비밀번호 찾기</a>
 											</div>
 											<div style="margin: 10px auto;">
 												<button style="width: 400px; margin-top: 10px; margin-bottom: 10px;" class="btn btn-dark d-block mx-auto" type="submit">login</button>
