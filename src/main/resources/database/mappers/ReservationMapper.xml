@@ -28,17 +28,27 @@
   </select>
   
   
-    <!-- 3) 새 예약 삽입 -->
-  <insert id="insertReservation"
-          parameterType="ReservationVO"
-          useGeneratedKeys="true"
-          keyProperty="reservationId">
-    INSERT INTO RESERVATION
-      (SCHEDULE_ID, USERNAME, FACILITY_ID, CREATED_AT)
-    VALUES
-      (#{scheduleId}, #{username}, #{facilityId}, #{createdAt})
-  </insert>
-  
+<insert id="insertReservation"
+        parameterType="com.spring.app.reservation.ReservationVO"
+        useGeneratedKeys="true"
+        keyProperty="reservationId">
+  <!-- 구독 활성 사용자만 INSERT -->
+  INSERT INTO RESERVATION
+    (USERNAME, SCHEDULE_ID, FACILITY_ID, CREATED_AT)
+  SELECT
+    #{username},
+    #{scheduleId},
+    #{facilityId},
+    NOW()
+  FROM DUAL
+  WHERE EXISTS (
+    SELECT 1
+      FROM MEMBER_SUBSCRIPT
+     WHERE USERNAME         = #{username}
+       AND SUBSCRIPT_STATUS = 'ACTIVE'
+       AND CURDATE() BETWEEN START_DATE AND END_DATE
+  )
+</insert>
   
     <!-- 4) 예약 취소 처리 -->
   <update id="cancelReservation"

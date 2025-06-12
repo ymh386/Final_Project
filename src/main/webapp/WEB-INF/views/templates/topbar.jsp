@@ -32,8 +32,9 @@
             		<h6>${user.name}님, 환영합니다!</h6>
 					<li><a class="dropdown-item"  href="/user/mypage">내 정보</a></li>
 					<li><a class="dropdown-item"  href="/user/logout">로그아웃</a></li>
+				 <li><a class="dropdown-item"  href="/schedule/page">일정</a></li>
+					
               <sec:authorize access="hasRole('TRAINER')">
-                  <li><a class="dropdown-item"  href="/schedule/page">일정관리</a></li>
 			    <li><a class="dropdown-item"  href="${pageContext.request.contextPath}/attendance/page">근태관리</a></li>
 			  </sec:authorize>
 			  
