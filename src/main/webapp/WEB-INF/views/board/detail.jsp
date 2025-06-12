@@ -14,6 +14,13 @@
     .files div, .comments div { margin-bottom: 5px; }
     .actions button, .actions a { margin-right: 8px; }
     #commentArea { width: 100%; height: 60px; }
+
+    .heart-btn {
+      font-size: 24px;
+      border: none;
+      background: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -24,18 +31,21 @@
     작성일: <fmt:formatDate value="${detail.boardDate}" pattern="yyyy-MM-dd HH:mm:ss"/>
   </div>
 
-  <div class="actions">
-    <!-- 좋아요/취소 토글 -->
-    좋아요 (<span id="likeCount">${likeCount}</span>)
-    <c:choose>
-      <c:when test="${isLiked}">
-        <button id="unlikeBtn">좋아요 취소</button>
-      </c:when>
-      <c:otherwise>
-        <button id="likeBtn">좋아요</button>
-      </c:otherwise>
-    </c:choose>
-  </div>
+  <!-- 좋아요 버튼 -->
+  <form action="<c:url value='/interaction/like'/>" method="post" style="display:inline;">
+    <input type="hidden" name="boardNum" value="${detail.boardNum}"/>
+    <button type="submit" class="heart-btn">
+      <c:choose>
+        <c:when test="${isLiked}">
+          ❤️
+        </c:when>
+        <c:otherwise>
+          🤍
+        </c:otherwise>
+      </c:choose>
+    </button>
+  </form>
+  <span>좋아요 수: ${likeCount}</span>
 
   <hr/>
 
@@ -43,6 +53,7 @@
     <c:out value="${detail.boardContents}"/>
   </div>
 
+  <!-- 첨부파일 -->
   <c:if test="${not empty files}">
     <div class="files">
       <strong>첨부파일:</strong>
@@ -60,6 +71,7 @@
 
   <hr/>
 
+  <!-- 댓글 목록 -->
   <div class="comments">
     <strong>댓글:</strong>
     <c:forEach var="cmt" items="${comments}">
@@ -74,16 +86,17 @@
   </div>
 
   <!-- 댓글 작성 -->
-  <div>
-    <textarea id="commentArea" placeholder="댓글을 입력하세요"></textarea><br/>
-    <button id="addCommentBtn">댓글 작성</button>
-  </div>
+  <form action="<c:url value='/comments/add'/>" method="post">
+    <input type="hidden" name="boardNum" value="${detail.boardNum}"/>
+    <textarea id="commentArea" name="commentContents" placeholder="댓글을 입력하세요"></textarea><br/>
+    <button type="submit">댓글 작성</button>
+  </form>
 
   <hr/>
 
+  <!-- 버튼: 목록 / 수정 / 삭제 -->
   <div class="actions">
     <a href="<c:url value='/board/list'/>">목록</a>
-    <!-- 수정/삭제 버튼은 작성자 자신일 때만 보여주세요 -->
     <c:if test="${detail.userName == sessionScope.userName}">
       <a href="<c:url value='/board/update'>
                  <c:param name='boardNum' value='${detail.boardNum}'/>
@@ -94,8 +107,6 @@
          onclick="return confirm('정말 삭제하시겠습니까?');">삭제</a>
     </c:if>
   </div>
-
-  <!-- (필요시 AJAX 스크립트 추가) -->
 
 </body>
 </html>
