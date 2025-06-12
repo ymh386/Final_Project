@@ -32,18 +32,10 @@ public class HomeController {
 		
 		
 		if (userVO!=null) {
-			List<MemberRoleVO> list = userService.getRole(userVO.getUsername());
-			for (MemberRoleVO memberRoleVO : list) {
-				if (memberRoleVO.getRoleNum()==2) {
-					return "index";
-				}else {
 					String username = userVO.getUsername();
 					int result = subscriptService.getRemainDays(username);
-					model.addAttribute("result", result);									
-				}
-			}
+					model.addAttribute("result", result);
 		}
-		
 		
 		return "index";
 	}

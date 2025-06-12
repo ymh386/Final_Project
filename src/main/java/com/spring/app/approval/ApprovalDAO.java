@@ -39,5 +39,22 @@ public interface ApprovalDAO {
 	
 	//서명/도장 삭제
 	public int deleteSign(UserVO userVO) throws Exception;
+	
+	//현재승인자 승인상태 업데이트
+	public int updateApprovalStatus(ApprovalVO approvalVO) throws Exception;
+	
+	//다음승인자 승인상태 업데이트
+	public int updateChildStatus(ApprovalVO approvalVO) throws Exception;
+	
+	//최종 승인시 결재상태 업데이트
+	public int updateDocumentStatus(DocumentVO documentVO) throws Exception;
 
+	//결재문서별로 승인리스트 조회
+	public List<ApprovalVO> getListByDocument(ApprovalVO approvalVO) throws Exception;
+	
+	//승인정보 디테일 조회
+	public ApprovalVO getApprovalDetail(ApprovalVO approvalVO) throws Exception;
+	
+	//ContentHTML 업데이트
+	public int updateContent(DocumentVO documentVO) throws Exception;
 }
