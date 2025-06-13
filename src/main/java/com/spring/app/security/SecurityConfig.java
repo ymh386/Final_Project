@@ -79,6 +79,8 @@ public class SecurityConfig {
 				.requestMatchers("/schedule/**").hasAnyAuthority("APPROVE", "CANCEL")
 				.requestMatchers("/approval/**").hasAnyAuthority("APPROVE", "CANCEL")
 				.requestMatchers("/subscript/list").access(new WebExpressionAuthorizationManager("!hasRole('TRAINER')"))
+				.requestMatchers("/friend/**").hasAnyAuthority("APPROVE", "CANCEL")
+				.requestMatchers("/chat/**").hasAnyAuthority("APPROVE", "CANCEL")
 				.anyRequest().permitAll();
 		})
 		.formLogin(login->login.disable())

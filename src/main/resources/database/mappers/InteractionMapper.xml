@@ -13,7 +13,7 @@
   </resultMap>
 
   <!-- 1) 좋아요 추가 -->
-  <insert id="addLike" parameterType="com.spring.app.board.interaction.InteractionVO">
+  <insert id="addInteractin" parameterType="com.spring.app.board.interaction.InteractionVO">
     INSERT INTO BOARD_INTERACTION
       (USERNAME, BOARD_NUM, TYPE)
     VALUES
@@ -21,7 +21,7 @@
   </insert>
 
   <!-- 2) 좋아요 삭제 -->
-  <delete id="removeLike" parameterType="com.spring.app.board.interaction.InteractionVO">
+  <delete id="removeInteraction" parameterType="com.spring.app.board.interaction.InteractionVO">
     DELETE FROM BOARD_INTERACTION
     WHERE USERNAME  = #{userName}
       AND BOARD_NUM = #{boardNum}

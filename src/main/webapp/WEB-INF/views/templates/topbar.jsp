@@ -11,14 +11,14 @@
     <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
         <sec:authorize access="isAuthenticated()">
             <sec:authorize access="!hasRole('TRAINER')">
-            <h3 class="navbar-brand me-3">구독권 잔여 일자 : ${result} 일</h3>
+            <h3 class="navbar-brand me-3">구독권 잔여 일자 : ${remainDay} 일</h3>
             <sec:authorize access="hasAuthority('CANCEL')">
                 <a class="btn btn-light me-3" href="/subscript/restart">구독 재개</a>
             </sec:authorize>
             <sec:authorize access="hasAuthority('APPROVE')">
                 <a class="btn btn-light me-3" href="/subscript/cancel">구독 취소</a>
             </sec:authorize>
-            <c:if test="${result eq 0}">
+            <c:if test="${remainDay eq 0}">
                 <a class="btn btn-light me-3"  href="/subscript/list">구독</a>
             </c:if>
             </sec:authorize>
@@ -32,9 +32,11 @@
             		<h6>${user.name}님, 환영합니다!</h6>
 					<li><a class="dropdown-item"  href="/user/mypage">내 정보</a></li>
 					<li><a class="dropdown-item"  href="/user/logout">로그아웃</a></li>
+				 <li><a class="dropdown-item"  href="/schedule/page">일정</a></li>
+					
               <sec:authorize access="hasRole('TRAINER')">
-                  <li><a class="dropdown-item"  href="/schedule/page">일정관리</a></li>
 			    <li><a class="dropdown-item"  href="${pageContext.request.contextPath}/attendance/page">근태관리</a></li>
+			    <li><a class="dropdown-item"  href="${pageContext.request.contextPath}/equipment/main">비품 신고</a></li>
 			  </sec:authorize>
 			  
 			  <sec:authorize access="hasRole('MEMBER')">
@@ -42,6 +44,7 @@
 			  </sec:authorize>
 	  		  <sec:authorize access="hasRole('ADMIN')">
 				<li><a class="dropdown-item"  href="/admin/main">관리자</a></li>
+				<li><a class="dropdown-item"  href="${pageContext.request.contextPath}/equipment/admin">비품 관리</a></li>
 			  </sec:authorize>
             </sec:authorize>      
            	<sec:authorize access="!isAuthenticated()">

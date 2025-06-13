@@ -17,7 +17,7 @@
                     <div class="container">
                         <div class="row justify-content-center">
                             <div class="col-lg-5">
-                                <div class="card shadow-lg border-0 rounded-lg mt-5">
+                                <div class="card shadow-lg border-0 rounded-lg">
                                     <div class="card-header"><h3 class="text-center font-weight-light my-4">Login</h3></div>
                                     <div class="card-body">
 										    <ul class="nav nav-tabs">
@@ -43,12 +43,22 @@
 											<input name="loginType" type="hidden" value="trainer">
 											<input id="autoLogin" type="checkbox"><label for="inputEmail">자동 로그인</label>
 											<input id="autoFlag" name="auto" type="hidden" value="false">
-											<input id="rememberId" type="checkbox"><label> id 저장</label><br>
-											<a href="/oauth2/authorization/kakao?redirect=trainer"><img src="/img/kakao.png"></a>
-											<a href="/oauth2/authorization/google?redirect=trainer"><img src="/img/1x.png"></a><br>
+											<input id="rememberId" type="checkbox"><label> id 저장</label>
+											<div class="d-flex justify-content-center gap-3 mb-3">
+											<a class="nav-link p-0" href="/user/findId">아이디 찾기</a>
+											<a class="nav-link p-0" href="/user/findPwByEmail">비밀번호 찾기</a>
+											</div>
 											<div style="margin: 10px auto;">
-												<button style="width: 400px; margin-bottom: 10px;" class="btn btn-dark d-block mx-auto" type="submit">login</button>
+												<button style="width: 400px; margin-top: 10px; margin-bottom: 10px;" class="btn btn-dark d-block mx-auto" type="submit">login</button>
 												<button style="width: 400px;" class="btn btn-dark d-block mx-auto" type="submit">join</button>
+											</div>
+											<div class="d-flex justify-content-center gap-3">
+											<a href="/oauth2/authorization/kakao?redirect=trainer" class="d-block">
+												<img src="/img/kakao.png" style="height:45px;" alt="카카오 로그인"/>
+											</a>
+											<a href="/oauth2/authorization/google?redirect=trainer" class="d-block">
+												<img src="/img/1x.png" style="height:45px;" alt="구글 로그인"/>
+											</a>
 											</div>
 											
 										</form>

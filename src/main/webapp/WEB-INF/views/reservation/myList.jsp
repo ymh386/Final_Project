@@ -101,5 +101,6 @@
   </table>
 
   <a class="button" href="${pageContext.request.contextPath}/reservation/book">예약하기</a>
+  <a class="button" href="${pageContext.request.contextPath}/">홈 화면</a>
 </body>
 </html>

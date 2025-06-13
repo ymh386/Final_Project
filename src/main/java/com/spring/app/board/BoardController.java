@@ -1,27 +1,40 @@
+
 // src/main/java/com/spring/app/board/BoardController.java
 package com.spring.app.board;
 
-import java.util.List;
 
+import java.io.File;
+import java.io.FileInputStream;
+
+import java.io.OutputStream;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 
 import com.spring.app.board.comment.CommentVO;
 import com.spring.app.board.interaction.InteractionVO;
 import com.spring.app.home.util.Pager;
+import com.spring.app.user.UserVO;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Controller
 @RequestMapping("/board")
 public class BoardController {
 
     @Autowired
     private BoardService boardService;
-
+    
     /** 1) 목록 + 페이징 + 검색 (/board/, /board/index) */
     @GetMapping({"/", "/index"})
     public String index(
@@ -61,15 +74,52 @@ public class BoardController {
         return "board/list";
     }
     
+ // 게시글 작성 폼 페이지
+    @GetMapping("/add")
+    public String add() {
+        return "board/add";
+    }
 
-    /** 2) 상세 (/board/detail) */
+    // 게시글 작성 처리
+    @PostMapping("/add")
+    public String add(@ModelAttribute BoardVO boardVO,
+                      @RequestParam(value="files", required=false) MultipartFile[] files,
+                      @AuthenticationPrincipal UserVO user) throws Exception {
+        
+        if (user == null) {
+            throw new RuntimeException("로그인이 필요합니다.");
+        }
+        
+        // 작성자 정보 설정
+        boardVO.setUserName(user.getUsername());
+        
+        // 게시글 저장
+        int result = boardService.add(boardVO, files);
+        
+        if (result > 0) {
+            return "redirect:/board/detail?boardNum=" + boardVO.getBoardNum();
+        } else {
+            throw new RuntimeException("게시글 작성에 실패했습니다.");
+        }
+    }
+
+    
+
+    /**
+     * 상세 보기: 조회수(hit) 비동기 업데이트는 /hitUpdateAsync 로 분리
+     */
     @GetMapping("/detail")
     public String detail(
             @RequestParam("boardNum") Long boardNum,
-            Model m,
-            @AuthenticationPrincipal User user) throws Exception {
+            @AuthenticationPrincipal UserVO user,
+            Model m
+    ) throws Exception {
+        // 기존에는 여기서 hitUpdate() 했는데, AJAX로 분리했습니다.
 
+        // 상세 데이터 조회
         BoardVO detail = boardService.getDetail(new BoardVO(boardNum));
+
+        // 좋아요 정보
         long likeCount = 0;
         boolean isLiked = false;
         if (detail != null) {
@@ -83,135 +133,156 @@ public class BoardController {
             }
         }
 
-        m.addAttribute("detail",    detail);
-        m.addAttribute("files",     boardService.getFileList(new BoardVO(boardNum)));
-        m.addAttribute("comments",  boardService.getCommentList(new BoardVO(boardNum)));
+        m.addAttribute("detail", detail);
+        m.addAttribute("files", boardService.getFileList(new BoardVO(boardNum)));
+        m.addAttribute("comments", boardService.getCommentList(new BoardVO(boardNum)));
         m.addAttribute("likeCount", likeCount);
-        m.addAttribute("isLiked",   isLiked);
+        m.addAttribute("isLiked", isLiked);
+
         return "board/detail";
     }
 
-    /** 3) 등록 폼 (/board/add) */
-    @GetMapping("/add")
-    public String addForm(
-            @AuthenticationPrincipal User user,
-            Model m) {
+    /**
+     * AJAX용 조회수 증가 → 업데이트된 조회수(long) 반환
+       /**
+     * AJAX 조회수 증가 + 증가된 값을 바로 리턴
+     */
+    @PostMapping("/hitUpdateAsync")
+    @ResponseBody
+    public String hitUpdateAsync(@RequestParam Long boardNum) throws Exception {
+        boardService.hitUpdate(new BoardVO(boardNum));
+        // 증가된 조회수를 다시 읽어서 리턴
+        BoardVO vo = boardService.getDetail(new BoardVO(boardNum));
+        return String.valueOf(vo.getBoardHits());
+    }
+    /**
+     * 좋아요 추가 → 다시 detail 리다이렉트
+     */
+    @PostMapping("/addInteraction")
+    public String addInteraction(
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserVO user,
+            RedirectAttributes rttr
+    ) throws Exception {
+        if (user == null) {
+            throw new RuntimeException("로그인이 필요합니다.");
+        }
+        Long boardNum = Long.valueOf(request.getParameter("boardNum"));
+        InteractionVO vo = new InteractionVO();
+        vo.setBoardNum(boardNum);
+        vo.setUserName(user.getUsername());
+        vo.setType("LIKE");
 
-        // 로그인 안 된 경우에만 메시지
-//        if (user == null) {
-//            m.addAttribute("msg",  "글 작성은 로그인 후에 가능합니다.");
-//            m.addAttribute("path", "/user/login");
-//            return "commons/result";
-//        }
+        boardService.addInteraction(vo);
 
-        // 로그인 된 경우만 등록 폼으로
-        m.addAttribute("boardVO", new BoardVO());
-        return "board/add";
+        rttr.addAttribute("boardNum", boardNum);
+        return "redirect:/board/detail";
     }
 
-    /** 4) 등록 처리 (POST /board/add) */
-    @PostMapping("/add")
-    public String add(
-            @ModelAttribute BoardVO vo,
-            @RequestParam(value="files", required=false) MultipartFile[] files,
-            @AuthenticationPrincipal User user,
-            Model m) throws Exception {
-//
-//        // 로그인 안 된 경우에만 메시지
-//        if (user == null) {
-//            m.addAttribute("msg",  "글 작성은 로그인 후에 가능합니다.");
-//            m.addAttribute("path", "/user/login");
-//            return "commons/result";
-//        }
+    /**
+     * 좋아요 취소 → 다시 detail 리다이렉트
+     */
+    @PostMapping("/removeInteraction")
+    public String removeInteraction(
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserVO user,
+            RedirectAttributes rttr
+    ) throws Exception {
+        if (user == null) {
+            throw new RuntimeException("로그인이 필요합니다.");
+        }
+        Long boardNum = Long.valueOf(request.getParameter("boardNum"));
+        InteractionVO vo = new InteractionVO();
+        vo.setBoardNum(boardNum);
+        vo.setUserName(user.getUsername());
+        vo.setType("LIKE");
 
-        // 첨부파일 개수 제한
-        if (files != null && files.length > 5) {
-            m.addAttribute("msg",  "첨부파일은 최대 5개까지 가능합니다.");
-            m.addAttribute("path", "/board/add");
-            return "commons/result";
+        boardService.removeInteraction(vo);
+
+        rttr.addAttribute("boardNum", boardNum);
+        return "redirect:/board/detail";
+    }
+
+
+    @PostMapping("/addComment")
+    public String addComment(
+            @RequestParam("boardNum") Long boardNum,
+            @RequestParam("commentContents") String commentContents,
+            @AuthenticationPrincipal UserVO user,
+            RedirectAttributes rttr
+    ) throws Exception {
+        if (user == null) {
+            throw new RuntimeException("로그인이 필요합니다.");
         }
 
-        // 로그인된 사용자명 세팅 후 저장
+        CommentVO vo = new CommentVO();
+        vo.setBoardNum(boardNum);
+        vo.setCommentContents(commentContents);
         vo.setUserName(user.getUsername());
-        boardService.add(vo, files != null ? files : new MultipartFile[0]);
-        return "redirect:/board/index";
-    }
 
-    /** 5) 로그인 폼 포워딩 (/board/login) */
-    @GetMapping("/login")
-    public String loginFromBoard() {
-        return "user/login";
-    }
-
-    /** 6) 수정 처리 (POST /board/update) */
-    @PostMapping("/update")
-    public String update(BoardVO vo) throws Exception {
-        boardService.update(vo);
-        return "redirect:/board/detail?boardNum=" + vo.getBoardNum();
-    }
-
-    /** 7) 삭제 처리 (POST /board/delete) */
-    @PostMapping("/delete")
-    public String delete(BoardVO vo) throws Exception {
-        boardService.delete(vo);
-        return "redirect:/board/index";
-    }
-
-    /** 8) 파일 다운로드 (/board/fileDown) */
-    @GetMapping("/fileDown")
-    public String fileDown(BoardFileVO fileVO, Model m) throws Exception {
-        m.addAttribute("fileVO", boardService.getFileDetail(fileVO));
-        return "fileDownView";
-    }
-
-    /** 9) 좋아요 등록 (Ajax POST /board/like) */
-    @PostMapping("/like")
-    @ResponseBody
-    public Long addLike(
-            @RequestBody InteractionVO vo,
-            @AuthenticationPrincipal User user) throws Exception {
-
-        if (user == null) throw new RuntimeException("로그인이 필요합니다.");
-        vo.setUserName(user.getUsername());
-        vo.setType("LIKE");
-        boardService.addInteraction(vo);
-        return boardService.getInteractionCount(vo);
-    }
-
-    /** 10) 좋아요 취소 (Ajax POST /board/unlike) */
-    @PostMapping("/unlike")
-    @ResponseBody
-    public Long removeLike(
-            @RequestBody InteractionVO vo,
-            @AuthenticationPrincipal User user) throws Exception {
-
-        if (user == null) throw new RuntimeException("로그인이 필요합니다.");
-        vo.setUserName(user.getUsername());
-        vo.setType("LIKE");
-        boardService.removeInteraction(vo);
-        return boardService.getInteractionCount(vo);
-    }
-
-    /** 11) 댓글 등록 (Ajax POST /board/commentAdd) */
-    @PostMapping("/commentAdd")
-    @ResponseBody
-    public List<CommentVO> commentAdd(
-            @RequestBody CommentVO vo,
-            @AuthenticationPrincipal User user) throws Exception {
-
-        if (user == null) throw new RuntimeException("로그인이 필요합니다.");
-        vo.setUserName(user.getUsername());
+        // 댓글 등록
         boardService.addComment(vo);
-        BoardVO bvo = new BoardVO(vo.getBoardNum());
-        return boardService.getCommentList(bvo);
+
+        // 상세보기로 돌아갈 때 boardNum 쿼리스트링에 포함
+        rttr.addAttribute("boardNum", boardNum);
+        return "redirect:/board/detail";
     }
 
-    /** 12) 댓글 삭제 (Ajax POST /board/commentDelete) */
-    @PostMapping("/commentDelete")
+
+    @PostMapping("/deletecomment")
     @ResponseBody
-    public List<CommentVO> commentDelete(@RequestBody CommentVO vo) throws Exception {
+    public List<CommentVO> deleteComment(@RequestParam("commentNum") Long commentNum,
+                                         @RequestParam("boardNum") Long boardNum) throws Exception {
+        CommentVO vo = new CommentVO();
+        vo.setCommentNum(commentNum);
+        vo.setBoardNum(boardNum);
         boardService.deleteComment(vo);
-        BoardVO bvo = new BoardVO(vo.getBoardNum());
-        return boardService.getCommentList(bvo);
+        return boardService.getCommentList(new BoardVO(boardNum));
+    }
+
+    @Value("${board.file.path}")
+    private String uploadDir;
+
+    /**
+     * 파일 다운로드
+     * GET /board/fileDown?fileNum={fileNum}
+     */
+    @GetMapping("/fileDown")
+    public void fileDown(
+            @RequestParam("fileNum") Long fileNum,
+            HttpServletResponse response
+    ) throws Exception {
+        BoardFileVO param = new BoardFileVO();
+        param.setFileNum(fileNum);
+        BoardFileVO file = boardService.getFileDetail(param);
+        if (file == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        File diskFile = new File(uploadDir, file.getFileName());
+        if (!diskFile.exists()) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        // set headers
+        response.setContentType("application/octet-stream");
+        String encoded = java.net.URLEncoder.encode(file.getOldName(), "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + encoded);
+        response.setContentLengthLong(diskFile.length());
+
+        // stream file
+        try (FileInputStream in = new FileInputStream(diskFile);
+             OutputStream out = response.getOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = in.read(buffer)) != -1) {
+                out.write(buffer, 0, len);
+            }
+            
+        }
     }
 }
+    
+

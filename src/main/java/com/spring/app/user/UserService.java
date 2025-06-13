@@ -69,6 +69,11 @@ public class UserService implements UserDetailsService {
 		return result;
 	}
 
+	public int giveTrainerRole(MemberRoleVO memberRoleVO) throws Exception {
+		int result = userDAO.giveTrainerRole(memberRoleVO);
+		
+		return result;
+	}
 	
 	public Long getTrainerCode() throws Exception {
 		Long code = userDAO.getTrainerCode();

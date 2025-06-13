@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.spring.app.chat.ChatDAO">
+  
+  	<select id="getRoomList" resultMap="roomMap">
+		SELECT *
+		  FROM CHAT_ROOM CR
+		 INNER JOIN CHAT_ROOM_MEMBER CRM
+		 USING (ROOM_ID)
+		 WHERE USERNAME=#{username}
+		
+  	</select>
+  	
+  	<resultMap type="ChatRoomVO" id="roomMap">
+  		<id column="ROOM_ID" property="roomId"/>
+  		<result column="ROOM_NAME" property="roomName"/>
+  		<result column="ROOM_TYPE" property="roomType"/>
+  		<result column="CREATED_AT" property="createdAt"/>
+		<association javaType="RoomMemberVO" property="roomMemberVO">
+			<id column="USERNAME" property="username"/>
+			<result column="JOINED_AT" property="joinedAt"/>
+			<result column="LAST_READ_MESSAGE" property="lastReadMessage"/>
+		</association>
+  	</resultMap>
+  	
+  	<insert id="makeChat" parameterType="ChatRoomVO" useGeneratedKeys="true" keyProperty="roomId">
+  		INSERT INTO CHAT_ROOM (ROOM_NAME, ROOM_TYPE, CREATED_AT) VALUES (#{roomName}, '단일 채팅', NOW())
+  	</insert>
+  	
+  	<insert id="makeRoom" parameterType="ChatRoomVO" useGeneratedKeys="true" keyProperty="roomId">
+  		INSERT INTO CHAT_ROOM (ROOM_NAME, ROOM_TYPE, CREATED_AT) VALUES (#{roomName}, '그룹 채팅', NOW())
+  	</insert>
+  	
+  	<insert id="insertMember" parameterType="RoomMemberVO">
+  		INSERT INTO CHAT_ROOM_MEMBER VALUES (#{roomId}, #{username}, NOW(), #{lastReadMessage})
+  	</insert>
+  	
+  </mapper>

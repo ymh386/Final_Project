@@ -2,7 +2,6 @@
 package com.spring.app.board;
 
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,8 +17,6 @@ import com.spring.app.files.FileManager;
 @Transactional(rollbackFor = Exception.class)
 public class BoardServiceImpl implements BoardService {
 
-	  private static final long QNA_CATEGORY_ID = 2L;
-	
     @Autowired
     private BoardDAO boardDAO;
 
@@ -45,11 +42,10 @@ public class BoardServiceImpl implements BoardService {
         if (vo != null) {
             vo.setBoardFileVOs(boardDAO.getFileList(boardVO));
             vo.setCommentVOs(boardDAO.getCommentList(boardVO));
-
-            InteractionVO likeQuery = new InteractionVO();
-            likeQuery.setBoardNum(boardVO.getBoardNum());
-            likeQuery.setType("LIKE");
-            vo.setLikeCount(boardDAO.getInteractionCount(likeQuery));
+            InteractionVO iq = new InteractionVO();
+            iq.setBoardNum(boardVO.getBoardNum());
+            iq.setType("LIKE");
+            vo.setLikeCount(boardDAO.getInteractionCount(iq));
         }
         return vo;
     }
@@ -58,16 +54,13 @@ public class BoardServiceImpl implements BoardService {
     public int add(BoardVO boardVO, MultipartFile[] files) throws Exception {
         int result = boardDAO.add(boardVO);
         if (result > 0 && files != null && fileManager != null) {
-            for (int i = 0; i < files.length && i < 5; i++) {
-                MultipartFile f = files[i];
+            for (MultipartFile f : files) {
                 if (f == null || f.isEmpty()) continue;
-                String newName = fileManager.saveFile(filePath, f);
+                String fileName = fileManager.saveFile(filePath, f);
                 BoardFileVO fileVO = new BoardFileVO();
                 fileVO.setBoardNum(boardVO.getBoardNum());
-                fileVO.setOriName(f.getOriginalFilename());
-                fileVO.setNewName(newName);
-                fileVO.setFilePath(filePath);
-                fileVO.setFileSize(f.getSize());
+                fileVO.setFileName(fileName);
+                fileVO.setOldName(f.getOriginalFilename());
                 boardDAO.addFile(fileVO);
             }
         }
@@ -84,50 +77,47 @@ public class BoardServiceImpl implements BoardService {
         return boardDAO.delete(boardVO);
     }
 
-    @Override
     public void hitUpdate(BoardVO boardVO) throws Exception {
-        boardDAO.hitUpdate(boardVO);
+        boardDAO.updateBoardHits(boardVO.getBoardNum());
     }
 
-    @Override
     public List<BoardFileVO> getFileList(BoardVO boardVO) throws Exception {
         return boardDAO.getFileList(boardVO);
     }
 
-    @Override
     public BoardFileVO getFileDetail(BoardFileVO fileVO) throws Exception {
         return boardDAO.getFileDetail(fileVO);
     }
 
-    @Override
     public int deleteFile(BoardFileVO fileVO) throws Exception {
         return boardDAO.deleteFile(fileVO);
     }
 
-    @Override
     public int addInteraction(InteractionVO vo) throws Exception {
-        if (boardDAO.isLiked(vo) > 0) return 0;
-        return boardDAO.addInteraction(vo);
+        int cnt = boardDAO.addInteraction(vo);
+        boardDAO.increaseLikeCount(vo.getBoardNum());
+        return cnt;
     }
 
-    @Override
     public int removeInteraction(InteractionVO vo) throws Exception {
-        return boardDAO.removeInteraction(vo);
+        int cnt = boardDAO.removeInteraction(vo);
+        boardDAO.decreaseLikeCount(vo.getBoardNum());
+        return cnt;
     }
 
-    @Override
     public long getInteractionCount(InteractionVO vo) throws Exception {
         return boardDAO.getInteractionCount(vo);
     }
 
-    @Override
     public boolean isLiked(InteractionVO vo) throws Exception {
-        return boardDAO.isLiked(vo) > 0;
+        return boardDAO.isLiked(vo);
     }
 
     @Override
     public int addComment(CommentVO vo) throws Exception {
-        return boardDAO.addComment(vo);
+        int cnt = boardDAO.addComment(vo);
+        boardDAO.increaseCommentCount(vo.getBoardNum());
+        return cnt;
     }
 
     @Override
@@ -137,23 +127,23 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public int deleteComment(CommentVO vo) throws Exception {
-        return boardDAO.deleteComment(vo);
+        int cnt = boardDAO.deleteComment(vo);
+        boardDAO.decreaseCommentCount(vo.getBoardNum());
+        return cnt;
     }
 
-    @Override
     public int updateSecret(BoardVO boardVO) throws Exception {
         return boardDAO.updateSecret(boardVO);
     }
 
-    @Override
     public boolean checkSecret(BoardVO boardVO) throws Exception {
         return boardDAO.checkSecret(boardVO);
     }
 
-    @Override
     public boolean validateSecret(BoardVO boardVO) throws Exception {
         BoardVO stored = boardDAO.getDetail(boardVO);
-        if (stored == null || stored.getSecretPassword() == null) return false;
-        return stored.getSecretPassword().equals(boardVO.getSecretPassword());
+        return stored != null
+            && stored.getSecretPassword() != null
+            && stored.getSecretPassword().equals(boardVO.getSecretPassword());
     }
 }

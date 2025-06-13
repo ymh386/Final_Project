@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.spring.app.user.friend.FriendDAO">
+  
+  <select id="friendList" resultMap="friendMap">
+		SELECT
+		  u.USERNAME
+		FROM FRIENDSHIP f
+		JOIN USER u
+		  ON u.USERNAME = CASE
+		                    WHEN f.USER1_ID = #{username} THEN f.USER2_ID
+		                    ELSE f.USER1_ID
+		                  END
+		WHERE f.USER1_ID = #{username} OR f.USER2_ID = #{username}
+  </select>
+  
+  <delete id="deleteFriend" parameterType="map">
+  		DELETE FROM FRIENDSHIP
+		WHERE (USER1_ID = #{user1} AND USER2_ID = #{user2})
+		   OR (USER1_ID = #{user2} AND USER2_ID = #{user1});
+  </delete>
+  
+  <resultMap type="FriendVO" id="friendMap">
+  	<result property="user2" column="USERNAME"/>
+  </resultMap>
+  
+  <select id="notFriendList" resultType="FriendVO">
+	  SELECT
+	    u.USERNAME AS user2
+	  FROM `USER` u
+	  LEFT JOIN (
+	    SELECT CASE
+	             WHEN f1.USER1_ID = #{username} THEN f1.USER2_ID
+	             ELSE f1.USER1_ID
+	           END AS friend_id
+	      FROM FRIENDSHIP f1
+	     WHERE f1.USER1_ID = #{username}
+	        OR f1.USER2_ID = #{username}
+	  ) fr ON u.USERNAME = fr.friend_id
+	  LEFT JOIN FRIEND_REQUEST r
+	    ON (r.REQUESTER_ID = #{username} AND r.RECEIVER_ID = u.USERNAME)
+	    OR (r.REQUESTER_ID = u.USERNAME AND r.RECEIVER_ID = #{username})
+	  WHERE fr.friend_id IS NULL
+	    AND r.request_id   IS NULL
+	    AND u.USERNAME    != #{username}
+  </select>
+  
+  <select id="receiveList" resultType="FriendRequestVO">
+  	SELECT REQUESTER_ID, CREATED_AT
+  	FROM FRIEND_REQUEST
+  	WHERE RECEIVER_ID=#{username}
+  	AND STATUS='요청 중'
+  </select>
+  
+  <select id="requestList" resultType="FriendRequestVO">
+  	SELECT RECEIVER_ID, CREATED_AT
+  	FROM FRIEND_REQUEST
+  	WHERE REQUESTER_ID=#{username}
+  	AND STATUS='요청 중'
+  </select>
+  
+  <insert id="friendRequest" parameterType="FriendRequestVO">
+  	INSERT INTO FRIEND_REQUEST
+  	 VALUES (NULL, #{requesterId}, #{receiverId}, '요청 중', NOW(), NULL)
+  </insert>
+  
+  <update id="accept" parameterType="FriendRequestVO">
+  	UPDATE FRIEND_REQUEST
+  	 SET STATUS='요청 수락', UPDATED_AT=NOW()
+  	WHERE REQUESTER_ID=#{requesterId} AND RECEIVER_ID=#{receiverId}
+  </update>
+  
+  <insert id="newFriend" parameterType="FriendVO">
+  	INSERT INTO FRIENDSHIP 
+  	 VALUES (#{user1}, #{user2}, NOW())
+  </insert>
+  
+  <delete id="cleanData" parameterType="FriendRequestVO">
+  	DELETE FROM FRIEND_REQUEST
+  	 WHERE (REQUESTER_ID=#{requesterId} AND RECEIVER_ID=#{receiverId})
+  	 OR (REQUESTER_ID=#{receiverId} AND RECEIVER_ID=#{requesterId})
+  </delete>
+  	
+  </mapper>

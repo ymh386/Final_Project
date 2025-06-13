@@ -144,17 +144,22 @@ public class UserController {
 	void findId() throws Exception{}
 	
 	@PostMapping("findId")
-	String findId(@RequestParam("email") String email, UserVO userVO, Model model) throws Exception {
+	String findId(@RequestParam("email") String input, UserVO userVO, Model model) throws Exception {
 		
-		userVO=findInfoService.getUserByEmail(email);
+		String email = findInfoService.getEmail(input);
+		userVO.setEmail(email);
 		
 		if (email!=null) {
+			userVO=findInfoService.getUserByEmail(email);
 			String username = userVO.getUsername();
 			username=findInfoService.maskEmail(username, 3, 6);
 			System.out.println(username);
 			
 			model.addAttribute("result", "아이디는 "+username+"입니다");
 			model.addAttribute("path", "/user/login/login");
+		}else {
+			model.addAttribute("result", "입력한 정보로 가입된 회원이 존재하지 않습니다.");
+			model.addAttribute("path", "/user/findId");
 		}
 		return "commons/result";
 	}
@@ -163,19 +168,23 @@ public class UserController {
 	void findPwByEmail() throws Exception{}
 	
 	@PostMapping("findPwByEmail")
-	String findPwEmail(@RequestParam("email") String email, Model model, UserVO userVO) throws Exception{
+	String findPwEmail(@RequestParam("email") String input, Model model, UserVO userVO) throws Exception{
+		String email = findInfoService.getEmail(input);
 		
-		userVO = findInfoService.getUserByEmail(email);
-		
-		
-		System.out.println(userVO.getUsername());
-		
-		String newPassword=findInfoService.randomPassword(12);
-		userVO.setPassword(encoder.encode(newPassword));
-		findInfoService.changePw(userVO);
-		findInfoService.findPwByEmail(email, newPassword);
-		
-		model.addAttribute("result", "입력하신 이메일로 임시 비밀번호를 발송했습니다.");
+		if (email!=null) {
+			userVO = findInfoService.getUserByEmail(email);
+			
+			System.out.println(userVO.getUsername());
+			
+			String newPassword=findInfoService.randomPassword(12);
+			userVO.setPassword(encoder.encode(newPassword));
+			findInfoService.changePw(userVO);
+			findInfoService.findPwByEmail(email, newPassword);
+			
+			model.addAttribute("result", "입력하신 이메일로 임시 비밀번호를 발송했습니다.");
+		}else {
+			model.addAttribute("result", "입력한 정보로 가입된 회원이 존재하지 않습니다.");
+		}
 		
 		List<MemberRoleVO> list = userService.getRole(userVO.getUsername());
 		
@@ -186,8 +195,7 @@ public class UserController {
 				model.addAttribute("path", "/user/login/login");				
 			}
 		}
-		
-		
+				
 		return "commons/result";
 	}
 	
@@ -195,17 +203,24 @@ public class UserController {
 	void findPwByPhone() throws Exception{}
 	
 	@PostMapping("findPwByPhone")
-	String findPwByPhone(@RequestParam("phone") String phone, Model model, UserVO userVO) throws Exception {
+	String findPwByPhone(@RequestParam("phone") String input, Model model, UserVO userVO) throws Exception {
 		
-		userVO=findInfoService.getUserByPhone(phone);
+		String phone = findInfoService.getPhone(input);
 		
-		String newPassword=findInfoService.randomPassword(12);
-		userVO.setPassword(encoder.encode(newPassword));
-		findInfoService.changePw(userVO);
+		if (phone!=null) {
+			userVO=findInfoService.getUserByPhone(phone);
+			
+			String newPassword=findInfoService.randomPassword(12);
+			userVO.setPassword(encoder.encode(newPassword));
+			findInfoService.changePw(userVO);
+			
+			findInfoService.findPwByPhone(phone, newPassword);
+			
+			model.addAttribute("result", "입력하신 전화번호로 임시 비밀번호를 발송했습니다.");			
+		}else {
+			model.addAttribute("result", "입력한 정보로 가입된 회원이 존재하지 않습니다.");
+		}
 		
-		findInfoService.findPwByPhone(phone, newPassword);
-		
-		model.addAttribute("result", "입력하신 전화번호로 임시 비밀번호를 발송했습니다.");
 		
 		List<MemberRoleVO> list = userService.getRole(userVO.getUsername());
 		

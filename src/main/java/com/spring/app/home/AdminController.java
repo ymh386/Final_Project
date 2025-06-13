@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.spring.app.user.MemberRoleVO;
 import com.spring.app.user.MemberStateVO;
 import com.spring.app.user.UserService;
 import com.spring.app.user.UserVO;
@@ -31,7 +32,7 @@ public class AdminController {
 	}
 	
 	@PostMapping("updateState")
-	String updateState(MemberStateVO memberStateVO) throws Exception {
+	String updateState(MemberStateVO memberStateVO, MemberRoleVO memberRoleVO) throws Exception {
 		int result = userService.updateUserState(memberStateVO);
 		return "redirect:../";
 	}
