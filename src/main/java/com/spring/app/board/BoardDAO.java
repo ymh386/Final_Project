@@ -4,6 +4,7 @@ package com.spring.app.board;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.spring.app.board.comment.CommentVO;
 import com.spring.app.board.interaction.InteractionVO;
@@ -31,7 +32,7 @@ public interface BoardDAO {
     int delete(BoardVO boardVO) throws Exception;
 
     /** 7) 조회수 증가 */
-    int updateBoardHits(Long boardNum) throws Exception;
+    int updateBoardHits(@Param("boadNum") Long boardNum) throws Exception;
 
     /** 8) 첨부파일 등록 */
     int addFile(BoardFileVO boardFileVO) throws Exception;
@@ -48,17 +49,16 @@ public interface BoardDAO {
     /** 12) 첨부파일 개수 조회 */
     int getFileCount(Long boardNum) throws Exception;
 
-    /** 13) 좋아요 추가 */
-    int addLike(InteractionVO interactionVO) throws Exception;
-
-    /** 14) 좋아요 삭제 */
-    int removeLike(InteractionVO interactionVO) throws Exception;
-
     /** 15) 좋아요 개수 조회 */
     long getInteractionCount(InteractionVO interactionVO) throws Exception;
 
     /** 16) 좋아요 중복 여부 확인 */
-    boolean isLiked(InteractionVO interactionVO) throws Exception;
+   boolean isLiked(InteractionVO interactionVO) throws Exception;
+   /** 11) 좋아요 추가 */
+   int addInteraction(InteractionVO vo) throws Exception;
+
+   /** 12) 좋아요 삭제 */
+   int removeInteraction(InteractionVO vo) throws Exception;
 
     /** 17) 좋아요 수 증가 */
     int increaseLikeCount(Long boardNum) throws Exception;
