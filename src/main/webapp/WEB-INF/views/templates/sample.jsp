@@ -8,16 +8,13 @@
 	<title>Insert title here</title>
 		<c:import url="/WEB-INF/views/templates/header.jsp"></c:import>
 	</head>
-	<body class="sb-nav-fixed">
+	<body class="sb-nav-fixed d-flex flex-column min-vh-100">
 		<c:import url="/WEB-INF/views/templates/topbar.jsp"></c:import>
-		<div id="layoutSidenav">
+		<div id="layoutSidenav" class="d-flex flex-grow-1">
 		<c:import url="/WEB-INF/views/templates/sidebar.jsp"></c:import>
-			<div id="layoutSidenav_content">
-                <main>
+			<div id="layoutSidenav_content" class="d-flex flex-column flex-grow-1">
+                <main class="flex-grow-1">
                     <div class="container">
-                        <div class="row justify-content-center">
-                            <div class="col-lg-5">
-							</div>
 							<!-- contents -->
 						
 

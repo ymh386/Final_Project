@@ -31,12 +31,6 @@ public class HomeController {
 		System.out.println("Home");
 		
 		
-		if (userVO!=null) {
-					String username = userVO.getUsername();
-					int result = subscriptService.getRemainDays(username);
-					model.addAttribute("result", result);
-		}
-		
 		return "index";
 	}
 

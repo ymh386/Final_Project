@@ -53,11 +53,11 @@
 												<button style="width: 400px;" class="btn btn-dark d-block mx-auto" type="submit">join</button>
 											</div>
 											<div class="d-flex justify-content-center gap-3">
-											<a href="${ctx}/oauth2/authorization/kakao?redirect=trainer" class="d-block">
-												<img src="${ctx}/img/kakao.png" style="height:45px;" alt="카카오 로그인"/>
+											<a href="/oauth2/authorization/kakao?redirect=trainer" class="d-block">
+												<img src="/img/kakao.png" style="height:45px;" alt="카카오 로그인"/>
 											</a>
-											<a href="${ctx}/oauth2/authorization/google?redirect=trainer" class="d-block">
-												<img src="${ctx}/img/1x.png" style="height:45px;" alt="구글 로그인"/>
+											<a href="/oauth2/authorization/google?redirect=trainer" class="d-block">
+												<img src="/img/1x.png" style="height:45px;" alt="구글 로그인"/>
 											</a>
 											</div>
 											

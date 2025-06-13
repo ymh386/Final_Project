@@ -113,6 +113,12 @@ public class UserController {
 		userVO.setTrainerCode(code);
 		int result = userService.join(userVO);
 		
+		MemberRoleVO memberRoleVO = new MemberRoleVO();
+		
+		memberRoleVO.setUsername(userVO.getUsername());
+		
+		userService.giveTrainerRole(memberRoleVO);
+		
 		return "redirect:/";
 	}
 	

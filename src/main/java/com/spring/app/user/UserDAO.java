@@ -14,6 +14,8 @@ public interface UserDAO {
 	
 	int join(UserVO userVO) throws Exception;
 	
+	int giveTrainerRole(MemberRoleVO memberRoleVO) throws Exception;
+	
 	int trainerJoin(UserVO userVO) throws Exception;
 	
 	int changePw(UserVO userVO) throws Exception;
