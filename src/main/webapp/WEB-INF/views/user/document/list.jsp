@@ -33,6 +33,7 @@
 	                <th scope="col">작성자</th>
 	                <th scope="col">제목</th>
 	                <th scope="col">진행상태</th>
+					<th scope="col">작성일시</th>
 	            </tr>
 	        </thead>
 	        <tbody>
@@ -44,15 +45,16 @@
 	                    <td><a href="./getDocument?documentId=${a.documentId}">${a.documentTitle}</a></td>
 	                    <c:choose>
 	                    	<c:when test="${a.documentStatus eq 'D1'}">
-	                    		<td>승인</td>
+	                    		<td style="color: blue;">승인</td>
 	                    	</c:when>
 	                    	<c:when test="${a.documentStatus eq 'D2'}">
-	                    		<td>반려</td>
+	                    		<td style="color: red;">반려</td>
 	                    	</c:when>
 	                    	<c:otherwise>
 	                    		<td>진행중</td>
 	                    	</c:otherwise>
 	                    </c:choose>
+						<td>${a.createdAt}</td>
 	                </tr>
 	            </c:forEach>
 	        </tbody>

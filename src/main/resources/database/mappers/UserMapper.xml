@@ -185,6 +185,30 @@
  		WHERE MR.ROLE_NUM=2 AND MS.STATE_NUM=1 AND U.DEPARTMENT_ID IS NOT NULL
  	</select>
  	
+ 	<select id="getUsersInTrainer" resultMap="usersWithDepartmentMap">
+ 		SELECT 
+ 			U.USERNAME,
+ 			U.NAME,
+ 			U.POSITION,
+ 			U.PARENT,
+ 			D.DEPARTMENT_ID,
+ 			D.DEPARTMENT_NAME,
+ 			R.ROLE_NUM,
+ 			S.STATE_NUM
+ 		FROM USER U
+ 		INNER JOIN MEMBER_ROLE MR
+ 		ON U.USERNAME=MR.USERNAME
+ 		INNER JOIN ROLE R
+		USING (ROLE_NUM)
+		INNER JOIN MEMBER_STATE MS
+		ON U.USERNAME=MS.USERNAME
+		INNER JOIN STATE S
+		USING (STATE_NUM)
+ 		LEFT OUTER JOIN DEPARTMENT D
+ 		ON U.DEPARTMENT_ID=D.DEPARTMENT_ID
+ 		WHERE MR.ROLE_NUM=2
+ 	</select>
+ 	
  	<resultMap type="UserVO" id="usersWithDepartmentMap">
  		<id column="USERNAME" property="username"/>
  		<result column="NAME" property="name"/>
@@ -232,6 +256,7 @@
  		INNER JOIN FORM F
  		ON D.FORM_ID=F.FORM_ID
  		WHERE D.DOCUMENT_ID=#{documentId}
+ 		AND D.WRITER_ID=#{writerId}
  	</select>
  	
  	<resultMap type="DocumentVO" id="getDocumentsMap">

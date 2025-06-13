@@ -58,28 +58,23 @@ uploadSign.addEventListener("click", ()=>{
                 //모든 해당 documentId를 갖는 approval의 진행상태가 'AS1'이된 경우 해당document의 진행상태도 'D1'
                 if(r != null) {
                     const f = new FormData();
-                    f.append("documentId", documentId.value)
                     f.append("approvalId", approvalId.value)
+                    f.append("documentId", documentId.value)
+                    f.append("contentHtml", document.getElementById("contentHtml").innerHTML)
+                    //승인인지 반려인지 구분용(1 이면 승인)
+                    f.append("type", 1)
 
-                    fetch("./approve", {
+
+                    fetch("./appOrRej", {
                         method : "POST",
                         body : f
                     })
                     .then(r2 => r2.json())
                     .then(r2 => {
 
-                        const f2 = new FormData();
-                        f2.append("documentId", documentId.value)
-                        f2.append("contentHtml", document.getElementById("contentHtml").innerHTML)
-
-                        fetch("./updateContent", {
-                            method : "POST",
-                            body : f2
-                        })
-
-                        if(r && r2 > 0){
+                        if(r != null && r2 > 0){
                             alert("승인완료")
-                            location.href="./approvedList"
+                            location.href="./list"
                         } else{
                             alert("승인실패")
                             location.reload();
@@ -92,12 +87,37 @@ uploadSign.addEventListener("click", ()=>{
                     alert("서명/도장을 기입해주세요")
                 }
             })
-        }
+        }  
+    })
+})
 
-        
+rejection.addEventListener('click', ()=>{
+    //현재 approvalId의 진행상태를 'AS2'로 변경 후 
+    //approver에 하나라도 상태가 'AS2'이면 document의 상태를 'D2'로 변경
+    const f = new FormData();
+    f.append("documentId", documentId.value)
+    f.append("approvalId", approvalId.value)
+    //승인인지 반려인지 구분(0 이면 반려)
+    f.append("type", 0)
+
+    fetch('./appOrRej', {
+        method : "POST",
+        body : f
+    })
+    .then(r => r.json())
+    .then(r=>{
+
+        if(r > 0) {
+            alert("반려완료")
+            location.href="./list"
+        }else {
+            alert("반려실패")
+            location.reload()
+        }
+    }).catch(e => {
+        alert("오류발생")
     })
 
-    
 })
 
 

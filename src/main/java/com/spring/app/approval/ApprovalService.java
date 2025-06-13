@@ -1,10 +1,13 @@
 package com.spring.app.approval;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 
 import com.spring.app.user.UserVO;
 
@@ -27,6 +30,7 @@ public class ApprovalService {
 		return approvalDAO.getForm(formVO);
 	}
 	
+	//결재 양식 등록
 	public int formRegister(FormVO formVO) throws Exception {
 		CategoryVO categoryVO = new CategoryVO();
 		categoryVO.setCategoryName(formVO.getFormTitle());
@@ -38,6 +42,38 @@ public class ApprovalService {
 			formVO.setCategoryId(categoryVO.getCategoryId()); //가져온 categoryVO의 ID formVO에 categoryID 넣기
 			
 			result = approvalDAO.addForm(formVO);
+		}
+		
+		return result;
+	}
+	
+	//결재 양식 수정
+	public int formUpdate(FormVO formVO) throws Exception {
+		CategoryVO categoryVO = new CategoryVO();
+		categoryVO.setCategoryId(formVO.getCategoryId());
+		categoryVO.setCategoryName(formVO.getFormTitle());
+		int result = approvalDAO.updateCategory(categoryVO); //양식을 수정하면서 해당 카테고리이름을 카테고리도 같이수정
+		
+		if(result > 0) {
+			
+			result = approvalDAO.updateForm(formVO);
+		}
+		
+		return result;
+	}
+	
+	//결재 양식 삭제
+	public int formDelete(FormVO formVO) throws Exception {
+		formVO = approvalDAO.getForm(formVO); //categoryId 가져오기 위함
+		CategoryVO categoryVO = new CategoryVO();
+		categoryVO.setCategoryId(formVO.getCategoryId());
+		
+		int result = approvalDAO.deleteForm(formVO); //양식 먼저 삭제
+		
+		//양식 삭제가 성공했을 때
+		if(result > 0) {
+			//카테고리도 삭제
+			result = approvalDAO.deleteCategory(categoryVO);
 		}
 		
 		return result;
@@ -64,6 +100,24 @@ public class ApprovalService {
 				approvalStatus = "AS3";
 			}
 		}
+	}
+	
+	//결재문서 삭제
+	public int deleteDocument(DocumentVO documentVO) throws Exception {
+		ApprovalVO approvalVO = new ApprovalVO();
+		approvalVO.setDocumentId(documentVO.getDocumentId());
+		
+		//승인절차가 한번이라도 진행된 것들
+		List<ApprovalVO> ar = approvalDAO.getAppOrRej(approvalVO);
+		
+		//없으면 삭제 실행
+		if(ar.size() <= 0) {
+			return approvalDAO.deleteDocument(documentVO);
+		}else {
+			return 0;
+		}
+		
+		
 	}
 	
 	//승인가능 목록 가져오기
@@ -105,26 +159,60 @@ public class ApprovalService {
 				List<ApprovalVO> ar = approvalDAO.getListByDocument(approvalVO);
 				//3번에서 조회한 리스트에서 상태가 승인인 정보를 제외한 정보들만 가져옴
 				List<ApprovalVO> ar2 =  ar.stream()
-						.filter(a -> !a.getApprovalStatus().equals("AS1"))
+						.filter(a -> !"AS1".equals(a.getApprovalStatus()))
 						.collect(Collectors.toList());
 				//3번에서 최종으로 가져온 리스트가 NULL 즉, 모두가 승인상태라면 결재문서의 상태를 승인으로 변경
 				if(ar2.size() < 1) {
 					documentVO.setDocumentStatus("D1");
-					log.info("documentVO {}", documentVO);
 					result = approvalDAO.updateDocumentStatus(documentVO);
 				}
+			}
+		}
+		
+		//모든과정이 다 성공하면 새로 렌더링된 문서 저장
+		if(result > 0) {
+			approvalDAO.updateContent(documentVO);
+		}
+		
+		return result;
+	}
+	
+	public int rejection(ApprovalVO approvalVO, DocumentVO documentVO) throws Exception {
+		
+		//1. 현재 승인정보의 상태를 반려로 변경
+		approvalVO.setApprovalStatus("AS2");
+		int result = approvalDAO.updateApprovalStatus(approvalVO);
+		
+		if(result > 0) {
+			//2. 해당 결재문서의 모든 승인정보 조회
+			List<ApprovalVO> ar = approvalDAO.getListByDocument(approvalVO);
+			//2번에서 조회한 리스트에서 상태가 반려인 정보를 제외한 정보들만 가져옴
+			List<ApprovalVO> ar2 =  ar.stream()
+					.filter(a -> "AS2".equals(a.getApprovalStatus()))
+					.collect(Collectors.toList());
+			
+			//3. 2번에서 최종으로 가져온 리스트가 NOT NULL 즉, 하나라도 반려상태라면 결재문서의 상태를 반려로 변경
+			if(ar2.size() > 0) {
+				documentVO.setDocumentStatus("D2");
+				result = approvalDAO.updateDocumentStatus(documentVO);
 			}
 		}
 		
 		return result;
 	}
 	
-	public ApprovalVO getApprovalDetail(ApprovalVO approvalVO) throws Exception {
-		return approvalDAO.getApprovalDetail(approvalVO);
+	//로그인한 유저의 승인내역 리스트
+	public List<ApprovalVO> getList(ApprovalVO approvalVO, String search) throws Exception {
+		Map<String, Object> map = new HashMap<>();
+		map.put("approvalVO", approvalVO);
+		map.put("search", search);
+		
+		return approvalDAO.getList(map);
 	}
 	
-	public int updateContent(DocumentVO documentVO) throws Exception {
-		return approvalDAO.updateContent(documentVO);
+	//로그인한 유저의 승인내역 디테일
+	public ApprovalVO getDetail(ApprovalVO approvalVO) throws Exception {
+		return approvalDAO.getDetail(approvalVO);
 	}
 
 }

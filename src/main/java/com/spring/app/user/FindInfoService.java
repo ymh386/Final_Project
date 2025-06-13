@@ -32,7 +32,7 @@ public class FindInfoService {
 	@Value("${nurigo.api.secret.key}")
 	private String secretKey;
 	
-	@Value("${nurigo.send.phone.number}")
+	//@Value("${nurigo.send.phone.number}")
 	private String sendPhone;
 
 	

@@ -300,7 +300,8 @@ public class UserController {
 	
 	//로그이한 유저가 작성한 전자결재의 한건 정보(디테일)
 	@GetMapping("getDocument")
-	public String getDocument(DocumentVO documentVO, Model model) throws Exception {
+	public String getDocument(@AuthenticationPrincipal UserVO userVO, DocumentVO documentVO, Model model) throws Exception {
+		documentVO.setWriterId(userVO.getUsername());
 		
 		documentVO = userService.getDocument(documentVO);
 		log.info("documentVO : {}", documentVO);

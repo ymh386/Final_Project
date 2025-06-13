@@ -53,6 +53,27 @@ public class ApprovalController {
 	@Value("${board.file.path}")
 	private String path;
 	
+	//결재양식 리스트
+	@GetMapping("formList")
+	public String formList(Model model) throws Exception {
+		List<FormVO> ar = approvalService.getForms();
+		
+		model.addAttribute("ar", ar);
+		
+		return "form/formList";
+		
+	}
+	
+	//결재양식 상세정보
+	@GetMapping("formDetail")
+	public String formDetail(FormVO formVO, Model model) throws Exception {
+		formVO = approvalService.getForm(formVO);
+		
+		model.addAttribute("vo", formVO);
+		
+		return "form/formDetail";
+	}
+	
 	//결재양식 등록 UI
 	@GetMapping("formRegister")
 	public String formRegister(Model model) throws Exception {
@@ -66,7 +87,36 @@ public class ApprovalController {
 		
 		int result = approvalService.formRegister(formVO);
 		
-		return "redirect:/";
+		return "redirect:./formList";
+	}
+	
+	//결재양식 수정 UI
+	@GetMapping("formUpdate")
+	public String formUpdate(FormVO formVO, Model model) throws Exception {
+		formVO = approvalService.getForm(formVO);
+		
+		model.addAttribute("vo", formVO);
+		
+		return "form/formUpdate";
+	}
+	
+	//결재양식 수정 프로세스
+	@PostMapping("formUpdate")
+	public String formUpdate(FormVO formVO) throws Exception {
+		
+		int result = approvalService.formUpdate(formVO);
+		
+		return "redirect:./formDetail?formId=".concat(formVO.getFormId().toString());
+		
+	}
+	
+	//결재양식 삭제
+	@GetMapping("formDelete")
+	public String formDelete(FormVO formVO) throws Exception {
+		
+		int result = approvalService.formDelete(formVO);
+		
+		return "redirect:./formList";
 	}
 	
 	//전자결재 작성 UI
@@ -96,6 +146,25 @@ public class ApprovalController {
 	    approvalService.addDocument(documentVO, approverList);
 	    
 	    return "redirect:/";
+	}
+	
+	//전자결재 문서 삭제
+	@GetMapping("deleteDocument")
+	public String deleteDocument(@AuthenticationPrincipal UserVO userVO, DocumentVO documentVO, Model model) throws Exception {
+		documentVO.setWriterId(userVO.getUsername());
+		
+		int result = approvalService.deleteDocument(documentVO);
+		
+		if(result > 0) {
+			return "redirect:/user/getDocuments";
+		}else {
+			model.addAttribute("result", "승인절차가 한 번 이상 진행된 요청은 취소할 수 없습니다.");
+			model.addAttribute("path", "/user/getDocument?documentId=".concat(documentVO.getDocumentId().toString()));
+			
+			return "commons/result";
+		}
+		
+		
 	}
 	
 	//전자결재 작성 시 양식 렌더링하기
@@ -316,13 +385,17 @@ public class ApprovalController {
 		return "redirect:/user/mypage";
 	}
 	
-	@PostMapping("approve")
+	@PostMapping("appOrRej")
 	@ResponseBody
-	public int approve(@AuthenticationPrincipal UserVO userVO, ApprovalVO approvalVO) throws Exception {
-		DocumentVO documentVO = new DocumentVO();
-		documentVO.setDocumentId(approvalVO.getDocumentId());
+	public int appOrRej(ApprovalVO approvalVO, DocumentVO documentVO, int type) throws Exception {		
+		int result = 0;
 		
-		int result = approvalService.approve(approvalVO, documentVO);
+		if(type == 1) {
+			result = approvalService.approve(approvalVO, documentVO);
+		}else {
+			result = approvalService.rejection(approvalVO, documentVO);
+		}
+		
 		
 		return result;
 	}
@@ -336,9 +409,45 @@ public class ApprovalController {
 		return userSignatureVO;
 	}
 	
-	@PostMapping("updateContent")
-	public void updateContent(DocumentVO documentVO) throws Exception {
-		approvalService.updateContent(documentVO);
+	@GetMapping("list")
+	public String list(@AuthenticationPrincipal UserVO userVO, FormVO formVO, String search, Model model) throws Exception {
+		ApprovalVO approvalVO = new ApprovalVO();
+		approvalVO.setApproverId(userVO.getUsername());
+		
+		//양식별 카테고리 정보 DB로 넘기기용
+		if(formVO.getFormId() != null) {
+			approvalVO.setDocumentVO(new DocumentVO());
+			approvalVO.getDocumentVO().setFormId(formVO.getFormId());
+		}
+		
+		List<ApprovalVO> ar = approvalService.getList(approvalVO, search);
+		model.addAttribute("ar", ar);
+		
+		//양식별로 결재문서 불러오기
+		List<FormVO> forms = approvalService.getForms();
+		model.addAttribute("forms", forms);
+		
+		//양식목록을 바꾸면 해당 목록으로 selected되있게 하기위함
+		model.addAttribute("selectedFormId", formVO.getFormId());
+		
+		//양식목록을 바꾸면 해당 작성자로 검색되있게 하기위함
+		model.addAttribute("writedId", search);
+		
+		return "approval/list";
+	
 	}
+	
+	@GetMapping("detail")
+	public String detail(@AuthenticationPrincipal UserVO userVO, ApprovalVO approvalVO, Model model) throws Exception {
+		
+		
+		approvalVO.setApproverId(userVO.getUsername());
+		
+		approvalVO = approvalService.getDetail(approvalVO);
+		model.addAttribute("vo", approvalVO);
+		
+		return "approval/detail";
+	}
+			
 
 }
