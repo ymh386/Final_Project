@@ -16,6 +16,7 @@
 </style>
 </head>
 <body>
+    <sec:authentication property="principal" var="user"/>
     <h2>결재 정보</h2><br>
     <div class="mb-3">
         <label class="form-label">작성자</label>
@@ -27,20 +28,28 @@
         <label class="form-label">진행 상태</label>
         <c:choose>
             <c:when test="${vo.documentStatus eq 'D1'}">
-                <input type="text" class="form-control" value="승인" readonly>
+                <input type="text" class="form-control" value="승인" readonly style="color: blue;">
             </c:when>
             <c:when test="${vo.documentStatus eq 'D2'}">
-                <input type="text" class="form-control" value="반려" readonly>
+                <input type="text" class="form-control" value="반려" readonly style="color: red;">
             </c:when>
             <c:otherwise>
                 <input type="text" class="form-control" value="진행중" readonly>
             </c:otherwise>
         </c:choose>
+        <label class="form-label">작성일시</label>
+        <input type="text" class="form-control" value="${vo.createdAt}" readonly>
     </div>
 
     <div>
         ${vo.contentHtml}
     </div>
+
+    <c:if test="${user.username eq vo.writerId}">
+        <div>
+            <a href="/approval/deleteDocument?documentId=${vo.documentId}" class="btn">결재 취소</a>
+        </div>
+    </c:if>
 
 </body>
 </html>

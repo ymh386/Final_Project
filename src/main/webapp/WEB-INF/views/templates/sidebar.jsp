@@ -19,9 +19,9 @@
                 </a>
                 </sec:authorize>
                 <sec:authorize access="hasRole('ADMIN')">
-                <a class="nav-link" href="/approval/formRegister">
+                <a class="nav-link" href="/approval/formList">
                     <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                    양식등록(관리자)
+                    결재양식(관리자)
                 </a>
                 </sec:authorize>
                 <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">

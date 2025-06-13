@@ -28,6 +28,7 @@
   		INNER JOIN FORM F
   		ON D.FORM_ID=F.FORM_ID
   		WHERE A.DOCUMENT_ID IS NOT NULL AND A.APPROVER_ID=#{approverId} AND A.APPROVAL_STATUS='AS0'
+  		ORDER BY APPROVAL_ID DESC
   	</select>
   	
   	<select id="getAwaitDetail" resultMap="awaitMap" parameterType="ApprovalVO">
@@ -36,7 +37,40 @@
   		ON A.DOCUMENT_ID=D.DOCUMENT_ID
   		INNER JOIN FORM F
   		ON D.FORM_ID=F.FORM_ID
-  		WHERE A.DOCUMENT_ID=#{documentId} AND A.APPROVER_ID=#{approverId} AND A.APPROVAL_STATUS='AS0'
+  		WHERE A.APPROVAL_ID=#{approvalId} AND A.APPROVER_ID=#{approverId} AND A.APPROVAL_STATUS='AS0'
+  	</select>
+  	
+  	<select id="getList" resultMap="awaitMap" parameterType="ApprovalVO">
+  		SELECT * FROM APPROVAL A
+  				 INNER JOIN DOCUMENT D
+  			ON A.DOCUMENT_ID=D.DOCUMENT_ID
+  				 INNER JOIN FORM F
+  			ON D.FORM_ID=F.FORM_ID
+  		 <where>
+		    A.APPROVER_ID = #{approvalVO.approverId}
+		    
+		    <if test="approvalVO.documentVO.formId != null">
+		        AND D.FORM_ID = #{approvalVO.documentVO.formId}
+		    </if>
+		    
+		    <if test="search != null and search != ''">
+		        AND D.WRITER_ID LIKE CONCAT('%', #{search}, '%')
+		    </if>
+		    
+		    AND A.APPROVAL_STATUS IN ('AS1', 'AS2')
+		</where>
+  		 ORDER BY APPROVED_AT DESC
+  	</select>
+  	
+  	<select id="getDetail" resultMap="awaitMap" parameterType="ApprovalVO">
+  		SELECT * FROM APPROVAL A
+  				 INNER JOIN DOCUMENT D
+  			ON A.DOCUMENT_ID=D.DOCUMENT_ID
+  				 INNER JOIN FORM F
+  			ON D.FORM_ID=F.FORM_ID
+  		 WHERE A.APPROVAL_ID=#{approvalId}
+  		 	   AND A.APPROVER_ID=#{approverId}
+  		 	   AND A.APPROVAL_STATUS IN ('AS1', 'AS2')
   	</select>
   	
   	<resultMap type="ApprovalVO" id="awaitMap">
@@ -68,8 +102,9 @@
   		WHERE DOCUMENT_ID=#{documentId}
   	</select>
   	
-  	<select id="getApprovalDetail" parameterType="ApprovalVO" resultType="ApprovalVO">
-  		SELECT * FROM APPROVAL WHERE APPROVAL_ID=#{approvalId}
+  	<select id="getAppOrRej" parameterType="ApprovalVO" resultType="ApprovalVO">
+  		SELECT * FROM APPROVAL
+  		WHERE DOCUMENT_ID=#{documentId} AND APPROVAL_STATUS IN ('AS1', 'AS2')
   	</select>
   	
   	<insert id="addForm" parameterType="FormVO">
@@ -114,7 +149,7 @@
   			#{parentId},
   			#{approvalStep},
   			#{approvalStatus},
-  			CURRENT_TIMESTAMP
+  			NULL
   		)
   	</insert>
   	
@@ -130,8 +165,19 @@
   		)
   	</insert>
   	
+  	<update id="updateCategory" parameterType="CategoryVO">
+  		UPDATE FORM_CATEGORY SET CATEGORY_NAME=#{categoryName}
+  		WHERE CATEGORY_ID=#{categoryId}
+  	</update>
+  	
+  	<update id="updateForm" parameterType="FormVO">
+  		UPDATE FORM SET FORM_TITLE=#{formTitle}, CONTENT_HTML=#{contentHtml}
+  		WHERE FORM_ID=#{formId}
+  	</update>
+  	
   	<update id="updateApprovalStatus" parameterType="ApprovalVO">
-  		UPDATE APPROVAL SET APPROVAL_STATUS=#{approvalStatus} WHERE APPROVAL_ID=#{approvalId}
+  		UPDATE APPROVAL SET APPROVAL_STATUS=#{approvalStatus}, APPROVED_AT=CURRENT_TIMESTAMP
+  		WHERE APPROVAL_ID=#{approvalId}
   	</update>
   	
   	<update id="updateChildStatus" parameterType="ApprovalVO">
@@ -146,8 +192,22 @@
   		UPDATE DOCUMENT SET CONTENT_HTML=#{contentHtml} WHERE DOCUMENT_ID=#{documentId}
   	</update>
   	
+  	<delete id="deleteCategory" parameterType="CategoryVO">
+  		DELETE FROM FORM_CATEGORY
+  		WHERE CATEGORY_ID=#{categoryId}
+  	</delete>
+  	
+  	<delete id="deleteForm" parameterType="FormVO">
+  		DELETE FROM FORM
+  		WHERE FORM_ID=#{formId}
+  	</delete>
+  	
   	<delete id="deleteSign" parameterType="UserVO">
   		DELETE FROM USER_SIGNATURE WHERE USERNAME=#{username}
+  	</delete>
+  	
+  	<delete id="deleteDocument" parameterType="DocumentVO">
+  		DELETE FROM DOCUMENT WHERE WRITER_ID=#{writerId} AND DOCUMENT_ID=#{documentId}
   	</delete>
   	
   	

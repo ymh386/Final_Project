@@ -9,23 +9,29 @@
 <title>Insert title here</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+<style>
+    th, td {
+        border: 1px solid #000000;
+    }
+</style>
 </head>
 <body>
-    <sec:authorize access="hasRole('ADMIN')">
-        <h2>부서 수정</h2>
-    
-        <form action="./update" method="post">
-            <input type="hidden" name="departmentId" value="${vo.departmentId}">
-            <label class="form-label">부서명</label>
-            <input type="text" class="form-control" name="departmentName" value="${vo.departmentName}">
-            <label class="form-label">부서 설명</label>
-            <input type="text" class="form-control" name="description" value="${vo.description}">
-            <button type="submit">수정</button>
-        </form>
-    </sec:authorize>
+    <sec:authentication property="principal" var="user"/>
+    <h2>양식 정보</h2><br>
+    <div class="mb-3">
+        <label class="form-label">양식이름</label>
+        <input type="text" class="form-control" value="${vo.formTitle}" readonly>
+        <label class="form-label">제작일시</label>
+        <input type="text" class="form-control" value="${vo.createdAt}" readonly>
 
-    <sec:authorize access="!hasRole('ADMIN')">
-        <h3>관리자만 이용 가능합니다.</h3>
-    </sec:authorize>
+    <div>
+        ${vo.contentHtml}
+    </div>
+
+    <div>
+        <a href="/approval/formUpdate?formId=${vo.formId}" class="btn">양식 수정</a><br>
+        <a href="/approval/formDelete?formId=${vo.formId}" class="btn">양식 삭제</a>
+    </div>
+
 </body>
 </html>

@@ -11,17 +11,22 @@
 <script src="https://cdn.ckeditor.com/4.22.1/full-all/ckeditor.js"></script>
 </head>
 <body>
-	<h2>전자결재 양식 등록</h2>
-	<form action="./formRegister" method="post">
+	<h2>전자결재 양식 수정</h2>
+	<form action="./formUpdate" method="post">
+
+        <input type="hidden" name="formId" value="${vo.formId}">
+
+        <input type="hidden" name="categoryId" value="${vo.categoryId}">
+
 		<label>양식 제목</label><br>
-		<input type="text" name="formTitle" required><br><br>
+		<input type="text" name="formTitle" value="${vo.formTitle}" required><br><br>
 		
 
         <label>내용</label><br>
-        <textarea name="contentHtml" id="editor"></textarea><br><br>
+        <textarea name="contentHtml" id="editor">${vo.contentHtml}</textarea><br><br>
         
-        <button type="submit">등록</button>
-
+        <button type="submit">수정</button>
+        
 	</form>
 	
 	<script>
@@ -30,7 +35,6 @@
             extraAllowedContent: 'td[id, contenteditable];th[id, contenteditable];img[src,style];',
             height: 1000
         });
-        CKEDITOR.instances['editor'].setData('*결재란은 최대3개까지</br>*결재란의 결재자이름칸에 id속성을 name_1, name_2, name_3 형식으로 넣기!</br>*결재란의 서명칸에 id속성을 sign_1, sign_2, sign_3 형식으로 넣기!')
     </script>
 </body>
 </html>
