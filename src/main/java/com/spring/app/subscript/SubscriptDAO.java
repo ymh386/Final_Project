@@ -33,4 +33,6 @@ public interface SubscriptDAO {
 	
 	public int getRemainDays(@Param("username") String username) throws Exception;
 	
+    int countActiveByUser(String username);
+	
 }

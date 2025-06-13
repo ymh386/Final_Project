@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.app.equipment.EquipmentDAO">
+
+    <!-- 결과 매핑 -->
+    <resultMap id="equipmentResultMap" type="com.spring.app.equipment.EquipmentVO">
+        <id     property="equipmentId"       column="EQUIPMENT_ID"/>
+        <result property="name"              column="NAME"/>
+        <result property="description"       column="DESCRIPTION"/>
+        <result property="location"          column="LOCATION"/>
+        <result property="lastMaintenanceAt" column="LAST_MAINTENANCE_AT"/>
+        <result property="status"            column="STATUS"/>
+        <result property="createdAt"         column="CREATED_AT"/>
+    </resultMap>
+
+    <!-- 모든 비품 조회 -->
+    <select id="selectAllEquipment" resultMap="equipmentResultMap">
+        SELECT
+            EQUIPMENT_ID,
+            NAME,
+            DESCRIPTION,
+            LOCATION,
+            LAST_MAINTENANCE_AT,
+            STATUS,
+            CREATED_AT
+        FROM EQUIPMENT
+        ORDER BY NAME ASC
+    </select>
+
+    <!-- 비품 아이디로 조회 -->
+    <select id="selectEquipmentById" parameterType="long" resultMap="equipmentResultMap">
+        SELECT
+            EQUIPMENT_ID,
+            NAME,
+            DESCRIPTION,
+            LOCATION,
+            LAST_MAINTENANCE_AT,
+            STATUS,
+            CREATED_AT
+        FROM EQUIPMENT
+        WHERE EQUIPMENT_ID = #{equipmentId}
+    </select>
+
+    <!-- 비품 상태로 조회 -->
+    <select id="selectEquipmentByStatus" parameterType="String" resultMap="equipmentResultMap">
+        SELECT
+            EQUIPMENT_ID,
+            NAME,
+            DESCRIPTION,
+            LOCATION,
+            LAST_MAINTENANCE_AT,
+            STATUS,
+            CREATED_AT
+        FROM EQUIPMENT
+        WHERE STATUS = #{status}
+        ORDER BY NAME ASC
+    </select>
+
+    <!-- 비품 등록 -->
+    <insert id="insertEquipment" parameterType="EquipmentVO" useGeneratedKeys="true" keyProperty="equipmentId">
+        INSERT INTO EQUIPMENT
+            (NAME, DESCRIPTION, LOCATION, LAST_MAINTENANCE_AT, STATUS, CREATED_AT)
+        VALUES
+            (#{name}, #{description}, #{location}, #{lastMaintenanceAt}, #{status}, #{createdAt})
+    </insert>
+
+    <!-- 비품 정보 수정 -->
+    <update id="updateEquipment" parameterType="EquipmentVO">
+        UPDATE EQUIPMENT
+        SET NAME                 = #{name},
+            DESCRIPTION          = #{description},
+            LOCATION             = #{location},
+            LAST_MAINTENANCE_AT  = #{lastMaintenanceAt},
+            STATUS               = #{status}
+        WHERE EQUIPMENT_ID = #{equipmentId}
+    </update>
+
+    <!-- 비품 상태 수정 -->
+    <update id="updateEquipmentStatus" parameterType="EquipmentVO">
+        UPDATE EQUIPMENT
+        SET STATUS = #{status}
+        WHERE EQUIPMENT_ID = #{equipmentId}
+    </update>
+
+    <!-- 비품 삭제 -->
+    <delete id="deleteEquipment" parameterType="Long">
+        DELETE FROM EQUIPMENT
+        WHERE EQUIPMENT_ID = #{equipmentId}
+    </delete>
+
+</mapper>
