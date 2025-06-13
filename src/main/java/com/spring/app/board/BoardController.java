@@ -2,19 +2,32 @@
 // src/main/java/com/spring/app/board/BoardController.java
 package com.spring.app.board;
 
+
+import java.io.File;
+import java.io.FileInputStream;
+
+import java.io.OutputStream;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 
 import com.spring.app.board.comment.CommentVO;
 import com.spring.app.board.interaction.InteractionVO;
 import com.spring.app.home.util.Pager;
 import com.spring.app.user.UserVO;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Controller
 @RequestMapping("/board")
 public class BoardController {
@@ -92,12 +105,21 @@ public class BoardController {
 
     
 
+    /**
+     * 상세 보기: 조회수(hit) 비동기 업데이트는 /hitUpdateAsync 로 분리
+     */
     @GetMapping("/detail")
-    public String detail(@RequestParam("boardNum") Long boardNum,
-                         Model m,
-                         @AuthenticationPrincipal UserVO user) throws Exception {
+    public String detail(
+            @RequestParam("boardNum") Long boardNum,
+            @AuthenticationPrincipal UserVO user,
+            Model m
+    ) throws Exception {
+        // 기존에는 여기서 hitUpdate() 했는데, AJAX로 분리했습니다.
 
+        // 상세 데이터 조회
         BoardVO detail = boardService.getDetail(new BoardVO(boardNum));
+
+        // 좋아요 정보
         long likeCount = 0;
         boolean isLiked = false;
         if (detail != null) {
@@ -116,52 +138,100 @@ public class BoardController {
         m.addAttribute("comments", boardService.getCommentList(new BoardVO(boardNum)));
         m.addAttribute("likeCount", likeCount);
         m.addAttribute("isLiked", isLiked);
+
         return "board/detail";
     }
 
-    @PostMapping("/like")
+    /**
+     * AJAX용 조회수 증가 → 업데이트된 조회수(long) 반환
+       /**
+     * AJAX 조회수 증가 + 증가된 값을 바로 리턴
+     */
+    @PostMapping("/hitUpdateAsync")
     @ResponseBody
-    public long addLike(@RequestParam("boardNum") Long boardNum,
-                        @AuthenticationPrincipal UserVO user) throws Exception {
-        if (user == null) throw new RuntimeException("로그인이 필요합니다.");
+    public String hitUpdateAsync(@RequestParam Long boardNum) throws Exception {
+        boardService.hitUpdate(new BoardVO(boardNum));
+        // 증가된 조회수를 다시 읽어서 리턴
+        BoardVO vo = boardService.getDetail(new BoardVO(boardNum));
+        return String.valueOf(vo.getBoardHits());
+    }
+    /**
+     * 좋아요 추가 → 다시 detail 리다이렉트
+     */
+    @PostMapping("/addInteraction")
+    public String addInteraction(
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserVO user,
+            RedirectAttributes rttr
+    ) throws Exception {
+        if (user == null) {
+            throw new RuntimeException("로그인이 필요합니다.");
+        }
+        Long boardNum = Long.valueOf(request.getParameter("boardNum"));
         InteractionVO vo = new InteractionVO();
         vo.setBoardNum(boardNum);
         vo.setUserName(user.getUsername());
         vo.setType("LIKE");
+
         boardService.addInteraction(vo);
-        return boardService.getInteractionCount(vo);
+
+        rttr.addAttribute("boardNum", boardNum);
+        return "redirect:/board/detail";
     }
 
-    @PostMapping("/unlike")
-    @ResponseBody
-    public long removeLike(@RequestParam("boardNum") Long boardNum,
-                           @AuthenticationPrincipal UserVO user) throws Exception {
-        if (user == null) throw new RuntimeException("로그인이 필요합니다.");
+    /**
+     * 좋아요 취소 → 다시 detail 리다이렉트
+     */
+    @PostMapping("/removeInteraction")
+    public String removeInteraction(
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserVO user,
+            RedirectAttributes rttr
+    ) throws Exception {
+        if (user == null) {
+            throw new RuntimeException("로그인이 필요합니다.");
+        }
+        Long boardNum = Long.valueOf(request.getParameter("boardNum"));
         InteractionVO vo = new InteractionVO();
         vo.setBoardNum(boardNum);
         vo.setUserName(user.getUsername());
         vo.setType("LIKE");
+
         boardService.removeInteraction(vo);
-        return boardService.getInteractionCount(vo);
+
+        rttr.addAttribute("boardNum", boardNum);
+        return "redirect:/board/detail";
     }
 
-    @PostMapping("/commentAdd")
-    @ResponseBody
-    public List<CommentVO> commentAdd(@RequestParam("boardNum") Long boardNum,
-                                      @RequestParam("commentContents") String commentContents,
-                                      @AuthenticationPrincipal UserVO user) throws Exception {
-        if (user == null) throw new RuntimeException("로그인이 필요합니다.");
+
+    @PostMapping("/addComment")
+    public String addComment(
+            @RequestParam("boardNum") Long boardNum,
+            @RequestParam("commentContents") String commentContents,
+            @AuthenticationPrincipal UserVO user,
+            RedirectAttributes rttr
+    ) throws Exception {
+        if (user == null) {
+            throw new RuntimeException("로그인이 필요합니다.");
+        }
+
         CommentVO vo = new CommentVO();
         vo.setBoardNum(boardNum);
         vo.setCommentContents(commentContents);
         vo.setUserName(user.getUsername());
+
+        // 댓글 등록
         boardService.addComment(vo);
-        return boardService.getCommentList(new BoardVO(boardNum));
+
+        // 상세보기로 돌아갈 때 boardNum 쿼리스트링에 포함
+        rttr.addAttribute("boardNum", boardNum);
+        return "redirect:/board/detail";
     }
 
-    @PostMapping("/commentDelete")
+
+    @PostMapping("/deletecomment")
     @ResponseBody
-    public List<CommentVO> commentDelete(@RequestParam("commentNum") Long commentNum,
+    public List<CommentVO> deleteComment(@RequestParam("commentNum") Long commentNum,
                                          @RequestParam("boardNum") Long boardNum) throws Exception {
         CommentVO vo = new CommentVO();
         vo.setCommentNum(commentNum);
@@ -169,4 +239,50 @@ public class BoardController {
         boardService.deleteComment(vo);
         return boardService.getCommentList(new BoardVO(boardNum));
     }
+
+    @Value("${board.file.path}")
+    private String uploadDir;
+
+    /**
+     * 파일 다운로드
+     * GET /board/fileDown?fileNum={fileNum}
+     */
+    @GetMapping("/fileDown")
+    public void fileDown(
+            @RequestParam("fileNum") Long fileNum,
+            HttpServletResponse response
+    ) throws Exception {
+        BoardFileVO param = new BoardFileVO();
+        param.setFileNum(fileNum);
+        BoardFileVO file = boardService.getFileDetail(param);
+        if (file == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        File diskFile = new File(uploadDir, file.getFileName());
+        if (!diskFile.exists()) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        // set headers
+        response.setContentType("application/octet-stream");
+        String encoded = java.net.URLEncoder.encode(file.getOldName(), "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + encoded);
+        response.setContentLengthLong(diskFile.length());
+
+        // stream file
+        try (FileInputStream in = new FileInputStream(diskFile);
+             OutputStream out = response.getOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = in.read(buffer)) != -1) {
+                out.write(buffer, 0, len);
+            }
+            
+        }
+    }
 }
+    
+

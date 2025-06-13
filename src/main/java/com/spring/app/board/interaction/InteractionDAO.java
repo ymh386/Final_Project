@@ -7,11 +7,11 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface InteractionDAO {
-    /** 좋아요 추가 */
-    int addLike(InteractionVO interactionVO) throws Exception;
+	 /**  좋아요 추가 */
+    int addInteraction(InteractionVO vo) throws Exception;
 
-    /** 좋아요 삭제 */
-    int removeLike(InteractionVO interactionVO) throws Exception;
+    /**  좋아요 삭제 */
+    int removeInteraction(InteractionVO vo) throws Exception;
 
     /** 특정 게시글의 좋아요 개수 조회 */
     Long getLikeCount(Long boardNum) throws Exception;

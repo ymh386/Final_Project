@@ -94,13 +94,13 @@ public class BoardServiceImpl implements BoardService {
     }
 
     public int addInteraction(InteractionVO vo) throws Exception {
-        int cnt = boardDAO.addLike(vo);
+        int cnt = boardDAO.addInteraction(vo);
         boardDAO.increaseLikeCount(vo.getBoardNum());
         return cnt;
     }
 
     public int removeInteraction(InteractionVO vo) throws Exception {
-        int cnt = boardDAO.removeLike(vo);
+        int cnt = boardDAO.removeInteraction(vo);
         boardDAO.decreaseLikeCount(vo.getBoardNum());
         return cnt;
     }

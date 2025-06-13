@@ -115,9 +115,9 @@
 
   <!-- 8) 조회수 증가 -->
   <update id="updateBoardHits" parameterType="long">
-    UPDATE BOARD SET BOARD_HITS = BOARD_HITS + 1 WHERE BOARD_NUM = #{boardNum}
+    UPDATE BOARD SET BOARD_HITS = BOARD_HITS + 1 WHERE BOARD_NUM = #{boardNum} = #{value}
   </update>
-
+  
   <!-- 9) 좋아요 수 증가 -->
   <update id="increaseLikeCount" parameterType="long">
     UPDATE BOARD SET LIKE_COUNT = LIKE_COUNT + 1 WHERE BOARD_NUM = #{boardNum}
@@ -198,17 +198,6 @@
         AND USERNAME = #{userName}
     </if>
   </select>
-
-  <!-- 21) 좋아요 추가 (기존 메서드 - 호환성 유지) -->
-  <insert id="addLike" parameterType="com.spring.app.board.interaction.InteractionVO">
-    INSERT INTO BOARD_INTERACTION (BOARD_NUM, USERNAME, TYPE)
-    VALUES (#{boardNum}, #{userName}, 'LIKE')
-  </insert>
-
-  <!-- 22) 좋아요 삭제 (기존 메서드 - 호환성 유지) -->
-  <delete id="removeLike" parameterType="com.spring.app.board.interaction.InteractionVO">
-    DELETE FROM BOARD_INTERACTION WHERE BOARD_NUM = #{boardNum} AND USERNAME = #{userName} AND TYPE = 'LIKE'
-  </delete>
 
   <!-- 23) 좋아요 수 조회 (기존 메서드 - 호환성 유지) -->
   <select id="getLikeCount" parameterType="long" resultType="long">
