@@ -1,6 +1,7 @@
 package com.spring.app.board;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.spring.app.board.comment.CommentVO;
@@ -22,9 +23,9 @@ public class BoardVO {
     /** 글 내용 */
     private String boardContents;
     /** 작성일 */
-    private Date boardDate;
+    private Timestamp boardDate;
     /** 수정일 */
-    private Date updateAt;
+    private Timestamp updateAt;
     /** 카테고리(FK) */
     private Long category;
     /** 비밀글 여부 */

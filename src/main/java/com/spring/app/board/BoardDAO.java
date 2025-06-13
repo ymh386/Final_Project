@@ -31,7 +31,7 @@ public interface BoardDAO {
     int delete(BoardVO boardVO) throws Exception;
 
     /** 7) 조회수 증가 */
-    int hitUpdate(BoardVO boardVO) throws Exception;
+    int updateBoardHits(Long boardNum) throws Exception;
 
     /** 8) 첨부파일 등록 */
     int addFile(BoardFileVO boardFileVO) throws Exception;
@@ -49,29 +49,42 @@ public interface BoardDAO {
     int getFileCount(Long boardNum) throws Exception;
 
     /** 13) 좋아요 추가 */
-    int addInteraction(InteractionVO interactionVO) throws Exception;
+    int addLike(InteractionVO interactionVO) throws Exception;
 
     /** 14) 좋아요 삭제 */
-    int removeInteraction(InteractionVO interactionVO) throws Exception;
+    int removeLike(InteractionVO interactionVO) throws Exception;
 
     /** 15) 좋아요 개수 조회 */
     long getInteractionCount(InteractionVO interactionVO) throws Exception;
 
     /** 16) 좋아요 중복 여부 확인 */
-    int isLiked(InteractionVO interactionVO) throws Exception;
+    boolean isLiked(InteractionVO interactionVO) throws Exception;
 
-    /** 17) 댓글 추가 */
+    /** 17) 좋아요 수 증가 */
+    int increaseLikeCount(Long boardNum) throws Exception;
+
+    /** 18) 좋아요 수 감소 */
+    int decreaseLikeCount(Long boardNum) throws Exception;
+
+    /** 19) 댓글 추가 */
     int addComment(CommentVO commentVO) throws Exception;
 
-    /** 18) 댓글 목록 조회 */
+    /** 20) 댓글 목록 조회 */
     List<CommentVO> getCommentList(BoardVO boardVO) throws Exception;
 
-    /** 19) 댓글 삭제 */
+    /** 21) 댓글 삭제 */
     int deleteComment(CommentVO commentVO) throws Exception;
 
-    /** 20) 비밀글 설정(업데이트) */
+    /** 22) 비밀글 설정(업데이트) */
     int updateSecret(BoardVO boardVO) throws Exception;
 
-    /** 21) 비밀글 여부 확인 */
+    /** 23) 비밀글 여부 확인 */
     boolean checkSecret(BoardVO boardVO) throws Exception;
+
+    /** 24) 게시글 등록 직접 호출용 */
+    void insertBoard(BoardVO vo);
+
+	void decreaseCommentCount(Long boardNum);
+
+	void increaseCommentCount(Long boardNum);
 }

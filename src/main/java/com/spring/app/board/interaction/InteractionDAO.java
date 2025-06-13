@@ -17,5 +17,5 @@ public interface InteractionDAO {
     Long getLikeCount(Long boardNum) throws Exception;
 
     /** 특정 사용자가 해당 게시글을 이미 좋아요했는지 확인 (0 = 안 했음, >0 = 했음) */
-    int isLiked(InteractionVO interactionVO) throws Exception;
+    boolean isLiked(InteractionVO interactionVO) throws Exception;
 }

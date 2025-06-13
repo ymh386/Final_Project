@@ -10,7 +10,7 @@ import lombok.ToString;
 @ToString
 public class CommentVO {
     /** PK */
-    private Long commentId;
+    private Long commentNum;
     /** 작성자(회원ID) */
     private String userName;
     /** 게시글 번호(FK) */
