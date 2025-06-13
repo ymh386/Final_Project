@@ -1,20 +1,19 @@
 package com.spring.app.chat;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@Setter
 @Getter
+@Setter
 @ToString
-public class MessageVO {
+public class RoomMemberVO {
 	
-	private Long messageId;
 	private Long roomId;
-	private String contents;
-	private String messageType;
-	private Date createdAt;
 	private String username;
+	private LocalDateTime joinedAt;
+	private Long lastReadMessage;
+
 }

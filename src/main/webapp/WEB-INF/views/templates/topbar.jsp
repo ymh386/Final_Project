@@ -11,7 +11,7 @@
     <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
         <sec:authorize access="isAuthenticated()">
             <sec:authorize access="!hasRole('TRAINER')">
-            <h3 class="navbar-brand me-3">구독권 잔여 일자 : ${result} 일</h3>
+            <h3 class="navbar-brand me-3">구독권 잔여 일자 : ${remainDay} 일</h3>
             <sec:authorize access="hasAuthority('CANCEL')">
                 <a class="btn btn-light me-3" href="/subscript/restart">구독 재개</a>
             </sec:authorize>

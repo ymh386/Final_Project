@@ -36,15 +36,6 @@ public class UserService implements UserDetailsService {
 	
 	@Value("${spring.mail.username}")
 	private String from;
-	
-	@Value("${twilio.account.sid}")
-	private String sid;
-	
-	@Value("${twilio.auth.token}")
-	private String token;
-	
-	@Value("${twilio.from.number}")
-	private String fromNum;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -78,6 +69,11 @@ public class UserService implements UserDetailsService {
 		return result;
 	}
 
+	public int giveTrainerRole(MemberRoleVO memberRoleVO) throws Exception {
+		int result = userDAO.giveTrainerRole(memberRoleVO);
+		
+		return result;
+	}
 	
 	public Long getTrainerCode() throws Exception {
 		Long code = userDAO.getTrainerCode();

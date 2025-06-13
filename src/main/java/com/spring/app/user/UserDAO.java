@@ -14,11 +14,17 @@ public interface UserDAO {
 	
 	int join(UserVO userVO) throws Exception;
 	
+	int giveTrainerRole(MemberRoleVO memberRoleVO) throws Exception;
+	
 	int trainerJoin(UserVO userVO) throws Exception;
 	
 	int changePw(UserVO userVO) throws Exception;
 	
+	String getEmail(String email) throws Exception;
+	
 	UserVO getUserByEmail(String email) throws Exception;
+	
+	String getPhone(String phone) throws Exception;
 	
 	UserVO getUserByPhone(String phone) throws Exception;
 	
