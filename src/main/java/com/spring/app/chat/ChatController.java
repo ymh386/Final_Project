@@ -67,6 +67,12 @@ public class ChatController {
 		return Map.of("roomId", roomId);
 	}
 	
+	@PostMapping("createdChat")
+	public void createChat(@AuthenticationPrincipal UserVO userVO) throws Exception {
+		
+		
+	}
+	
 	@GetMapping("list")
 	public void roomList(@AuthenticationPrincipal UserVO userVO, Model model
 			           , ChatRoomVO chatRoomVO) throws Exception {
