@@ -40,13 +40,25 @@ public class FindInfoService {
 		return RandomStringUtils.randomAlphanumeric(12);
 	}
 	
+	public String getPhone(String input) throws Exception {
+		String phone = userDAO.getPhone(input);
+		
+		return phone;
+	}
+	
 	public UserVO getUserByPhone(String phone) throws Exception {
 		UserVO userVO = userDAO.getUserByPhone(phone);
 		
 		return userVO;
 	}
 	
-	public UserVO getUserByEmail(String email) throws Exception {
+	public String getEmail(String input) throws Exception {
+		String email = userDAO.getEmail(input);
+		
+		return email;
+	}
+	
+	public UserVO getUserByEmail(String email) throws Exception{
 		UserVO userVO = userDAO.getUserByEmail(email);
 		
 		return userVO;

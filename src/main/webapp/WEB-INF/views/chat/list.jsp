@@ -19,13 +19,13 @@
                             <div class="col-lg-5">
 							</div>
 							<!-- contents -->
-						
+						set
+							
 
 
 
 
 
-							<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 						</div>
 					</div>
 				</main>

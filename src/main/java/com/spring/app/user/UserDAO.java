@@ -18,7 +18,11 @@ public interface UserDAO {
 	
 	int changePw(UserVO userVO) throws Exception;
 	
+	String getEmail(String email) throws Exception;
+	
 	UserVO getUserByEmail(String email) throws Exception;
+	
+	String getPhone(String phone) throws Exception;
 	
 	UserVO getUserByPhone(String phone) throws Exception;
 	

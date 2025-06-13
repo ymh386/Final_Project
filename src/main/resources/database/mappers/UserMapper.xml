@@ -20,12 +20,20 @@
  		 VALUES (#{username}, #{password}, #{name}, #{email}, #{phone}, #{birth}, #{fileName}, #{oriName}, 1, 1, 1, 1, #{sns}, #{trainerCode})
   	</insert>
   	
+  	<select id="getEmail" resultType="String">
+  		SELECT EMAIL FROM USER WHERE EMAIL=#{email}
+  	</select>
+  	
   	<select id="getUserByEmail" resultType="UserVO">
   		SELECT * FROM USER WHERE EMAIL=#{email}
   	</select>
   	
   	  <select id="getUserByPhone" resultType="UserVO">
   		SELECT * FROM USER WHERE PHONE=#{phone}
+  	</select>
+  	
+  	<select id="getPhone" resultType="String">
+  		SELECT PHONE FROM USER WHERE PHONE=#{phone}
   	</select>
   	
   	<update id="changePw" parameterType="UserVO">
