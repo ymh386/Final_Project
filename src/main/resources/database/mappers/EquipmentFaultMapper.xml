@@ -18,15 +18,19 @@
 
   <!-- 모든 고장 신고 조회 -->
   <select id="selectAllFaultReports" resultMap="faultReportResultMap">
-    SELECT REPORT_ID,
-           EQUIPMENT_ID,
-           USERNAME,
-           REPORT_DATE,
-           DESCRIPTION,
-           FAULT_STATUS,
-           RESOLVED_AT
-      FROM EQUIPMENT_FAULT
-     ORDER BY REPORT_DATE DESC
+  SELECT
+    EF.REPORT_ID,
+    EF.EQUIPMENT_ID,
+    EF.USERNAME,
+    EF.REPORT_DATE,
+    EF.DESCRIPTION,
+    EF.FAULT_STATUS,
+    EF.RESOLVED_AT,
+    E.NAME       AS equipmentName,
+    E.LOCATION   AS equipmentLocation
+  FROM EQUIPMENT_FAULT EF
+  JOIN EQUIPMENT E
+    ON EF.EQUIPMENT_ID = E.EQUIPMENT_ID
   </select>
 
   <!-- 신고 ID로 조회 -->
@@ -58,16 +62,21 @@
 
   <!-- 신고 상태로 조회 -->
   <select id="selectFaultReportsByStatus" parameterType="String" resultMap="faultReportResultMap">
-    SELECT REPORT_ID,
-           EQUIPMENT_ID,
-           USERNAME,
-           REPORT_DATE,
-           DESCRIPTION,
-           FAULT_STATUS,
-           RESOLVED_AT
-      FROM EQUIPMENT_FAULT
-     WHERE FAULT_STATUS = #{faultStatus}
-     ORDER BY REPORT_DATE DESC
+      SELECT
+    EF.REPORT_ID,
+    EF.EQUIPMENT_ID,
+    EF.USERNAME,
+    EF.REPORT_DATE,
+    EF.DESCRIPTION,
+    EF.FAULT_STATUS,
+    EF.RESOLVED_AT,
+    E.NAME     AS equipmentName,
+    E.LOCATION AS equipmentLocation
+  FROM EQUIPMENT_FAULT EF
+  JOIN EQUIPMENT E
+    ON EF.EQUIPMENT_ID = E.EQUIPMENT_ID
+  WHERE EF.FAULT_STATUS = #{faultStatus}
+  ORDER BY EF.REPORT_DATE DESC
   </select>
 
   <!-- 고장 신고 등록 -->

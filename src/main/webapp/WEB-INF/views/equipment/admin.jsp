@@ -1,29 +1,39 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+       pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>관리자 페이지 - 비품 고장 신고 관리</title>
+    <title>관리자 페이지 – 비품 고장 신고 관리</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1, h2 { margin-bottom: 0.5em; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 1.5em; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background: #f5f5f5; }
+        .no-data { padding: 20px; color: #666; }
+        .btn { padding: 4px 10px; margin-right: 4px; cursor: pointer; }
+        .btn-process { background: #4CAF50; color: white; border: none; }
+        .btn-complete { background: #2196F3; color: white; border: none; }
+    </style>
 </head>
 <body>
 
-<h1>관리자 페이지 - 비품 고장 신고 관리</h1>
+<h1>관리자 페이지 – 비품 고장 신고 관리</h1>
 
 <c:if test="${not empty message}">
-    <div>
-        ${message}
-    </div>
+    <div style="margin-bottom:1em; color: green;">${message}</div>
 </c:if>
 
 <h2>미처리 신고 현황</h2>
 <c:choose>
     <c:when test="${empty pendingReports}">
-        <p>처리 대기 중인 신고가 없습니다.</p>
+        <div class="no-data">처리 대기 중인 신고가 없습니다.</div>
     </c:when>
     <c:otherwise>
-        <table border="1">
+        <table>
             <thead>
                 <tr>
                     <th>신고번호</th>
@@ -41,28 +51,23 @@
                         <td>#${report.reportId}</td>
                         <td>${report.equipmentName}</td>
                         <td>${report.username}</td>
+                        <td>${report.reportDateStr}</td>
                         <td>
                             <c:choose>
-                                <c:when test="${not empty report.reportDate}">
-                                    ${report.reportDate.format(
-                                        java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                                    )}
-                                </c:when>
-                                <c:otherwise>-</c:otherwise>
+                                <c:when test="${empty report.description}">–</c:when>
+                                <c:otherwise>${report.description}</c:otherwise>
                             </c:choose>
-                        </td>
-                        <td>
-                            <c:if test="${empty report.description}">
-                                상세 내용 없음
-                            </c:if>
-                            <c:if test="${not empty report.description}">
-                                ${report.description}
-                            </c:if>
                         </td>
                         <td>${report.faultStatus}</td>
                         <td>
-                            <button onclick="updateStatus(${report.reportId}, '처리중')">처리중</button>
-                            <button onclick="resolveReport(${report.reportId}, ${report.equipmentId})">완료</button>
+                            <button class="btn btn-process"
+                                    onclick="updateStatus(${report.reportId}, '처리중')">
+                                처리중
+                            </button>
+                            <button class="btn btn-complete"
+                                    onclick="resolveReport(${report.reportId}, ${report.equipmentId})">
+                                완료
+                            </button>
                         </td>
                     </tr>
                 </c:forEach>
@@ -74,10 +79,10 @@
 <h2>전체 신고 내역</h2>
 <c:choose>
     <c:when test="${empty allReports}">
-        <p>신고 내역이 없습니다.</p>
+        <div class="no-data">신고 내역이 없습니다.</div>
     </c:when>
     <c:otherwise>
-        <table border="1">
+        <table>
             <thead>
                 <tr>
                     <th>신고번호</th>
@@ -97,35 +102,23 @@
                         <td>${report.equipmentName}</td>
                         <td>${report.equipmentLocation}</td>
                         <td>${report.username}</td>
-                        <td>
-                            <c:choose>
-                                <c:when test="${not empty report.reportDate}">
-                                    ${report.reportDate.format(
-                                        java.time.format.DateTimeFormatter.ofPattern("MM-dd HH:mm")
-                                    )}
-                                </c:when>
-                                <c:otherwise>-</c:otherwise>
-                            </c:choose>
-                        </td>
+                        <td>${report.reportDateStr}</td>
                         <td>${report.faultStatus}</td>
+                        <td>${report.resolvedAtStr}</td>
                         <td>
                             <c:choose>
-                                <c:when test="${not empty report.resolvedAt}">
-                                    ${report.resolvedAt.format(
-                                        java.time.format.DateTimeFormatter.ofPattern("MM-dd HH:mm")
-                                    )}
+                                <c:when test="${report.faultStatus != '처리완료'}">
+                                    <button class="btn btn-process"
+                                            onclick="updateStatus(${report.reportId}, '처리중')">
+                                        처리중
+                                    </button>
+                                    <button class="btn btn-complete"
+                                            onclick="resolveReport(${report.reportId}, ${report.equipmentId})">
+                                        완료
+                                    </button>
                                 </c:when>
-                                <c:otherwise>-</c:otherwise>
+                                <c:otherwise>완료됨</c:otherwise>
                             </c:choose>
-                        </td>
-                        <td>
-                            <c:if test="${report.faultStatus != '처리완료'}">
-                                <button onclick="updateStatus(${report.reportId}, '처리중')">처리중</button>
-                                <button onclick="resolveReport(${report.reportId}, ${report.equipmentId})">완료</button>
-                            </c:if>
-                            <c:if test="${report.faultStatus == '처리완료'}">
-                                완료됨
-                            </c:if>
                         </td>
                     </tr>
                 </c:forEach>
@@ -135,12 +128,12 @@
 </c:choose>
 
 <form id="statusUpdateForm" action="/equipment/updateStatus" method="post" style="display:none;">
-    <input type="hidden" name="reportId" id="statusReportId" />
-    <input type="hidden" name="faultStatus" id="statusValue" />
+    <input type="hidden" name="reportId" id="statusReportId"/>
+    <input type="hidden" name="faultStatus" id="statusValue"/>
 </form>
 <form id="resolveForm" action="/equipment/resolve" method="post" style="display:none;">
-    <input type="hidden" name="reportId" id="resolveReportId" />
-    <input type="hidden" name="equipmentId" id="resolveEquipmentId" />
+    <input type="hidden" name="reportId" id="resolveReportId"/>
+    <input type="hidden" name="equipmentId" id="resolveEquipmentId"/>
 </form>
 
 <script>

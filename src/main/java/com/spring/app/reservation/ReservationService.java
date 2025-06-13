@@ -93,17 +93,26 @@ public class ReservationService {
 	}
 
 	public List<Map<String, Object>> getEvent(String username) {
-
-		return reservationDAO.selectMember(username).stream().map(row -> {
-			Map<String, Object> evt = new HashMap<>();
-			evt.put("id", row.get("reservationId"));
-			evt.put("title", "예약: " + row.get("facilityName"));
-			evt.put("start", row.get("scheduleDate") + "T" + row.get("startTime"));
-			evt.put("end", row.get("scheduleDate") + "T" + row.get("endTime"));
-			evt.put("allDay", false);
-			return evt;
-		}).collect(Collectors.toList());
-
+	    return reservationDAO.selectMember(username).stream().map(row -> {
+	        Map<String, Object> evt = new HashMap<>();
+	        evt.put("id", row.get("reservationId"));
+	        
+	        // 시간 포맷팅
+	        String startTime = row.get("startTime").toString().substring(0, 5); // HH:MM
+	        String endTime = row.get("endTime").toString().substring(0, 5);     // HH:MM
+	        
+	        // 제목: "09:00-10:00\n김트레이너\n헬스장" 형태
+	        String title = String.format("%s-%s\n%s\n%s", 
+	            startTime, endTime, 
+	            row.get("trainerName"),   // 트레이너명 추가
+	            row.get("facilityName"));
+	        evt.put("title", title);
+	        
+	        evt.put("start", row.get("scheduleDate") + "T" + row.get("startTime"));
+	        evt.put("end", row.get("scheduleDate") + "T" + row.get("endTime"));
+	        evt.put("allDay", false);
+	        return evt;
+	    }).collect(Collectors.toList());
 	}
 	
 
