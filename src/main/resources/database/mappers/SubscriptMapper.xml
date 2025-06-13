@@ -2,83 +2,110 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-  
-  <mapper namespace="com.spring.app.subscript.SubscriptDAO">
-  
-  	<select id="getPlans" resultType="SubscriptionVO">
-  		SELECT * FROM SUBSCRIPTION WHERE IS_ACTIVE=1
-  	</select>
-	
-	<select id="getPlansDetail" resultType="SubscriptionVO">
-		SELECT * FROM SUBSCRIPTION WHERE SUBSCRIPTION_ID=#{subscriptionId}
+
+<mapper namespace="com.spring.app.subscript.SubscriptDAO">
+
+	<select id="getPlans" resultType="SubscriptionVO">
+		SELECT * FROM SUBSCRIPTION WHERE IS_ACTIVE=1
 	</select>
-	
+
+	<select id="getPlansDetail" resultType="SubscriptionVO">
+		SELECT * FROM
+		SUBSCRIPTION WHERE SUBSCRIPTION_ID=#{subscriptionId}
+	</select>
+
 	<select id="getEndingPlan" resultType="SubscriptVO">
-		SELECT * FROM MEMBER_SUBSCRIPT 
+		SELECT * FROM
+		MEMBER_SUBSCRIPT
 		WHERE END_DATE=CURDATE()
 	</select>
-	
+
 	<select id="getEndDate" resultType="java.time.LocalDate">
-		SELECT MAX(END_DATE) FROM MEMBER_SUBSCRIPT WHERE USERNAME=#{username}
+		SELECT MAX(END_DATE) FROM
+		MEMBER_SUBSCRIPT WHERE USERNAME=#{username}
 	</select>
-	
+
 	<select id="getSubscriptById" resultType="SubscriptVO">
-		SELECT * FROM MEMBER_SUBSCRIPT WHERE SUBSCRIPTION_ID=#{subscriptionId} AND USERNAME=#{username}
+		SELECT * FROM
+		MEMBER_SUBSCRIPT WHERE SUBSCRIPTION_ID=#{subscriptionId} AND
+		USERNAME=#{username}
 	</select>
-	
+
 	<select id="getSubscriptByUser" resultMap="subscript">
-		SELECT * FROM MEMBER_SUBSCRIPT MS
+		SELECT * FROM
+		MEMBER_SUBSCRIPT MS
 		INNER JOIN SUBSCRIPTION
 		USING (SUBSCRIPTION_ID)
 		WHERE USERNAME=#{username} AND SUBSCRIPT_STATUS='ACTIVE'
 	</select>
-	
+
 	<resultMap type="SubscriptVO" id="subscript">
-		<id column="SUBSCRIPT_ID" property="subscriptId"/>
-		<result column="USERNAME" property="username"/>
-		<result column="START_DATE" property="startDate"/>
-		<result column="END_DATE" property="endDate"/>
-		<result column="SUBSCRIPT_STATUS" property="subscriptStatus"/>
-		<result column="CREATED_AT" property="createdAt"/>
-		<association javaType="SubscriptionVO" property="subscriptionVO">
-			<id column="SUBSCRIPTION_ID" property="subscriptionId"/>
-			<result column="SUBSCRIPTION_NAME" property="subscriptionName"/>
-			<result column="DAYS" property="days"/>
-			<result column="PRICE" property="price"/>
-			<result column="SUBSCRIPTION_CONTENTS" property="subscriptionContents"/>
-			<result column="IS_ACTIVE" property="isActive"/>
+		<id column="SUBSCRIPT_ID" property="subscriptId" />
+		<result column="USERNAME" property="username" />
+		<result column="START_DATE" property="startDate" />
+		<result column="END_DATE" property="endDate" />
+		<result column="SUBSCRIPT_STATUS" property="subscriptStatus" />
+		<result column="CREATED_AT" property="createdAt" />
+		<association javaType="SubscriptionVO"
+			property="subscriptionVO">
+			<id column="SUBSCRIPTION_ID" property="subscriptionId" />
+			<result column="SUBSCRIPTION_NAME" property="subscriptionName" />
+			<result column="DAYS" property="days" />
+			<result column="PRICE" property="price" />
+			<result column="SUBSCRIPTION_CONTENTS"
+				property="subscriptionContents" />
+			<result column="IS_ACTIVE" property="isActive" />
 		</association>
 	</resultMap>
-	
+
 	<select id="getRemainDays" resultType="int">
-		SELECT IFNULL(SUM(DATEDIFF(END_DATE, CURRENT_DATE())), 0)
-		  FROM MEMBER_SUBSCRIPT
-		 WHERE USERNAME = #{username}
-		   AND SUBSCRIPT_STATUS = 'ACTIVE'	
+		SELECT
+		IFNULL(SUM(DATEDIFF(END_DATE, CURRENT_DATE())), 0)
+		FROM MEMBER_SUBSCRIPT
+		WHERE USERNAME = #{username}
+		AND SUBSCRIPT_STATUS = 'ACTIVE'
 	</select>
-	
+
 	<select id="getNextId" resultType="long">
-  		SELECT AUTO_INCREMENT
+		SELECT AUTO_INCREMENT
 		FROM INFORMATION_SCHEMA.TABLES
 
-		WHERE TABLE_SCHEMA = 'final'
+		WHERE TABLE_SCHEMA =
+		'final'
 
-		AND TABLE_NAME = 'MEMBER_SUBSCRIPT';		
+		AND TABLE_NAME = 'MEMBER_SUBSCRIPT';
 	</select>
-	
-	<insert id="newSubscript" parameterType="SubscriptVO">
-		INSERT INTO MEMBER_SUBSCRIPT VALUES 
-		(#{subscriptId}, #{subscriptionId}, #{username}, #{startDate}, #{endDate}, #{subscriptStatus}, #{createdAt})
-	</insert>
-	
-	<update id="updateSubscript" parameterType="SubscriptVO">
-		UPDATE MEMBER_SUBSCRIPT SET SUBSCRIPT_STATUS='CANCEL' WHERE USERNAME=#{username}
-	</update>
-	
-	<delete id="deleteSubscript">
-		DELETE FROM MEMBER_SUBSCRIPT WHERE SUBSCRIPT_ID=#{subscriptId}
-	</delete>
-	
 
-  	
-  </mapper>
+	<insert id="newSubscript" parameterType="SubscriptVO">
+		INSERT INTO
+		MEMBER_SUBSCRIPT VALUES
+		(#{subscriptId}, #{subscriptionId}, #{username}, #{startDate}, #{endDate},
+		#{subscriptStatus}, #{createdAt})
+	</insert>
+
+	<update id="updateSubscript" parameterType="SubscriptVO">
+		UPDATE
+		MEMBER_SUBSCRIPT SET SUBSCRIPT_STATUS='CANCEL' WHERE
+		USERNAME=#{username}
+	</update>
+
+	<delete id="deleteSubscript">
+		DELETE FROM MEMBER_SUBSCRIPT WHERE
+		SUBSCRIPT_ID=#{subscriptId}
+	</delete>
+
+	<!-- 오늘자 ACTIVE 구독 건수 조회 -->
+	<select id="countActiveByUser" parameterType="string"
+		resultType="int">
+		SELECT COUNT(*)
+		FROM MEMBER_SUBSCRIPT
+		WHERE USERNAME = #{username}
+		AND SUBSCRIPT_STATUS = 'ACTIVE'
+		AND CURDATE() BETWEEN START_DATE AND END_DATE
+	</select>
+
+
+
+
+
+</mapper>

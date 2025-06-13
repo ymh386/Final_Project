@@ -22,7 +22,7 @@ public interface ReservationDAO {
     List<ReservationVO> selectByUsername(String username);
 
     /** 3) 새 예약 삽입 */
-    void insertReservation(ReservationVO vo);
+    int insertReservation(ReservationVO vo);
 
     /** 4) 예약 취소 처리 */
     void cancelReservation(ReservationVO vo);
