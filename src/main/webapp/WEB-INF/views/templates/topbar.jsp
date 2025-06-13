@@ -18,7 +18,7 @@
             <sec:authorize access="hasAuthority('APPROVE')">
                 <a class="btn btn-light me-3" href="/subscript/cancel">구독 취소</a>
             </sec:authorize>
-            <c:if test="${result eq 0}">
+            <c:if test="${remainDay eq 0}">
                 <a class="btn btn-light me-3"  href="/subscript/list">구독</a>
             </c:if>
             </sec:authorize>

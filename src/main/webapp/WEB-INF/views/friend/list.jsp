@@ -36,6 +36,7 @@
 									<div class="d-flex justify-content-center align-items-center" 
 										style="height: 60vh;">
 										<h1 class="text-muted">친구가 없습니다ㅠㅠㅠ 불쌍해라</h1>
+										<input hidden name="user1" value="${user.username}">
 									</div>
 									</c:if>
 								<c:forEach var="l" items="${list}">

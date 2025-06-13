@@ -34,7 +34,6 @@ public class AdminController {
 	@PostMapping("updateState")
 	String updateState(MemberStateVO memberStateVO, MemberRoleVO memberRoleVO) throws Exception {
 		int result = userService.updateUserState(memberStateVO);
-		int result2 = userService.giveTrainerRole(memberRoleVO);
 		return "redirect:../";
 	}
 

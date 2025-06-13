@@ -6,24 +6,36 @@
   <mapper namespace="com.spring.app.chat.ChatDAO">
   
   	<select id="getRoomList" resultMap="roomMap">
-  		SELECT cr.ROOM_ID, cr.ROOM_NAME, cr.ROOM_TYPE, cr.CREATED_AT, lm.MESSAGE_ID, lm.CONTENTS, lm.MESSAGE_TYPE, lm.CREATED_AT, lm.USERNAME
-  		  FROM CHAT_ROOM cr
-  		  LEFT JOIN (
-  		SELECT m1.*
-  		  FROM CHAT_MESSAGE m1
-  		 INNER JOIN (
-  		SELECT ROOM_ID, MAX(CREATED_AT) AS last_created, 
-  		  FROM CHAT_MESSAGE
-  		 GROUP BY ROOM_ID) m2
-  		       ON m1.ROOM_ID=m2.ROOM_ID
-  		       AND m1.CREATED_AT=m2.last_created
-  		       ) AS lm
-  		       ON cr.ROOM_ID=lm.ROOM_ID
-  		 ORDER BY lm.last_created DESC;
+		SELECT *
+		  FROM CHAT_ROOM CR
+		 INNER JOIN CHAT_ROOM_MEMBER CRM
+		 USING (ROOM_ID)
+		 WHERE USERNAME=#{username}
+		
   	</select>
   	
   	<resultMap type="ChatRoomVO" id="roomMap">
-  		
+  		<id column="ROOM_ID" property="roomId"/>
+  		<result column="ROOM_NAME" property="roomName"/>
+  		<result column="ROOM_TYPE" property="roomType"/>
+  		<result column="CREATED_AT" property="createdAt"/>
+		<association javaType="RoomMemberVO" property="roomMemberVO">
+			<id column="USERNAME" property="username"/>
+			<result column="JOINED_AT" property="joinedAt"/>
+			<result column="LAST_READ_MESSAGE" property="lastReadMessage"/>
+		</association>
   	</resultMap>
+  	
+  	<insert id="makeChat" parameterType="ChatRoomVO" useGeneratedKeys="true" keyProperty="roomId">
+  		INSERT INTO CHAT_ROOM (ROOM_NAME, ROOM_TYPE, CREATED_AT) VALUES (#{roomName}, '단일 채팅', NOW())
+  	</insert>
+  	
+  	<insert id="makeRoom" parameterType="ChatRoomVO" useGeneratedKeys="true" keyProperty="roomId">
+  		INSERT INTO CHAT_ROOM (ROOM_NAME, ROOM_TYPE, CREATED_AT) VALUES (#{roomName}, '그룹 채팅', NOW())
+  	</insert>
+  	
+  	<insert id="insertMember" parameterType="RoomMemberVO">
+  		INSERT INTO CHAT_ROOM_MEMBER VALUES (#{roomId}, #{username}, NOW(), #{lastReadMessage})
+  	</insert>
   	
   </mapper>

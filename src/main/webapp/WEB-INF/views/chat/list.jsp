@@ -20,77 +20,46 @@
 								<h2 class="mb-0">채팅</h2>
 
 								<div class="d-flex gap-2">
-									<a href="/chat/makeRoom" class="btn btn-primary btn-sm">새 채팅</a>
+									<a onclick="makeChat()" class="btn btn-primary btn-sm">채팅 시작</a>
 								</div>
 								</div>
 								<!-- Chat List Wrapper -->
 								<div class="list-group">
-
-								<!-- 하나의 채팅방 아이템 -->
-								<a href="#" onclick="openChatRoom()"  class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
-									<div class="d-flex align-items-center">
-									<img src="/img/default.png" 
-										class="rounded-circle me-3" 
-										width="48" height="48" 
-										alt="avatar">
-									<div>
-										<div class="fw-bold">Test_ChatRoom_title</div>
-										<div class="text-muted small text-truncate" style="max-width:200px;">
-										Test_ChatRoom_Content_Title
+								
+								<c:forEach var="l" items="${list}">
+									<a href="#" onclick="openChatRoom()"  class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
+										<div class="d-flex align-items-center">
+										<img src="/img/default.png" 
+											class="rounded-circle me-3" 
+											width="48" height="48" 
+											alt="avatar">
+										<div>
+											<div class="fw-bold">${l.roomName}</div>
+											<div class="text-muted small text-truncate" style="max-width:200px;">
+											Test_ChatRoom_Content_Title
+											</div>
 										</div>
-									</div>
-									</div>
-									<div class="text-end">
-									<div class="text-muted small">오전 9:50</div>
-									<span class="badge bg-danger rounded-pill">1</span>
-									</div>
-								</a>
-
-								<a href="#" onclick="showChatModal()" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
-									<div class="d-flex align-items-center">
-									<img src="/img/default.png" class="rounded-circle me-3" width="48" height="48">
-									<div>
-										<div class="fw-bold">Test_ChatRoom_title</div>
-										<div class="text-muted small text-truncate" style="max-width:200px;">
-										Test_ChatRoom_Content_Title
 										</div>
-									</div>
-									</div>
-									<div class="text-end">
-									<div class="text-muted small">오전 9:42</div>
-									<span class="badge bg-secondary rounded-pill">4</span>
-									</div>
-								</a>
+										<div class="text-end">
+										<div class="text-muted small">오전 9:50</div>
+										<span class="badge bg-danger rounded-pill">1</span>
+										</div>
+									</a>
+								</c:forEach>
 								</div>
-								<div class="modal fade" id="chatModal" tabindex="-1">
-								<div class="modal-dialog">
-									<div class="modal-content">
-									<div class="modal-header">채팅</div>
-									<div class="modal-body" id="chatContent"></div>
-									</div>
-								</div>
-								</div>
-								<script>
-								function openChatRoom() {
-									window.open(
-									'/',
-									'_blank',
-									'width=500,height=700,left=100,top=100,resizable=no'
-									);
-								}
-								</script>
-							
-						</div>
+								
+							</div>
 					</div>
 				</main>
 			</div>
 					
-	
-	
-	
-	
-		<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+			
+			
+			
+			
+			<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 		</div>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="/js/chat/chat.js"></script>
 	</body>
 </html>
