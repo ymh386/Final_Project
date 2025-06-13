@@ -32,6 +32,12 @@
 										<a class="nav-link" href="./suggestList">추천 친구</a>
 									</li>																		
 								</ul>
+								    <c:if test="${empty list}">
+									<div class="d-flex justify-content-center align-items-center" 
+										style="height: 60vh;">
+										<h1 class="text-muted">친구가 없습니다ㅠㅠㅠ 불쌍해라</h1>
+									</div>
+									</c:if>
 								<c:forEach var="l" items="${list}">
 									<form action="/friend/deleteFriend" method="post">
 										<a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">

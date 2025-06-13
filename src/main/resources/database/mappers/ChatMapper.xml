@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.spring.app.chat.ChatDAO">
+  
+  	<select id="getRoomList" resultMap="roomMap">
+  		SELECT cr.ROOM_ID, cr.ROOM_NAME, cr.ROOM_TYPE, cr.CREATED_AT, lm.MESSAGE_ID, lm.CONTENTS, lm.MESSAGE_TYPE, lm.CREATED_AT, lm.USERNAME
+  		  FROM CHAT_ROOM cr
+  		  LEFT JOIN (
+  		SELECT m1.*
+  		  FROM CHAT_MESSAGE m1
+  		 INNER JOIN (
+  		SELECT ROOM_ID, MAX(CREATED_AT) AS last_created, 
+  		  FROM CHAT_MESSAGE
+  		 GROUP BY ROOM_ID) m2
+  		       ON m1.ROOM_ID=m2.ROOM_ID
+  		       AND m1.CREATED_AT=m2.last_created
+  		       ) AS lm
+  		       ON cr.ROOM_ID=lm.ROOM_ID
+  		 ORDER BY lm.last_created DESC;
+  	</select>
+  	
+  	<resultMap type="ChatRoomVO" id="roomMap">
+  		
+  	</resultMap>
+  	
+  </mapper>

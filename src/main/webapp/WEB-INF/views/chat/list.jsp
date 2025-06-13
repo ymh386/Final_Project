@@ -16,12 +16,18 @@
                 <main class="flex-grow-1">
                     <div class="container">
 							<!-- contents -->
-							    <h2>채팅</h2>
+							    <div class="d-flex justify-content-between align-items-center mb-3">
+								<h2 class="mb-0">채팅</h2>
+
+								<div class="d-flex gap-2">
+									<a href="/chat/makeRoom" class="btn btn-primary btn-sm">새 채팅</a>
+								</div>
+								</div>
 								<!-- Chat List Wrapper -->
 								<div class="list-group">
 
 								<!-- 하나의 채팅방 아이템 -->
-								<a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
+								<a href="#" onclick="openChatRoom()"  class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
 									<div class="d-flex align-items-center">
 									<img src="/img/default.png" 
 										class="rounded-circle me-3" 
@@ -40,7 +46,7 @@
 									</div>
 								</a>
 
-								<a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
+								<a href="#" onclick="showChatModal()" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
 									<div class="d-flex align-items-center">
 									<img src="/img/default.png" class="rounded-circle me-3" width="48" height="48">
 									<div>
@@ -55,14 +61,24 @@
 									<span class="badge bg-secondary rounded-pill">4</span>
 									</div>
 								</a>
-
 								</div>
-
-
-
-
-
-
+								<div class="modal fade" id="chatModal" tabindex="-1">
+								<div class="modal-dialog">
+									<div class="modal-content">
+									<div class="modal-header">채팅</div>
+									<div class="modal-body" id="chatContent"></div>
+									</div>
+								</div>
+								</div>
+								<script>
+								function openChatRoom() {
+									window.open(
+									'/',
+									'_blank',
+									'width=500,height=700,left=100,top=100,resizable=no'
+									);
+								}
+								</script>
 							
 						</div>
 					</div>
