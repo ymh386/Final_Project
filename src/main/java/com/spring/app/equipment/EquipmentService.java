@@ -1,6 +1,7 @@
 package com.spring.app.equipment;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,8 +95,13 @@ public class EquipmentService {
     @Transactional
     public boolean resolveFaultReport(Long reportId, Long equipmentId) {
         try {
+        	
+        	
+        	EquipmentFaultVO vo = new EquipmentFaultVO();
+            vo.setReportId(reportId);
+            vo.setResolvedAt(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
             // 1. 신고 처리 완료
-            int reportResult = faultDAO.resolveFaultReport(reportId);
+            int reportResult = faultDAO.resolveFaultReport(vo);
             
             // 2. 비품 상태를 '정상'으로 변경
             int statusResult = equipmentDAO.updateEquipmentStatus(equipmentId, "정상");
@@ -105,6 +111,16 @@ public class EquipmentService {
             throw new RuntimeException("고장 신고 처리 완료 중 오류가 발생했습니다.", e);
         }
     }
+    
+    public int getTotalFaultReportsCount() {
+        return faultDAO.getTotalFaultReportsCount();
+    }
+    
+    public List<EquipmentFaultVO> getFaultReportsByPage(int offset, int size) {
+        return faultDAO.getFaultReportsByPage(offset, size);
+    }
+    
+    
 }
 
 	

@@ -96,10 +96,10 @@
   </update>
 
   <!-- 신고 처리 완료 -->
-  <update id="resolveFaultReport" parameterType="Long">
+  <update id="resolveFaultReport" parameterType="EquipmentFaultVO">
     UPDATE EQUIPMENT_FAULT
        SET FAULT_STATUS = '처리완료',
-           RESOLVED_AT  = NOW()
+           RESOLVED_AT  = #{resolvedAt}
      WHERE REPORT_ID   = #{reportId}
   </update>
 
@@ -108,5 +108,33 @@
     DELETE FROM EQUIPMENT_FAULT
      WHERE REPORT_ID = #{reportId}
   </delete>
+  
+  <!-- 페이징을 위한 새로운 쿼리들 -->
+<select id="getTotalFaultReportsCount" resultType="int">
+    SELECT COUNT(*)
+    FROM EQUIPMENT_FAULT
+</select>
+
+<select id="getFaultReportsByPage" resultType="EquipmentFaultVO" parameterType="map">
+    SELECT FR.REPORT_ID AS REPORTID,
+           FR.EQUIPMENT_ID AS EQUIPMENTID,
+           E.NAME AS EQUIPMENTNAME,
+           FR.USERNAME,
+           FR.DESCRIPTION,
+           FR.FAULT_STATUS AS FAULTSTATUS,
+           FR.REPORT_DATE AS REPORTDATE,
+           DATE_FORMAT(FR.REPORT_DATE, '%Y-%m-%d %H:%i') AS REPORTDATESTR,
+           FR.RESOLVED_AT AS RESOLVEDAT,
+           DATE_FORMAT(FR.RESOLVED_AT, '%Y-%m-%d %H:%i') AS RESOLVEDATSTR
+    FROM EQUIPMENT_FAULT FR
+    JOIN EQUIPMENT E ON FR.EQUIPMENT_ID = E.EQUIPMENT_ID
+    ORDER BY FR.REPORT_DATE DESC
+    LIMIT #{offset}, #{size}
+</select>
+  
+  
+  
+  
+  
 
 </mapper>

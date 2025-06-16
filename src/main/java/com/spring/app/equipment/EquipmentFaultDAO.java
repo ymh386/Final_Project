@@ -28,10 +28,15 @@ public interface EquipmentFaultDAO {
     int updateFaultStatus(@Param("reportId") Long reportId, @Param("faultStatus") String faultStatus);
     
     // 신고 처리 완료
-    int resolveFaultReport(@Param("reportId") Long reportId);
+    int resolveFaultReport(EquipmentFaultVO vo);
     
     // 신고 삭제
     int deleteFaultReport(@Param("reportId") Long reportId);
+    
+    //페이징
+    int getTotalFaultReportsCount();
+    
+    List<EquipmentFaultVO> getFaultReportsByPage(int offset, int size);
 	
 	
 	
