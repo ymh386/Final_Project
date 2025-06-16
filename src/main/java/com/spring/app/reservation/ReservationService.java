@@ -88,8 +88,10 @@ public class ReservationService {
 		scheduleDAO.incrementRemainingSeats(vo.getScheduleId());
 	}
 
-	public List<ReservationVO> getReservationsByUsername(String username) {
-		return reservationDAO.selectByUsername(username);
+	public List<ReservationVO> getReservationsByUsername(String username, int startRow, int pageSize) {
+		
+		return reservationDAO.getReservationsByUsernameWithPaging(username,startRow, pageSize);
+		
 	}
 
 	public List<Map<String, Object>> getEvent(String username) {
@@ -115,5 +117,10 @@ public class ReservationService {
 	    }).collect(Collectors.toList());
 	}
 	
+	
+	//사용자 전체 예약 개수 조회
+	 public long getTotalReservationCount(String username) {
+	        return reservationDAO.countReservationsByUsername(username);
+	    }
 
 }

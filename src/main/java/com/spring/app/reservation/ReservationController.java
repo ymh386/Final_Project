@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.spring.app.home.util.Pager;
 import com.spring.app.schedule.ScheduleService;
 import com.spring.app.schedule.ScheduleVO;
 
@@ -104,23 +105,49 @@ public class ReservationController {
     }
     
     @GetMapping("/my")
-    public String myReservations(Model model) {
+    public String myReservations(
+            @RequestParam(defaultValue = "1") int page,
+            Model model) {
+        
         String username = SecurityContextHolder
-                              .getContext()
-                              .getAuthentication()
-                              .getName();
-        List<ReservationVO> list = reservationService.getReservationsByUsername(username);
+                .getContext()
+                .getAuthentication()
+                .getName();
+        
+        // Pager 객체 생성 및 설정
+        Pager pager = new Pager();
+        pager.setCurPage(page);
+        pager.setPerPage(5); // 페이지당 10개씩 표시
+        pager.setPerBlock(5);  // 블록당 5개 페이지 번호 표시
+        
+        // DB 쿼리용 파라미터 계산 (startRow, pageSize)
+        pager.makeRow();
+
+        
+        // 현재 사용자의 전체 예약 개수 조회
+        long totalCount = reservationService.getTotalReservationCount(username);
+        
+        // 페이징 정보 계산 (totalPage, startPage, lastPage, prev, next)
+        pager.makePage(totalCount);
+        
+        System.out.println("Total Page: " + pager.getTotalPage());
+        System.out.println("Current Page: " + pager.getCurPage());
+        
+        
+        // 현재 페이지의 예약 목록 조회 (LIMIT 적용)
+        List<ReservationVO> list = reservationService.getReservationsByUsername(
+                username, pager.getStartRow(), pager.getPageSize());
+        
         model.addAttribute("list", list);
-        model.addAttribute("trainerList",  userService.getUsersByUsernamePrefix("T%"));
-   
-        // 4) 전체 스케줄 목록 (scheduleId → username 매핑용)
+        model.addAttribute("pager", pager); // 페이징 정보 추가
+        model.addAttribute("trainerList", userService.getUsersByUsernamePrefix("T%"));
+        
+        // 전체 스케줄 목록 (scheduleId → username 매핑용)
         List<ScheduleVO> schedules = scheduleService.getAllSchedules();
         model.addAttribute("schedules", schedules);
         
-        
         return "reservation/myList";
     }
-    
     
     
     

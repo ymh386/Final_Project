@@ -9,15 +9,133 @@
   <meta charset="UTF-8">
   <title>내 예약 목록</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h2 { margin-bottom: 10px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background: #f0f0f0; }
-    .msg { color: green; margin-bottom: 15px; }
-    a.button { margin-top: 15px; display: inline-block; padding: 6px 12px; 
-               background: #007bff; color: #fff; text-decoration: none; border-radius: 4px; }
-    a.button:hover { background: #0056b3; }
+    /* Reset & Base */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f5f7fa; color: #333; margin: 20px; }
+    
+    h2 { margin-bottom: 20px; color: #2c3e50; font-size: 2rem; }
+    
+    p { margin-bottom: 15px; color: #34495e; }
+    
+    table { 
+      border-collapse: collapse; 
+      width: 100%; 
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+    }
+    
+    th, td { 
+      border: 1px solid #e0e6ed; 
+      padding: 12px 8px; 
+      text-align: center; 
+    }
+    
+    th { 
+      background: #34495e; 
+      color: #fff;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    
+    td {
+      font-size: 0.85rem;
+      color: #2c3e50;
+    }
+    
+    .msg { 
+      color: #27ae60; 
+      margin-bottom: 15px; 
+      padding: 10px;
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      border-radius: 4px;
+    }
+    
+    a.button { 
+      margin-top: 15px; 
+      margin-right: 10px;
+      display: inline-block; 
+      padding: 10px 20px; 
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: #fff; 
+      text-decoration: none; 
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 8px rgba(37,117,252,0.3);
+    }
+    
+    a.button:hover { 
+      background: linear-gradient(135deg, #5a09b8 0%, #1f65e0 100%);
+      box-shadow: 0 6px 12px rgba(31,101,224,0.4);
+      transform: translateY(-2px);
+    }
+    
+    /* Form 스타일링 */
+    form input[type="text"] {
+      padding: 6px 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      width: 120px;
+    }
+    
+    form button {
+      padding: 6px 12px;
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      margin-left: 5px;
+    }
+    
+    form button:hover {
+      background: #c0392b;
+    }
+
+    /* Pagination - 게시판 스타일과 동일하게 */
+    .pagination { 
+      text-align: center; 
+      margin-top: 36px; 
+    }
+    
+    .pagination a, .pagination strong {
+      display: inline-block; 
+      margin: 0 6px; 
+      padding: 10px 14px; 
+      border-radius: 4px;
+      font-size: 0.9rem; 
+      transition: background 0.2s ease;
+    }
+    
+    .pagination a {
+      color: #3498db;
+      text-decoration: none;
+    }
+    
+    .pagination a:hover {
+      background: #ecf6fc;
+    }
+    
+    .pagination strong {
+      background: #3498db;
+      color: #fff;
+    }
+
+    /* 페이지 정보 스타일링 */
+    .page-info {
+      text-align: center; 
+      margin-top: 10px; 
+      color: #7f8c8d; 
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
@@ -99,6 +217,35 @@
       </tr>
     </c:forEach>
   </table>
+
+  <!-- 페이징 네비게이션 - 게시판 스타일 적용 -->
+  <c:if test="${pager.totalPage > 1}">
+    <div class="pagination">
+      <c:if test="${pager.prev}">
+        <a href="?page=${pager.startPage - 1}">&laquo; 이전</a>
+      </c:if>
+
+      <c:forEach var="i" begin="${pager.startPage}" end="${pager.lastPage}">
+        <c:choose>
+          <c:when test="${i == pager.curPage}">
+            <strong>${i}</strong>
+          </c:when>
+          <c:otherwise>
+            <a href="?page=${i}">${i}</a>
+          </c:otherwise>
+        </c:choose>
+      </c:forEach>
+
+      <c:if test="${pager.next}">
+        <a href="?page=${pager.lastPage + 1}">다음 &raquo;</a>
+      </c:if>
+    </div>
+    
+    <!-- 페이지 정보 표시 -->
+    <div class="page-info">
+      총 ${pager.totalCount}개 중 ${pager.curPage}/${pager.totalPage} 페이지
+    </div>
+  </c:if>
 
   <a class="button" href="${pageContext.request.contextPath}/reservation/book">예약하기</a>
   <a class="button" href="${pageContext.request.contextPath}/">홈 화면</a>

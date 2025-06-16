@@ -19,7 +19,10 @@ public interface ReservationDAO {
     List<ReservationVO> selectBySchedule(Long scheduleId);
     
     // 유저 별 리스트 조회
-    List<ReservationVO> selectByUsername(String username);
+    List<ReservationVO> getReservationsByUsernameWithPaging(
+            @Param("username") String username, 
+            @Param("startRow") int startRow, 
+            @Param("pageSize") int pageSize);
 
     /** 3) 새 예약 삽입 */
     int insertReservation(ReservationVO vo);
@@ -38,6 +41,12 @@ public interface ReservationDAO {
     int countByUsernameAndMonth(@Param ("username") String username,
     							@Param ("year") int year,
     							@Param ("month") int month);
+    
+    
+    /**
+     * 사용자의 전체 예약 개수 조회
+     */
+    long countReservationsByUsername(String username);
     
     
     

@@ -60,12 +60,38 @@
   </update>
   
   
+    <!-- 페이징을 적용한 예약 목록 조회 -->
+    <select id="getReservationsByUsernameWithPaging" 
+            parameterType="map" 
+            resultType="ReservationVO">
+        SELECT RESERVATION_ID as reservationId,
+               SCHEDULE_ID as scheduleId,
+               FACILITY_ID as facilityId,
+               USERNAME,
+               CREATED_AT as createdAt,
+               CANCELED_AT as canceledAt,
+               CANCELED_REASON as canceledReason
+        FROM RESERVATION 
+        WHERE USERNAME = #{username}
+        ORDER BY CREATED_AT DESC
+        LIMIT #{startRow}, #{pageSize}
+    </select>
   
-  <select id="selectByUsername" parameterType="string" resultType="ReservationVO">
-  SELECT * FROM RESERVATION 
-  WHERE USERNAME =#{username}
+  <!-- 사용자의 전체 예약 개수 조회 -->
+      <select id="countReservationsByUsername" parameterType="String" resultType="long">
+        SELECT COUNT(*) 
+        FROM RESERVATION 
+        WHERE USERNAME = #{username}
+    </select>
   
-  </select>
+  
+  
+  
+  
+  
+  
+  
+  
   
   
 <select id="selectMember" resultType="map">

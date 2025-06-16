@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.spring.app.home.util.Pager;
+
 @Controller
 @RequestMapping("/equipment")
 public class EquipmentController {
@@ -22,17 +24,39 @@ public class EquipmentController {
 	
 	
 	   // 메인 페이지 - 비품 목록과 신고 폼
-    @GetMapping("/main")
-    public String mainPage(Model model) {
-        List<EquipmentVO> equipmentList = equipmentService.getAllEquipment();
-        List<EquipmentFaultVO> faultReports = equipmentService.getAllFaultReports();
-        
-        model.addAttribute("equipmentList", equipmentList);
-        model.addAttribute("faultReports", faultReports);
-        model.addAttribute("faultReport", new EquipmentFaultVO());
-        
-        return "equipment/main";
-    }
+
+	@GetMapping("/main")
+	public String mainPage(Model model,
+	                      @RequestParam(defaultValue = "1") int page,
+	                      @RequestParam(defaultValue = "3") int size) throws Exception {
+
+	    // 1. 전체 장비 목록
+	    List<EquipmentVO> equipmentList = equipmentService.getAllEquipment();
+
+	    // 2. Pager 객체 생성 및 설정
+	    Pager pager = new Pager();
+	    pager.setCurPage(page);
+	    pager.setPerPage(size);
+	    pager.makeRow(); // startRow, pageSize 계산
+
+	    // 3. 전체 신고 수 조회 및 페이징 처리
+	    long totalReports = equipmentService.getTotalFaultReportsCount();
+	    pager.makePage(totalReports);
+
+	    // 4. 페이징된 신고 내역 조회
+	    List<EquipmentFaultVO> faultReports = equipmentService.getFaultReportsByPage(
+	        pager.getStartRow(), pager.getPageSize()
+	    );
+
+	    // 5. 모델에 데이터 추가
+	    model.addAttribute("equipmentList", equipmentList);
+	    model.addAttribute("faultReports", faultReports);
+	    model.addAttribute("faultReport", new EquipmentFaultVO());
+	    model.addAttribute("pager", pager);
+
+	    return "equipment/main";
+	}
+
     
     // 비품 목록 페이지
     @GetMapping("/list")
