@@ -12,6 +12,8 @@ public interface ChatDAO {
 	
 	List<RoomMemberVO> getUserByRoom(@Param("roomId") Long roomId) throws Exception;
 	
+	List<ChatMessageVO> getLastMsg(@Param("roomId") Long roomId) throws Exception;
+	
 	int outUser(RoomMemberVO memberVO) throws Exception;
 	
 	ChatRoomVO getRoomDetail(@Param("roomId") Long roomId) throws Exception;
@@ -29,5 +31,7 @@ public interface ChatDAO {
 	int renameRoom(@Param("roomId") Long roomId, @Param("roomName") String roomName) throws Exception;
 	
 	Long findRoom(@Param("user1") String user1, @Param("user2") String user2) throws Exception;
+	
+	Long findRoomByMsg(@Param("user1") String user1, @Param("user2") String user2) throws Exception;
 	
 }

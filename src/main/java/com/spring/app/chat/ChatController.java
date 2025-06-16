@@ -93,7 +93,7 @@ public class ChatController {
 	
 	@GetMapping("list")
 	public void roomList(@AuthenticationPrincipal UserVO userVO, Model model
-			           , ChatRoomVO chatRoomVO) throws Exception {
+			           , ChatRoomVO chatRoomVO, ChatMessageVO chatMessageVO) throws Exception {
 		
 		chatRoomVO.setUsername(userVO.getUsername());
 		List<ChatRoomVO> list = chatService.getRoomList(userVO.getUsername());
@@ -108,8 +108,6 @@ public class ChatController {
 		ChatRoomVO room = chatService.getRoomDetail(roomId);
 		List<ChatMessageVO> list = chatService.getMessageByRoom(roomId);
 		List<RoomMemberVO> members = chatService.getUserByRoom(roomId);
-		
-		System.out.println("참여 목록 : "+members.get(0)+", "+members.get(1));
 		
 		model.addAttribute("members", members);
 		model.addAttribute("room", room);
@@ -135,8 +133,9 @@ public class ChatController {
 			hour=hour-12;
 			if (min<10) {
 				time=day+" "+hour+":"+"0"+min;	
+			}else {
+				time=day+" "+hour+":"+min;				
 			}
-			time=day+" "+hour+":"+min;
 		}else {
 			if (min<10) {
 				time=day+" "+hour+":"+"0"+min;	
@@ -180,20 +179,13 @@ public class ChatController {
 	}
 	
 	@PostMapping("out")
-	public String out(@AuthenticationPrincipal UserVO userVO, @RequestParam("roomId") Long roomId
+	public void out(@AuthenticationPrincipal UserVO userVO, @RequestParam("roomId") Long roomId
 			        , RoomMemberVO memberVO, Model model) throws Exception {
-		
-		ChatRoomVO roomVO = chatService.getRoomDetail(roomId);
 		
 		memberVO.setUsername(userVO.getUsername());
 		memberVO.setRoomId(roomId);
 		
 		chatService.outUser(memberVO);
-		
-		model.addAttribute("result", "채팅방을 퇴장하였습니다.");
-		model.addAttribute("path", "/chat/list");
-		
-		return "commons/result";
 	}
 
 }

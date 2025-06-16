@@ -43,10 +43,24 @@
   		 WHERE ROOM_ID=#{roomId}
   	</update>
   	
+  	<select id="findRoomByMsg" resultType="long">
+  		SELECT ROOM_ID
+  		  FROM CHAT_MESSAGE
+  		 INNER JOIN
+  		       CHAT_ROOM
+  		 USING (ROOM_ID)
+  		 WHERE SENDER_ID IN (#{user1}, #{user2}) AND ROOM_TYPE='1:1 채팅'
+  		 GROUP BY ROOM_ID
+  		HAVING COUNT(DISTINCT SENDER_ID)=2
+  	</select>
+  	
   	<select id="findRoom" resultType="long">
   		SELECT ROOM_ID
   		  FROM CHAT_ROOM_MEMBER
-  		 WHERE USERNAME IN (#{user1}, #{user2})
+  		 INNER JOIN
+  		       CHAT_ROOM
+  		 USING (ROOM_ID)  		  
+  		 WHERE USERNAME IN (#{user1}, #{user2}) AND ROOM_TYPE='1:1 채팅'
   		 GROUP BY ROOM_ID
   		HAVING COUNT(DISTINCT USERNAME)=2
   	</select>
@@ -54,6 +68,23 @@
   	<delete id="deleteRoom" parameterType="ChatRoomVO">
   		DELETE FROM CHAT_ROOM WHERE ROOM_ID=#{roomId}
   	</delete>
+  	
+  	<select id="getLastMsg" resultType="ChatMessageVO">
+  		SELECT CONTENTS, CREATED_AT
+  		  FROM CHAT_MESSAGE
+  		 WHERE CREATED_AT=
+  		  (
+  		SELECT MAX(CREATED_AT)
+  	      FROM CHAT_MESSAGE
+  	     WHERE ROOM_ID=#{roomId}
+  	      )
+  	       AND MESSAGE_ID=
+  	      (
+  	    SELECT MAX(MESSAGE_ID)
+  	      FROM CHAT_MESSAGE
+  	     WHERE ROOM_ID=#{roomID}
+  	      )
+  	</select>
   	
   	<resultMap type="ChatRoomVO" id="roomMap">
   		<id column="ROOM_ID" property="roomId"/>

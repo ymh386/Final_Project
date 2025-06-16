@@ -58,22 +58,42 @@ public class ChatService {
 	
 	public Long insertMemberRoom(List<String> usernames, boolean isGroup) throws Exception {
 		
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String user = auth.getName();
+		
 		if (!isGroup && usernames.size()==2) {
 			Long exist = chatDAO.findRoom(usernames.get(0), usernames.get(1));
-			
+			System.out.println("결과 : "+exist);
 			if (exist!=null) {
 				return exist;
+			} else {
+				Long exist2 = chatDAO.findRoomByMsg(usernames.get(0), usernames.get(1));
+				if (exist2!=null) {
+					List<RoomMemberVO> list = chatDAO.getUserByRoom(exist2);
+					RoomMemberVO memberVO = new RoomMemberVO();
+					
+					if (!list.contains(user)){		
+						memberVO.setUsername(user);
+						memberVO.setRoomId(exist2);
+						chatDAO.insertMember(memberVO);
+					} else if (!list.contains(usernames.get(1))) {
+							memberVO.setUsername(usernames.get(1));
+							memberVO.setRoomId(exist2);
+							chatDAO.insertMember(memberVO);
+						} else {
+							
+					}
+					return exist2;
+				}
 			}
 		}
 		
 		ChatRoomVO chatRoomVO = new ChatRoomVO();
 		
 		if (isGroup) {
-			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-			String username = auth.getName();
 			
 			int person = usernames.size()-1;
-			chatRoomVO.setCreatedBy(username);
+			chatRoomVO.setCreatedBy(user);
 			chatRoomVO.setRoomName(usernames.get(0)+"님 외 "+person+"명");	
 			chatDAO.makeRoom(chatRoomVO);
 		}else {

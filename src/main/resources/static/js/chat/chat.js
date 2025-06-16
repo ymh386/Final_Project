@@ -2,6 +2,7 @@ const createBtn = document.getElementById("createBtn");
 const user2 = document.getElementById("user2");
 const getRoomId = document.getElementById("getRoomId");
 const sender = document.getElementById("sender");
+const outRoom = document.getElementById("outRoom");
 
 function makeChat() {
 window.open(
@@ -41,6 +42,9 @@ function createSingleChat(targetUsername) {
   })
   .then(data => {
     openChatRoom(`${data.roomId}`);
+    if (window.opener && !window.opener.closed) {
+      window.opener.location.reload();
+    }
   })
   .catch(err => {
     console.error(err);
@@ -72,6 +76,9 @@ function createGroupChat() {
     return res.json();
   })
   .then(data => {
+    if (window.opener && !window.opener.closed) {
+      window.opener.location.reload();
+    }
     openChatRoom(`${data.roomId}`)
   })
   .catch(err => {
@@ -84,6 +91,16 @@ document.getElementById("chatForm").addEventListener("submit", function(e) {
     e.preventDefault();
     sendMessage();
 });
+
+outRoom.addEventListener('click', async ()=>{
+    await fetch(`/chat/out`, { method: 'POST' });
+    if (window.opener && !window.opener.closed) {
+      alert('채팅방을 퇴장하였습니다.');
+      window.opener.location.reload();
+    }
+
+    window.close();
+})
 
 
   let stompClient = null;
