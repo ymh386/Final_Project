@@ -67,4 +67,6 @@ public interface BoardService {
 
     /** 20) 비밀글 비밀번호 검증 */
     boolean validateSecret(BoardVO boardVO) throws Exception;
+
+
 }

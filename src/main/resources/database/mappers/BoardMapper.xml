@@ -113,11 +113,12 @@
     DELETE FROM BOARD WHERE BOARD_NUM = #{boardNum}
   </delete>
 
-  <!-- 8) 조회수 증가 -->
-  <update id="updateBoardHits" parameterType="long">
-    UPDATE BOARD SET BOARD_HITS = BOARD_HITS + 1 WHERE BOARD_NUM = #{boardNum} = #{value}
-  </update>
-  
+<update id="updateBoardHits" parameterType="long">
+    UPDATE BOARD
+      SET BOARD_HITS = BOARD_HITS + 1
+    WHERE BOARD_NUM = #{boardNum}
+</update>
+
   <!-- 9) 좋아요 수 증가 -->
   <update id="increaseLikeCount" parameterType="long">
     UPDATE BOARD SET LIKE_COUNT = LIKE_COUNT + 1 WHERE BOARD_NUM = #{boardNum}
@@ -205,14 +206,14 @@
   </select>
 
   <!-- 24) 비밀글 여부 확인 -->
-  <select id="checkSecret" parameterType="long" resultType="boolean">
-    SELECT IS_SECRET = 1 FROM BOARD WHERE BOARD_NUM = #{boardNum}
-  </select>
+<select id="checkSecret" parameterType="long" resultType="boolean">
+  SELECT COUNT(*) > 0 FROM BOARD WHERE BOARD_NUM = #{boardNum} AND IS_SECRET = 1
+</select>
 
   <!-- 25) 비밀글 설정 변경 -->
-  <update id="updateSecret" parameterType="map">
-    UPDATE BOARD SET IS_SECRET = #{isSecret} WHERE BOARD_NUM = #{boardNum}
-  </update>
+<update id="updateSecret" parameterType="map">
+  UPDATE BOARD SET IS_SECRET = #{isSecret} WHERE BOARD_NUM = #{boardNum}
+</update>
 
   <!-- 26) 댓글 추가 -->
   <insert id="addComment" parameterType="com.spring.app.board.comment.CommentVO" useGeneratedKeys="true" keyProperty="commentNum" keyColumn="COMMENT_NUM">

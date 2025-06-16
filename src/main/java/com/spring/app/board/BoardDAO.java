@@ -32,7 +32,7 @@ public interface BoardDAO {
     int delete(BoardVO boardVO) throws Exception;
 
     /** 7) 조회수 증가 */
-    int updateBoardHits(@Param("boadNum") Long boardNum) throws Exception;
+    int updateBoardHits(@Param("boardNum") Long boardNum); // O
 
     /** 8) 첨부파일 등록 */
     int addFile(BoardFileVO boardFileVO) throws Exception;

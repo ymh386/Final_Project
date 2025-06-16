@@ -78,6 +78,7 @@ public class BoardServiceImpl implements BoardService {
     }
 
     public void hitUpdate(BoardVO boardVO) throws Exception {
+        System.out.println("조회수 증가 boardNum = " + boardVO.getBoardNum());
         boardDAO.updateBoardHits(boardVO.getBoardNum());
     }
 

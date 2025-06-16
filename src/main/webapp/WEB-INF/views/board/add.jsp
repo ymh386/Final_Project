@@ -138,7 +138,7 @@
         <input type="password" name="secretPassword" placeholder="비밀번호 입력(필수)" style="margin-top:8px;" />
       </div>
       <div class="actions">
-        <a href="<c:url value='/board/index'/>" class="btn btn-secondary">취소</a>
+        <a href="<c:url value='/board/list'/>" class="btn btn-secondary">취소</a>
         <button type="submit" class="btn btn-primary">등록</button>
       </div>
     </form>

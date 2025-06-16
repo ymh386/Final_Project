@@ -7,15 +7,10 @@
   <meta charset="UTF-8"/>
   <title>게시판 목록</title>
   <style>
-    /* Reset & Base */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f5f7fa; color: #333; }
     a { text-decoration: none; color: inherit; }
-
-    /* Container */
     .container { width: 90%; max-width: 900px; margin: 40px auto; }
-
-    /* Header */
     header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     header h1 { font-size: 2.2rem; color: #2c3e50; }
     .btn { padding: 10px 20px; border-radius: 6px; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
@@ -28,16 +23,12 @@
       color: #fff;
       box-shadow: 0 4px 8px rgba(37,117,252,0.3);
     }
-    .btn-home:hover {
-      background: #aab2b8;
-    }
+    .btn-home:hover { background: #aab2b8; }
     .btn-write:hover {
       background: linear-gradient(135deg, #5a09b8 0%, #1f65e0 100%);
       box-shadow: 0 6px 12px rgba(31,101,224,0.4);
       transform: translateY(-2px);
     }
-
-    /* Search */
     .search-form { display: flex; gap: 10px; margin-bottom: 32px; }
     .search-form select,
     .search-form input {
@@ -57,11 +48,7 @@
       font-weight: 500;
       transition: background 0.2s ease;
     }
-    .search-form button:hover {
-      background: #2980b9;
-    }
-
-    /* List Items */
+    .search-form button:hover { background: #2980b9; }
     .list { list-style:none; padding: 0; }
     .list-item {
       display: flex; justify-content: space-between; align-items: center;
@@ -69,38 +56,23 @@
       border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
       transition: box-shadow 0.2s ease;
     }
-    .list-item:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .list-item a {
-      font-size: 1rem; color: #34495e; font-weight: 500;
-    }
+    .list-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .list-item a { font-size: 1rem; color: #34495e; font-weight: 500; }
     .info { display: flex; gap: 16px; color: #7f8c8d; font-size: 0.9rem; }
-
-    /* No Data */
+    .secret-lock { color: #eb5757; margin-right: 6px; font-size: 1.08em; vertical-align: middle; }
     .no-data { text-align: center; padding: 60px 0; color: #95a5a6; font-size: 1rem; }
-
-    /* Pagination */
     .pagination { text-align:center; margin-top: 36px; }
     .pagination a, .pagination strong {
       display: inline-block; margin:0 6px; padding:10px 14px; border-radius:4px;
       font-size:0.9rem; transition: background 0.2s ease;
     }
-    .pagination a {
-      color:#3498db;
-    }
-    .pagination a:hover {
-      background:#ecf6fc;
-    }
-    .pagination strong {
-      background:#3498db;
-      color:#fff;
-    }
+    .pagination a { color:#3498db; }
+    .pagination a:hover { background:#ecf6fc; }
+    .pagination strong { background:#3498db; color:#fff; }
   </style>
 </head>
 <body>
   <div class="container">
-
     <!-- Header -->
     <header>
       <h1>게시판</h1>
@@ -127,7 +99,15 @@
       <c:forEach var="b" items="${boards}">
         <li class="list-item">
           <a href="<c:url value='/board/detail?boardNum=${b.boardNum}'/>">
-            <c:out value="${b.boardTitle}"/>
+            <c:choose>
+              <c:when test="${b.isSecret}">
+                <span class="secret-lock">&#128274;</span>
+                비밀글입니다
+              </c:when>
+              <c:otherwise>
+                <c:out value="${b.boardTitle}"/>
+              </c:otherwise>
+            </c:choose>
           </a>
           <div class="info">
             <span>작성자: <c:out value="${b.userName}"/></span>
@@ -175,7 +155,6 @@
                   </c:url>">다음 &raquo;</a>
       </c:if>
     </div>
-
   </div>
 </body>
 </html>
