@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.spring.app.websocket.NotificationDAO">
+  
+  	<select id="getUnread" resultMap="NotificationMap" parameterType="NotificationVO">
+  		SELECT N.*,
+  			   U.NAME,
+  			   S.NAME AS SENDER_NAME
+  		FROM NOTIFICATION N
+  		LEFT OUTER JOIN USER U
+  		  ON N.USERNAME = U.USERNAME
+  		LEFT OUTER JOIN USER S
+  		  ON N.SENDER_ID = S.USERNAME
+  		WHERE N.USERNAME=#{username} AND IS_READ = 0
+  	</select>
+  	
+  	<select id="getDetail" resultMap="NotificationMap" parameterType="NotificationVO">
+  		SELECT N.*,
+  			   U.NAME,
+  			   S.NAME AS SENDER_NAME
+  		FROM NOTIFICATION N
+  		LEFT OUTER JOIN USER U
+  		  ON N.USERNAME = U.USERNAME
+  		LEFT OUTER JOIN USER S
+  		  ON N.SENDER_ID = S.USERNAME
+  		WHERE N.NOTIFICATION_ID=#{notificationId}
+  	</select>
+  	
+  	<resultMap type="NotificationVO" id="NotificationMap">
+  		<id column="NOTIFICATION_ID" property="notificationId"/>
+  		<result column="USERNAME" property="username"/>
+  		<result column="NOTIFICATION_TITLE" property="notificationTitle"/>
+  		<result column="MESSAGE" property="message"/>
+  		<result column="LINK_URL" property="linkUrl"/>
+  		<result column="IS_READ" property="isRead"/>
+  		<result column="CREATED_AT" property="createdAt"/>
+  		<result column="NOTIFICATION_TYPE" property="notificationType"/>
+  		<result column="SENDER_ID" property="senderId"/>
+  		<association javaType="UserVO" property="userVO">
+  			<result column="NAME" property="name"/>
+  		</association>
+  		<association javaType="UserVO" property="senderVO">
+  			<result column="SENDER_NAME" property="name"/>
+  		</association>
+  	</resultMap>
+  	
+  	<select id="getUnreadCount" resultType="java.lang.Long" parameterType="NotificationVO">
+  		SELECT COUNT(*) FROM NOTIFICATION WHERE USERNAME=#{username} AND IS_READ = 0
+  	</select>
+  
+  	<insert id="add" parameterType="NotificationVO" useGeneratedKeys="true" keyProperty="notificationId">
+  		INSERT INTO NOTIFICATION
+  		 (
+  		 NOTIFICATION_ID,
+  		 USERNAME,
+  		 NOTIFICATION_TITLE,
+  		 MESSAGE,
+  		 LINK_URL,
+  		 IS_READ,
+  		 CREATED_AT,
+  		 NOTIFICATION_TYPE,
+  		 SENDER_ID
+  		 )
+  		VALUES
+  		(
+  			NULL,
+  			#{username},
+  			#{notificationTitle},
+  			#{message},
+  			#{linkUrl},
+  			0,
+  			#{createdAt},
+  			#{notificationType},
+  			#{senderId}
+  		)
+  	</insert>
+  	
+  	<update id="updateIsRead" parameterType="NotificationVO">
+  		UPDATE NOTIFICATION SET IS_READ = 1 WHERE USERNAME=#{username} AND NOTIFICATION_ID=#{notificationId}
+  	</update>
+  
+  </mapper>

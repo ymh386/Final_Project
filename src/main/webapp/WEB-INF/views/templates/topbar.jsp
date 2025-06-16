@@ -2,6 +2,9 @@
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!-- Bootstrap Icons 필요 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
 
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark justify-content-between">
     <!-- Navbar Brand-->
@@ -10,6 +13,7 @@
     <!-- Navbar-->
     <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
         <sec:authorize access="isAuthenticated()">
+
             <sec:authorize access="!hasRole('TRAINER')">
             <h3 class="navbar-brand me-3">구독권 잔여 일자 : ${remainDay} 일</h3>
             <sec:authorize access="hasAuthority('CANCEL')">
@@ -22,6 +26,23 @@
                 <a class="btn btn-light me-3"  href="/subscript/list">구독</a>
             </c:if>
             </sec:authorize>
+
+            <!-- 알림 아이콘 -->
+             <li class="nav-item">
+                 <div id="notification" data-username="${user.username}" class="dropdown">
+                     <button class="btn btn-light position-relative" id="notificationButton" data-bs-toggle="dropdown" aria-expanded="false">
+                         <i class="bi bi-bell" style="font-size: 1.5rem;"></i>
+                         <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+                         0
+                         </span>
+                     </button>
+     
+                     <ul id="notificationList" class="dropdown-menu dropdown-menu-end p-2" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                         
+                     </ul>
+                 </div>
+             </li>
+
         </sec:authorize>
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="true">
@@ -55,3 +76,7 @@
         </li>
     </ul>
 </nav>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script src="/js/notification/notification.js"></script>

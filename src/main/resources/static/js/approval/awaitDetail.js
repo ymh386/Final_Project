@@ -61,6 +61,7 @@ uploadSign.addEventListener("click", ()=>{
                     f.append("approvalId", approvalId.value)
                     f.append("documentId", documentId.value)
                     f.append("contentHtml", document.getElementById("contentHtml").innerHTML)
+                    f.append("writerId", writerId.value)
                     //승인인지 반려인지 구분용(1 이면 승인)
                     f.append("type", 1)
 
@@ -97,6 +98,7 @@ rejection.addEventListener('click', ()=>{
     const f = new FormData();
     f.append("documentId", documentId.value)
     f.append("approvalId", approvalId.value)
+    f.append("writerId", writerId.value)
     //승인인지 반려인지 구분(0 이면 반려)
     f.append("type", 0)
 
