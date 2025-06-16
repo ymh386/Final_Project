@@ -11,14 +11,56 @@
 		 INNER JOIN CHAT_ROOM_MEMBER CRM
 		 USING (ROOM_ID)
 		 WHERE USERNAME=#{username}
-		
   	</select>
+  	
+  	<select id="getRoomDetail" resultType="ChatRoomVO">
+  		SELECT * 
+  		  FROM CHAT_ROOM
+  		 WHERE ROOM_ID=#{roomId}
+  	</select>
+  	
+  	<select id="getMessageByRoom" resultType="ChatMessageVO">
+  		SELECT *
+  		  FROM CHAT_MESSAGE
+  		 WHERE ROOM_ID=#{roomId}
+  		 ORDER BY CREATED_AT ASC
+  	</select>
+  	
+  	<select id="getUserByRoom" resultType="RoomMemberVO">
+  		SELECT USERNAME, ROOM_ID
+  		  FROM CHAT_ROOM_MEMBER
+  		 WHERE ROOM_ID=#{roomId}
+  	</select>
+  	
+  	<delete id="outUser" parameterType="RoomMemberVO">
+  		DELETE FROM CHAT_ROOM_MEMBER
+  		 WHERE USERNAME=#{username} AND ROOM_ID=#{roomId}
+  	</delete>
+  	
+  	<update id="renameRoom" parameterType="ChatRoomVO">
+  		UPDATE CHAT_ROOM
+  		   SET ROOM_NAME=#{roomName}
+  		 WHERE ROOM_ID=#{roomId}
+  	</update>
+  	
+  	<select id="findRoom" resultType="long">
+  		SELECT ROOM_ID
+  		  FROM CHAT_ROOM_MEMBER
+  		 WHERE USERNAME IN (#{user1}, #{user2})
+  		 GROUP BY ROOM_ID
+  		HAVING COUNT(DISTINCT USERNAME)=2
+  	</select>
+  	
+  	<delete id="deleteRoom" parameterType="ChatRoomVO">
+  		DELETE FROM CHAT_ROOM WHERE ROOM_ID=#{roomId}
+  	</delete>
   	
   	<resultMap type="ChatRoomVO" id="roomMap">
   		<id column="ROOM_ID" property="roomId"/>
   		<result column="ROOM_NAME" property="roomName"/>
   		<result column="ROOM_TYPE" property="roomType"/>
   		<result column="CREATED_AT" property="createdAt"/>
+  		<result column="CREATED_BY" property="createdBy"/>
 		<association javaType="RoomMemberVO" property="roomMemberVO">
 			<id column="USERNAME" property="username"/>
 			<result column="JOINED_AT" property="joinedAt"/>
@@ -27,15 +69,21 @@
   	</resultMap>
   	
   	<insert id="makeChat" parameterType="ChatRoomVO" useGeneratedKeys="true" keyProperty="roomId">
-  		INSERT INTO CHAT_ROOM (ROOM_NAME, ROOM_TYPE, CREATED_AT) VALUES (#{roomName}, '단일 채팅', NOW())
+  		INSERT INTO CHAT_ROOM (ROOM_NAME, ROOM_TYPE, CREATED_AT) VALUES (#{roomName}, '1:1 채팅', NOW())
   	</insert>
   	
   	<insert id="makeRoom" parameterType="ChatRoomVO" useGeneratedKeys="true" keyProperty="roomId">
-  		INSERT INTO CHAT_ROOM (ROOM_NAME, ROOM_TYPE, CREATED_AT) VALUES (#{roomName}, '그룹 채팅', NOW())
+  		INSERT INTO CHAT_ROOM (ROOM_NAME, ROOM_TYPE, CREATED_AT, CREATED_BY) VALUES (#{roomName}, '그룹 채팅', NOW(), #{createdBy})
   	</insert>
   	
   	<insert id="insertMember" parameterType="RoomMemberVO">
   		INSERT INTO CHAT_ROOM_MEMBER VALUES (#{roomId}, #{username}, NOW(), #{lastReadMessage})
+  	</insert>
+  	
+  	<insert id="insertMessage" parameterType="ChatMessageVO" useGeneratedKeys="true" keyProperty="messageId">
+  		INSERT
+  		  INTO CHAT_MESSAGE (ROOM_ID, SENDER_ID, CONTENTS, MESSAGE_TYPE, CREATED_AT)
+  		VALUES (#{roomId}, #{senderId}, #{contents}, #{messageType}, #{createdAt})
   	</insert>
   	
   </mapper>

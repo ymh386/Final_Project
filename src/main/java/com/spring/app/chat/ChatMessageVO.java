@@ -1,6 +1,8 @@
 package com.spring.app.chat;
 
+import java.sql.Date;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -15,8 +17,8 @@ public class ChatMessageVO {
 	private Long roomId;
 	private String contents;
 	private String messageType;
-	private LocalDateTime createdAt;
-	private String username;
+	private String createdAt;
+	private String senderId;
 	
 
 }

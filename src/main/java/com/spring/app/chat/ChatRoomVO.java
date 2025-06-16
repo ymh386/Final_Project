@@ -16,6 +16,7 @@ public class ChatRoomVO {
 	private String roomName;
 	private String roomType;
 	private LocalDateTime createdAt;
+	private String createdBy;
 	private String username;
 	private LocalDateTime joinedAt;
 	private Long lastReadMessage;

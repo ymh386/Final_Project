@@ -1,17 +1,25 @@
 package com.spring.app.chat;
 
+import java.sql.Date;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.spring.app.user.UserVO;
@@ -19,7 +27,7 @@ import com.spring.app.user.friend.FriendService;
 import com.spring.app.user.friend.FriendVO;
 
 @Controller
-@RequestMapping("/chat/*")
+@RequestMapping("/chat")
 public class ChatController {
 	
 	@Autowired
@@ -27,6 +35,9 @@ public class ChatController {
 	
 	@Autowired
 	private ChatService chatService;
+	
+	@Autowired
+	private SimpMessagingTemplate messagingTemplate;
 	
 	@GetMapping("chat")
 	public void makeChat(@AuthenticationPrincipal UserVO userVO
@@ -62,15 +73,22 @@ public class ChatController {
 		List<String> selectedUsers = body.get("users");
 		selectedUsers.add(userVO.getUsername());
 		
-		Long roomId = chatService.insertMember(selectedUsers);
+		Long roomId = chatService.insertMemberRoom(selectedUsers, true);
 		
 		return Map.of("roomId", roomId);
 	}
 	
-	@PostMapping("createdChat")
-	public void createChat(@AuthenticationPrincipal UserVO userVO) throws Exception {
+	@PostMapping("makeChat")
+	@ResponseBody
+	public Map<String, Object> createSingleChat(@RequestBody Map<String, String> body,
+			                                    @AuthenticationPrincipal UserVO userVO) throws Exception {
 		
+		System.out.println("makeChat 컨트롤러 진입");
+		String me = userVO.getUsername();
+		String target = body.get("target");
+		Long roomId = chatService.insertMemberRoom(List.of(me, target), false);
 		
+		return Map.of("roomId", roomId);
 	}
 	
 	@GetMapping("list")
@@ -81,6 +99,101 @@ public class ChatController {
 		List<ChatRoomVO> list = chatService.getRoomList(userVO.getUsername());
 		
 		model.addAttribute("list", list);
+	}
+	
+	@GetMapping("detail/{roomId}")
+	public String roomDetail(@AuthenticationPrincipal UserVO userVO,
+			 			   @PathVariable Long roomId, Model model) throws Exception {
+		
+		ChatRoomVO room = chatService.getRoomDetail(roomId);
+		List<ChatMessageVO> list = chatService.getMessageByRoom(roomId);
+		List<RoomMemberVO> members = chatService.getUserByRoom(roomId);
+		
+		System.out.println("참여 목록 : "+members.get(0)+", "+members.get(1));
+		
+		model.addAttribute("members", members);
+		model.addAttribute("room", room);
+		model.addAttribute("msg", list);
+		model.addAttribute("host", room.getCreatedBy());
+		
+		return "chat/detail";
+	}
+	
+	@MessageMapping("/chat.sendMessage")
+	public void sendMessage(ChatMessageVO message) throws Exception {
+		
+		LocalDateTime now = LocalDateTime.now();
+		
+		int hour=now.getHour();
+		int min = now.getMinute();
+		String day = "오전";
+		
+		String time = "";
+		
+		if (hour>12) {
+			day="오후";
+			hour=hour-12;
+			if (min<10) {
+				time=day+" "+hour+":"+"0"+min;	
+			}
+			time=day+" "+hour+":"+min;
+		}else {
+			if (min<10) {
+				time=day+" "+hour+":"+"0"+min;	
+			}else {
+				time=day+" "+hour+":"+min;				
+			}
+		}
+		System.out.println(min);
+		System.out.println(time);
+		
+		message.setCreatedAt(time);
+		message.setMessageType("TEXT");
+		System.out.println("message : "+message);
+		
+		chatService.saveMessage(message);
+		messagingTemplate.convertAndSend(
+				"/topic/chat/"+message.getRoomId(), message);
+	}
+	
+	@PostMapping("kick")
+	public String kickUser(@AuthenticationPrincipal UserVO userVO, @RequestParam("roomId") Long roomId 
+						 , @RequestParam("username") String username, RoomMemberVO memberVO, Model model) throws Exception {
+		
+		ChatRoomVO roomVO=chatService.getRoomDetail(roomId);
+		String host = roomVO.getCreatedBy();
+		
+		if (host!=userVO.getUsername()) {
+			model.addAttribute("result", "강퇴 권한이 없습니다. 방장에게 문의하세요.");
+			model.addAttribute("path", "/chat/detail/"+roomId);
+		}else {
+			memberVO.setUsername(username);
+			memberVO.setRoomId(roomId);
+			
+			chatService.outUser(memberVO);
+			
+			model.addAttribute("result", "강퇴에 성공했습니다.");
+			model.addAttribute("path", "/chat/detail/"+roomId);			
+		}
+		
+		return "commons/result";
+	}
+	
+	@PostMapping("out")
+	public String out(@AuthenticationPrincipal UserVO userVO, @RequestParam("roomId") Long roomId
+			        , RoomMemberVO memberVO, Model model) throws Exception {
+		
+		ChatRoomVO roomVO = chatService.getRoomDetail(roomId);
+		
+		memberVO.setUsername(userVO.getUsername());
+		memberVO.setRoomId(roomId);
+		
+		chatService.outUser(memberVO);
+		
+		model.addAttribute("result", "채팅방을 퇴장하였습니다.");
+		model.addAttribute("path", "/chat/list");
+		
+		return "commons/result";
 	}
 
 }

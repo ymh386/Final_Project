@@ -27,7 +27,8 @@
 								<div class="list-group">
 								
 								<c:forEach var="l" items="${list}">
-									<a href="#" onclick="openChatRoom()"  class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
+									<input hidden id="roomId" name="roomId" value="${l.roomId}">
+									<a href="#" onclick="openChatRoom('${l.roomId}')"  class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
 										<div class="d-flex align-items-center">
 										<img src="/img/default.png" 
 											class="rounded-circle me-3" 

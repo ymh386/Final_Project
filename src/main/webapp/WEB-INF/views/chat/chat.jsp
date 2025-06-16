@@ -66,7 +66,7 @@
         </li>
       </ul>
       <c:forEach var="l" items="${list}">
-        <form action="/chat/makeSingleRoom" method="post">
+        <form>
           <a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
             <div class="d-flex align-items-center">
             <img src="/img/default.png" 
@@ -75,17 +75,18 @@
               alt="avatar">
             <div>
                 <div class="fw-bold">${l.user2}</div>
-                <input hidden name="user2" value="${l.user2}">
+                <input hidden id="user2" name="user2" value="${l.user2}">
                 <input hidden name="user1" value="${user.username}">
             </div>
             </div>
             <div class="text-end">
-              <button type="submit" class="btn btn-outline-primary">채팅 시작</button>
+              <button type="button" onclick="createSingleChat('${l.user2}')" class="btn btn-outline-primary">채팅 시작</button>
             </div>
           </a>
         </form>
       </c:forEach>	
     </div>
   </div>
+	<script src="/js/chat/chat.js"></script>   
 </body>
 </html>

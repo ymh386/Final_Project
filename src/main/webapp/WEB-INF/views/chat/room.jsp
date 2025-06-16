@@ -65,7 +65,6 @@
         </li>
       </ul>
       <c:forEach var="l" items="${list}">
-        <form action="/chat/makeSingleRoom" method="post">
           <a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
             <div class="d-flex align-items-center">
             <img src="/img/default.png" 
@@ -82,13 +81,12 @@
               <input class="form-check-input user-checkbox" type="checkbox" value="${l.user2}" id="checkDefault">
             </div>
           </a>
-        </form>
       </c:forEach>	
     </div>
 
     <div class="chat-footer">
         <div class="d-flex justify-content-end">
-         <button class="btn btn-primary" id="createBtn" type="button">채팅방 생성</button>
+         <button class="btn btn-primary" onclick="createGroupChat()" id="createBtn" type="button">채팅방 생성</button>
         </div>
     </div>
   </div>
