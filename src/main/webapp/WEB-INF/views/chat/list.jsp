@@ -60,6 +60,9 @@
 			
 			<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 		</div>
+		<script>
+		window.baseUrl = '${pageContext.request.contextPath}';
+		</script>
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="/js/chat/chat.js"></script>
 	</body>

@@ -108,7 +108,8 @@ public class ChatController {
 		List<ChatMessageVO> list = chatService.getMessageByRoom(roomId);
 		List<RoomMemberVO> members = chatService.getUserByRoom(roomId);
 		List<FriendVO> notFriends = friendService.notfriendList(userVO.getUsername());
-
+		
+		System.out.println("host : "+room.getCreatedBy());
 		
 		model.addAttribute("notFriend", notFriends);
 		model.addAttribute("friend", friends);
@@ -180,7 +181,11 @@ public class ChatController {
 			memberVO.setUsername(username);
 			memberVO.setRoomId(roomId);
 			
-			chatService.outUser(memberVO);
+			int result = chatService.outUser(memberVO);
+			
+			if (result>0) {
+				notificationManager.kickNotification(memberVO, roomVO, username);				
+			}
 			
 			model.addAttribute("result", "강퇴에 성공했습니다.");
 			model.addAttribute("path", "/chat/detail/"+roomId);			
@@ -225,14 +230,23 @@ public class ChatController {
 	}
 	
 	@PostMapping("invite")
-	public String invite(@RequestParam("roomId") Long roomId,
+	public String invite(@AuthenticationPrincipal UserVO userVO,
+						 @RequestParam("roomId") Long roomId,
 			             @RequestParam("username") String username, Model model) throws Exception {
+		
+		ChatRoomVO chatRoomVO = new ChatRoomVO();
+		
+		chatRoomVO=chatService.getRoomDetail(roomId);
 		
 		RoomMemberVO memberVO = new RoomMemberVO();
 		memberVO.setRoomId(roomId);
 		memberVO.setUsername(username);
 		
-		chatService.invite(memberVO);
+		int result = chatService.invite(memberVO);
+		
+		if (result>0) {
+			notificationManager.inviteNotification(memberVO, chatRoomVO, userVO.getUsername(), username);			
+		}
 		
 		model.addAttribute("result", username+" 님을 초대했습니다.");
 		model.addAttribute("path", "/chat/detail/"+roomId);
@@ -244,7 +258,15 @@ public class ChatController {
 	public String changeHost(@RequestParam("createdBy") String createdBy,
 			                 @RequestParam("roomId") Long roomId, Model model) throws Exception {
 		
-		chatService.changeHost(createdBy, roomId);
+		ChatRoomVO chatRoomVO = new ChatRoomVO();
+		
+		chatRoomVO=chatService.getRoomDetail(roomId);
+		
+		int result = chatService.changeHost(createdBy, roomId);
+		
+		if (result>0) {
+			notificationManager.getHostNotification(chatRoomVO, createdBy);			
+		}
 		
 		model.addAttribute("result", "방장 변경 완료");
 		model.addAttribute("path", "/chat/detail/"+roomId);

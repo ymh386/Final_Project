@@ -17,6 +17,7 @@ import com.spring.app.approval.ApprovalVO;
 import com.spring.app.approval.DocumentVO;
 import com.spring.app.board.notice.NoticeDAO;
 import com.spring.app.chat.ChatMessageVO;
+import com.spring.app.chat.ChatRoomVO;
 import com.spring.app.chat.RoomMemberVO;
 import com.spring.app.user.UserVO;
 
@@ -103,7 +104,9 @@ public class NotificationManager {
 	public void messageNotification(ChatMessageVO chatMessageVO, List<RoomMemberVO> ar) throws Exception {
 		String senderName = notificationDAO.getSenderName(chatMessageVO.getSenderId());
 		NotificationVO notificationVO = null;
+		
 		for(RoomMemberVO roomMemberVO : ar) {
+			
 			if(chatMessageVO.getSenderId().equals(roomMemberVO.getUsername())) {
 				continue;
 			}
@@ -123,12 +126,75 @@ public class NotificationManager {
 			}
 			senderVO.setName(senderName);
 			
-			
-			log.info("알림VO : {}", notificationVO);
-			
 			this.sendNotification(notificationVO);
 		}
 		
+	}
+	
+	//강퇴 알림
+	public void kickNotification(RoomMemberVO memberVO, ChatRoomVO chatRoomVO, String username) throws Exception {
+		String senderName = notificationDAO.getSenderName(chatRoomVO.getCreatedBy());
+		NotificationVO notificationVO = new NotificationVO();
+		
+		notificationVO.setNotificationTitle("강퇴 알림");
+		notificationVO.setUsername(username);
+		notificationVO.setMessage("방장에 의해 강퇴당했습니다.");
+		notificationVO.setLinkUrl("/chat/list");
+		notificationVO.setNotificationType("N9");
+		notificationVO.setSenderId(chatRoomVO.getCreatedBy());
+		
+		UserVO senderVO = notificationVO.getSenderVO();
+		if (senderVO == null) {
+			senderVO = new UserVO();
+			notificationVO.setSenderVO(senderVO);
+		}
+		senderVO.setName(senderName);
+		
+		this.sendNotification(notificationVO);
+	}
+	
+	//초대 알림
+	public void inviteNotification(RoomMemberVO memberVO, ChatRoomVO chatRoomVO, String sender, String username) throws Exception {
+		String senderName = notificationDAO.getSenderName(sender);
+		NotificationVO notificationVO = new NotificationVO();
+		
+		notificationVO.setNotificationTitle("초대 알림");
+		notificationVO.setUsername(username);
+		notificationVO.setMessage("채팅에 초대되었습니다.");
+		notificationVO.setLinkUrl("/chat/detail/"+chatRoomVO.getRoomId());
+		notificationVO.setNotificationType("N1");
+		notificationVO.setSenderId(sender);
+		
+		UserVO senderVO = notificationVO.getSenderVO();
+		if (senderVO == null) {
+			senderVO = new UserVO();
+			notificationVO.setSenderVO(senderVO);
+		}
+		senderVO.setName(senderName);
+		
+		this.sendNotification(notificationVO);
+	}
+	
+	//방장 위임 알림
+	public void getHostNotification(ChatRoomVO chatRoomVO, String username) throws Exception {
+		String senderName = notificationDAO.getSenderName(chatRoomVO.getCreatedBy());
+		NotificationVO notificationVO = new NotificationVO();
+		
+		notificationVO.setNotificationTitle("방장 권한 위임");
+		notificationVO.setUsername(username);
+		notificationVO.setMessage("방장에 대한 권한을 위임받았습니다.");
+		notificationVO.setLinkUrl("/chat/detail/"+chatRoomVO.getRoomId());
+		notificationVO.setNotificationType("N10");
+		notificationVO.setSenderId(chatRoomVO.getCreatedBy());
+		
+		UserVO senderVO = notificationVO.getSenderVO();
+		if (senderVO == null) {
+			senderVO = new UserVO();
+			notificationVO.setSenderVO(senderVO);
+		}
+		senderVO.setName(senderName);
+		
+		this.sendNotification(notificationVO);
 	}
 
 }

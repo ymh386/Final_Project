@@ -2,10 +2,13 @@ const user2 = document.getElementById("user2");
 const getRoomId = document.getElementById("getRoomId");
 const sender = document.getElementById("sender");
 const outRoom = document.getElementById("outRoom");
+const host = document.getElementById("host");
+let roomId = getRoomId.value;
+
 
 function makeChat() {
 window.open(
-'http://localhost:81/chat/chat',
+`${window.baseUrl}/chat/chat`,
 '_blank',
 'width=500,height=700,left=100,top=100,resizable=no'
 );
@@ -13,7 +16,7 @@ window.open(
 
 function makeRoom() {
 window.open(
-'http://localhost:81/',
+`${window.baseUrl}/`,
 '_blank',
 'width=500,height=700,left=100,top=100,resizable=no'
 );
@@ -21,7 +24,7 @@ window.open(
 
 function openChatRoom(roomId) {
     window.open(
-    'http://localhost:81/chat/detail/'+roomId,
+    `${window.baseUrl}/chat/detail/`+roomId,
     '_blank',
     'width=500,height=700,left=100,top=100,resizable=no'
     );
@@ -90,18 +93,24 @@ document.getElementById("chatForm").addEventListener("submit", function(e) {
     e.preventDefault();
     sendMessage();
 });
+let hostId=host.value;
+console.log(hostId)
+console.log(sender.value)
+if (hostId != sender.value){
+  outRoom.addEventListener('click', async ()=>{
+      await fetch(`${window.baseUrl}/chat/out`, { method: 'POST' });
+      if (window.opener && !window.opener.closed) {
+        alert('채팅방을 퇴장하였습니다.');
+        window.opener.location.reload();
+      }
+  
+      window.close();
+  })
+}
 
-outRoom.addEventListener('click', async ()=>{
-    await fetch(`/chat/out`, { method: 'POST' });
-    if (window.opener && !window.opener.closed) {
-      alert('채팅방을 퇴장하였습니다.');
-      window.opener.location.reload();
-    }
 
-    window.close();
-})
-  let roomId = getRoomId.value;
-  const username1 = sender.value;
+    var username1 = sender.value;
+    console.log(username1)
 
   function connect() {
     // 이미 연결된 경우 아무것도 하지 않음
@@ -127,7 +136,10 @@ outRoom.addEventListener('click', async ()=>{
   }
 
   function sendMessage() {
+    
     const content = document.getElementById("msgInput").value;
+
+
     const payload = {
       roomId: roomId,
       senderId: username1,
