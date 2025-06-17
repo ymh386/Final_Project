@@ -31,6 +31,7 @@ import com.spring.app.files.FileManager;
 import com.spring.app.user.DepartmentVO;
 import com.spring.app.user.UserService;
 import com.spring.app.user.UserVO;
+import com.spring.app.websocket.NotificationManager;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,6 +50,9 @@ public class ApprovalController {
 	
 	@Autowired
 	private FileManager fileManager;
+	
+	@Autowired
+	private NotificationManager notificationManager;
 	
 	@Value("${board.file.path}")
 	private String path;
@@ -387,13 +391,13 @@ public class ApprovalController {
 	
 	@PostMapping("appOrRej")
 	@ResponseBody
-	public int appOrRej(ApprovalVO approvalVO, DocumentVO documentVO, int type) throws Exception {		
+	public int appOrRej(@AuthenticationPrincipal UserVO userVO, ApprovalVO approvalVO, DocumentVO documentVO, int type) throws Exception {		
 		int result = 0;
 		
 		if(type == 1) {
-			result = approvalService.approve(approvalVO, documentVO);
+			result = approvalService.approve(approvalVO, documentVO, userVO);
 		}else {
-			result = approvalService.rejection(approvalVO, documentVO);
+			result = approvalService.rejection(approvalVO, documentVO, userVO);
 		}
 		
 		

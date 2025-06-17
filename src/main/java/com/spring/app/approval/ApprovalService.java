@@ -9,13 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
+import com.spring.app.user.UserDAO;
 import com.spring.app.user.UserVO;
+import com.spring.app.websocket.NotificationManager;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
 public class ApprovalService {
+	@Autowired
+	private NotificationManager notificationManager;
 	
 	@Autowired
 	private ApprovalDAO approvalDAO;
@@ -94,6 +98,12 @@ public class ApprovalService {
 				vo.setApprovalStatus(approvalStatus);
 				//결재자 INSERT
 				approvalDAO.addApproval(vo);
+				//첫 결재자에게 알림전송
+				if(parentId == null) {
+					UserVO userVO = new UserVO();
+					userVO.setUsername(documentVO.getWriterId());
+					notificationManager.approvalNotification(vo, userVO);
+				}
 				//방금 넣은 결재자의 approvalId parentId에 넣기
 				parentId = vo.getApprovalId();
 				//2번째 결재자부턴 상태 '미도달'
@@ -141,17 +151,26 @@ public class ApprovalService {
 	}
 	
 	//결재 승인 처리
-	public int approve(ApprovalVO approvalVO, DocumentVO documentVO) throws Exception {
-
+	public int approve(ApprovalVO approvalVO, DocumentVO documentVO, UserVO userVO) throws Exception {
+		
 		//1. 현재 승인정보의 상태를 승인으로 변경
 		approvalVO.setApprovalStatus("AS1");
 		int result = approvalDAO.updateApprovalStatus(approvalVO);
 		
 		//1번 성공 시
 		if(result > 0) {
+			//결재요청자에게 승인알림
+			notificationManager.approvedNotification(documentVO, userVO);
+			
 			//2. 다음 승인정보를 진행중으로 변경
 			approvalVO.setApprovalStatus("AS0");
 			result = approvalDAO.updateChildStatus(approvalVO);
+			
+			//승인 시 다음 결재자에게 알림
+			ApprovalVO approvalVO2 = approvalDAO.getChild(approvalVO);
+			if(approvalVO2 != null) {
+				notificationManager.approvalNotification(approvalVO2, userVO);		
+			}
 			
 			//2번 실패 시 -> 다음결재자가 없음(최종승인 됨)
 			if(result <= 0) {
@@ -165,6 +184,9 @@ public class ApprovalService {
 				if(ar2.size() < 1) {
 					documentVO.setDocumentStatus("D1");
 					result = approvalDAO.updateDocumentStatus(documentVO);
+					
+					//최종 결과 시 결재 요청자에게 알림
+					notificationManager.appOrRejNotification(documentVO, userVO);
 				}
 			}
 		}
@@ -177,7 +199,7 @@ public class ApprovalService {
 		return result;
 	}
 	
-	public int rejection(ApprovalVO approvalVO, DocumentVO documentVO) throws Exception {
+	public int rejection(ApprovalVO approvalVO, DocumentVO documentVO, UserVO userVO) throws Exception {
 		
 		//1. 현재 승인정보의 상태를 반려로 변경
 		approvalVO.setApprovalStatus("AS2");
@@ -195,6 +217,9 @@ public class ApprovalService {
 			if(ar2.size() > 0) {
 				documentVO.setDocumentStatus("D2");
 				result = approvalDAO.updateDocumentStatus(documentVO);
+				
+				//최종 결과 시 결재 요청자에게 알림
+				notificationManager.appOrRejNotification(documentVO, userVO);
 			}
 		}
 		

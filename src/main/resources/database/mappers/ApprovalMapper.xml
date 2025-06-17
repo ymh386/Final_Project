@@ -107,6 +107,12 @@
   		WHERE DOCUMENT_ID=#{documentId} AND APPROVAL_STATUS IN ('AS1', 'AS2')
   	</select>
   	
+  	<select id="getChild" parameterType="ApprovalVO" resultType="ApprovalVO">
+  		SELECT *
+  		  FROM APPROVAL
+  		 WHERE PARENT_ID=#{approvalId}
+  	</select>
+  	
   	<insert id="addForm" parameterType="FormVO">
   		INSERT INTO FORM VALUES
   		(

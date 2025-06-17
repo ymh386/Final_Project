@@ -75,4 +75,7 @@ public interface ApprovalDAO {
 	
 	//로그인한 유저의 승인내역 디테일
 	public ApprovalVO getDetail(ApprovalVO approvalVO) throws Exception;
+	
+	//다음결재자 정보 조회
+	public ApprovalVO getChild(ApprovalVO approvalVO) throws Exception;
 }

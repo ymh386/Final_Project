@@ -1,44 +1,71 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
-</head>
-<body>
-
-    <h2>양식 목록</h2>
+<html class="fontawesome-i2svg-active fontawesome-i2svg-complete">
+	<head>
+	<meta charset="UTF-8">
+	<title>Insert title here</title>
+		<c:import url="/WEB-INF/views/templates/header.jsp"></c:import>
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jstree@3.3.15/dist/themes/default/style.min.css" />
+		<script src="https://cdn.jsdelivr.net/npm/jstree@3.3.15/dist/jstree.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+		<script src="https://cdn.ckeditor.com/4.22.1/full-all/ckeditor.js"></script>
+	</head>
+	<body class="sb-nav-fixed d-flex flex-column min-vh-100">
+		<c:import url="/WEB-INF/views/templates/topbar.jsp"></c:import>
+		<div id="layoutSidenav" class="d-flex flex-grow-1">
+		<c:import url="/WEB-INF/views/templates/sidebar.jsp"></c:import>
+			<div id="layoutSidenav_content" class="d-flex flex-column flex-grow-1">
+                <main class="flex-grow-1">
+                    <div class="container">
+							<!-- contents -->
+						<h2>양식 목록</h2>
     
-    <c:if test="${not empty ar}">
-	    <table class="table">
-	        <thead>
-	            <tr>
-	                <th scope="col">양식번호</th>
-	                <th scope="col">양식이름</th>
-	                <th scope="col">제작일시</th>
-	            </tr>
-	        </thead>
-	        <tbody>
-	            <c:forEach var="a" items="${ar}">
-	                <tr>
-	                    <th scope="row">${a.formId}</th>
-                        <td><a href="./formDetail?formId=${a.formId}">${a.formTitle}</a></td>
-	                    <td>${a.createdAt}</td>
-	                </tr>
-	            </c:forEach>
-	        </tbody>
-	    </table>
-    </c:if>
-    <c:if test="${empty ar}">
-    	<h3>조회된 양식이 없습니다.</h3>
-    </c:if>
-    <div>
-        <a href="./formRegister" class="btn">양식 등록</a>
-    </div>
-</body>
+						<c:if test="${not empty ar}">
+							<table class="table table-hover">
+								<thead>
+									<tr>
+										<th scope="col">양식번호</th>
+										<th scope="col">양식이름</th>
+										<th scope="col">제작일시</th>
+									</tr>
+								</thead>
+								<tbody>
+									<c:forEach var="a" items="${ar}">
+										<tr class="table-row" onclick="location.href='./formDetail?formId=${a.formId}'">
+											<th scope="row">${a.formId}</th>
+											<td>${a.formTitle}</td>
+											<td>${a.createdAt}</td>
+										</tr>
+									</c:forEach>
+								</tbody>
+							</table>
+						</c:if>
+						<c:if test="${empty ar}">
+							<h3>조회된 양식이 없습니다.</h3>
+						</c:if>
+						<div>
+							<a href="./formRegister" class="btn">양식 등록</a>
+						</div>
+
+
+
+
+					<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+					</div>
+				</main>
+			</div>
+		</div>
+					
+	
+	
+	
+	
+		<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+		</div>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	</body>
 </html>
