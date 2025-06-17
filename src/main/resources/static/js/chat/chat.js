@@ -1,4 +1,3 @@
-const createBtn = document.getElementById("createBtn");
 const user2 = document.getElementById("user2");
 const getRoomId = document.getElementById("getRoomId");
 const sender = document.getElementById("sender");
@@ -102,10 +101,11 @@ outRoom.addEventListener('click', async ()=>{
     window.close();
 })
 
-
-  let stompClient = null;
+if (typeof stompClient === 'undefined') {
+    let stompClient = null;
+}
   let roomId = getRoomId.value;
-  const username = sender.value;
+  const username1 = sender.value;
 
   function connect() {
     console.log("WebSocket 연결 시도")
@@ -127,7 +127,7 @@ outRoom.addEventListener('click', async ()=>{
     const content = document.getElementById("msgInput").value;
     const payload = {
       roomId: roomId,
-      senderId: username,
+      senderId: username1,
       contents: content,
       messageType: "TEXT"
     };
@@ -139,7 +139,7 @@ outRoom.addEventListener('click', async ()=>{
 function showMessage(msg) {
     const chatBox = document.getElementById("chatContent");
     const msgDiv = document.createElement("div");
-    if (msg.senderId === username) {
+    if (msg.senderId === username1) {
         msgDiv.innerHTML = `
             <div class="d-flex justify-content-end align-items-end mb-2">
             <input hidden name="contents" value="${msg.contents}">

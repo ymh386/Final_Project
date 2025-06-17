@@ -20,7 +20,7 @@
 								<h2 class="mb-0">채팅</h2>
 
 								<div class="d-flex gap-2">
-									<a onclick="makeChat()" class="btn btn-primary btn-sm">채팅 시작</a>
+									<a href="#" onclick="makeChat()" class="btn btn-primary btn-sm">채팅 시작</a>
 								</div>
 								</div>
 								<!-- Chat List Wrapper -->
