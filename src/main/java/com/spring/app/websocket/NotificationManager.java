@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Calendar;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Component;
 import com.spring.app.approval.ApprovalVO;
 import com.spring.app.approval.DocumentVO;
 import com.spring.app.board.notice.NoticeDAO;
+import com.spring.app.chat.ChatMessageVO;
+import com.spring.app.chat.RoomMemberVO;
 import com.spring.app.user.UserVO;
 
 import lombok.extern.slf4j.Slf4j;
@@ -36,9 +39,13 @@ public class NotificationManager {
 		Timestamp timestamp = Timestamp.valueOf(now);
 		notificationVO.setCreatedAt(timestamp);
 		
-		int result = notificationDAO.add(notificationVO);
+		int result = 1;
 		
-		notificationVO = notificationDAO.getDetail(notificationVO);
+		//채팅메세지는 DB기록 X
+		if(!"N0".equals(notificationVO.getNotificationType())) {
+			result = notificationDAO.add(notificationVO);
+			notificationVO = notificationDAO.getDetail(notificationVO);
+		}
 		
 		if(result > 0) {
 			//해당 경로로 메세지를 보내면, 그 사용자에게 알림이 도착
@@ -90,6 +97,38 @@ public class NotificationManager {
 		notificationVO.setSenderId(userVO.getUsername());
 		
 		this.sendNotification(notificationVO);
+	}
+	
+	//채팅메세지
+	public void messageNotification(ChatMessageVO chatMessageVO, List<RoomMemberVO> ar) throws Exception {
+		String senderName = notificationDAO.getSenderName(chatMessageVO.getSenderId());
+		NotificationVO notificationVO = null;
+		for(RoomMemberVO roomMemberVO : ar) {
+			if(chatMessageVO.getSenderId().equals(roomMemberVO.getUsername())) {
+				continue;
+			}
+			
+			notificationVO = new NotificationVO();
+			notificationVO.setNotificationTitle("채팅 메세지");
+			notificationVO.setUsername(roomMemberVO.getUsername());
+			notificationVO.setMessage(chatMessageVO.getContents());
+			notificationVO.setLinkUrl("/chat/detail/".concat(chatMessageVO.getRoomId().toString()));
+			notificationVO.setNotificationType("N0");
+			notificationVO.setSenderId(chatMessageVO.getSenderId());
+			
+			UserVO senderVO = notificationVO.getSenderVO();
+			if(senderVO == null) {
+				senderVO = new UserVO();
+				notificationVO.setSenderVO(senderVO);
+			}
+			senderVO.setName(senderName);
+			
+			
+			log.info("알림VO : {}", notificationVO);
+			
+			this.sendNotification(notificationVO);
+		}
+		
 	}
 
 }

@@ -21,10 +21,14 @@ import com.spring.app.attendance.AttendanceService;
 import com.spring.app.user.UserVO;
 import com.spring.app.user.friend.FriendService;
 import com.spring.app.user.friend.FriendVO;
+import com.spring.app.websocket.NotificationManager;
 
 @Controller
 @RequestMapping("/chat")
 public class ChatController {
+	
+	@Autowired
+	private NotificationManager notificationManager;
 	
 	@Autowired
 	private FriendService friendService;
@@ -146,7 +150,14 @@ public class ChatController {
 		message.setCreatedAt(time);
 		message.setMessageType("TEXT");
 		
-		chatService.saveMessage(message);
+		int result = chatService.saveMessage(message);
+		
+		//메세지저장 성공 시 채팅방안 모든 인원에게 메세지 전송
+		if(result > 0) {
+			List<RoomMemberVO> ar = chatService.getUserByRoom(message.getRoomId());
+			notificationManager.messageNotification(message, ar);
+		}
+		
 		messagingTemplate.convertAndSend(
 				"/topic/chat/"+message.getRoomId(), message);
 	}

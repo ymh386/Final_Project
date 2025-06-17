@@ -63,6 +63,10 @@
   	<select id="getUnreadCount" resultType="java.lang.Long" parameterType="NotificationVO">
   		SELECT COUNT(*) FROM NOTIFICATION WHERE USERNAME=#{username} AND IS_READ = 0
   	</select>
+  	
+  	<select id="getSenderName" resultType="java.lang.String" parameterType="java.lang.String">
+  		SELECT NAME FROM USER WHERE USERNAME=#{username}
+  	</select>
   
   	<insert id="add" parameterType="NotificationVO" useGeneratedKeys="true" keyProperty="notificationId">
   		INSERT INTO NOTIFICATION

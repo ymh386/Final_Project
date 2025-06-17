@@ -6,7 +6,7 @@ const outRoom = document.getElementById("outRoom");
 
 function makeChat() {
 window.open(
-'http://localhost/chat/chat',
+'http://localhost:81/chat/chat',
 '_blank',
 'width=500,height=700,left=100,top=100,resizable=no'
 );
@@ -14,7 +14,7 @@ window.open(
 
 function makeRoom() {
 window.open(
-'http://localhost/',
+'http://localhost:81/',
 '_blank',
 'width=500,height=700,left=100,top=100,resizable=no'
 );
@@ -22,7 +22,7 @@ window.open(
 
 function openChatRoom(roomId) {
     window.open(
-    'http://localhost/chat/detail/'+roomId,
+    'http://localhost:81/chat/detail/'+roomId,
     '_blank',
     'width=500,height=700,left=100,top=100,resizable=no'
     );
@@ -103,20 +103,26 @@ outRoom.addEventListener('click', async ()=>{
 })
 
 
-  let stompClient = null;
   let roomId = getRoomId.value;
-  const username = sender.value;
+  const username1 = sender.value;
 
   function connect() {
+    // 이미 연결된 경우 아무것도 하지 않음
+    if (window.stompClient && window.stompClient.connected) {
+        console.log("이미 소켓에 연결됨");
+        return;
+    }
+    
+
     console.log("WebSocket 연결 시도")
     const socket = new SockJS("/ws-chat");
     console.log("WebSocket 연결 완료")
-    stompClient = Stomp.over(socket);
-    stompClient.connect({}, function (frame) {
+    window.stompClient = Stomp.over(socket);
+    window.stompClient.connect({}, function (frame) {
       console.log("Connected: " + frame);
 
       // 메시지 수신 구독
-      stompClient.subscribe(`/topic/chat/${roomId}`, function (message) {
+      window.stompClient.subscribe(`/topic/chat/${roomId}`, function (message) {
         const msg = JSON.parse(message.body);
         showMessage(msg);
       });
@@ -127,11 +133,11 @@ outRoom.addEventListener('click', async ()=>{
     const content = document.getElementById("msgInput").value;
     const payload = {
       roomId: roomId,
-      senderId: username,
+      senderId: username1,
       contents: content,
       messageType: "TEXT"
     };
-    stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(payload));
+    window.stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(payload));
     document.getElementById("msgInput").value="";
   }
 
@@ -139,7 +145,7 @@ outRoom.addEventListener('click', async ()=>{
 function showMessage(msg) {
     const chatBox = document.getElementById("chatContent");
     const msgDiv = document.createElement("div");
-    if (msg.senderId === username) {
+    if (msg.senderId === username1) {
         msgDiv.innerHTML = `
             <div class="d-flex justify-content-end align-items-end mb-2">
             <input hidden name="contents" value="${msg.contents}">

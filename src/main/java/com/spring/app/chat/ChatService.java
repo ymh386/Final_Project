@@ -53,9 +53,9 @@ public class ChatService {
 		return list;
 	}
 	
-	public void saveMessage(ChatMessageVO message) throws Exception {
+	public int saveMessage(ChatMessageVO message) throws Exception {
 		
-		chatDAO.insertMessage(message);
+		return chatDAO.insertMessage(message);
 	}
 	
 	public int renameRoom(String roomName, Long roomId) throws Exception {

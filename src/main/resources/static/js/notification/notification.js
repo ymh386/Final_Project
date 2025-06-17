@@ -3,23 +3,29 @@ const badge = document.getElementById("notificationBadge");
 const notificationList = document.getElementById("notificationList");
 const username = document.getElementById("notification").getAttribute("data-username");
 
-let stompClient = null;
+
 
 //topic/notify/{username} 구독
 function connectStomp() {
     // 이미 연결된 경우 아무것도 하지 않음
-    if (stompClient && stompClient.connected) {
+    if (window.stompClient && window.stompClient.connected) {
         console.log("이미 소켓에 연결됨");
         return;
     }
+    
 
   const socket = new SockJS('/ws-chat');
-  stompClient = Stomp.over(socket);
+  window.stompClient = Stomp.over(socket);
 
-  stompClient.connect({}, function () {
-    stompClient.subscribe('/topic/notify/' + username, function (message) {
+  window.stompClient.connect({}, function () {
+    window.stompClient.subscribe('/topic/notify/' + username, function (message) {
       const notification = JSON.parse(message.body);
-      addNotification(notification); // 실시간 알림 추가
+      
+    //채팅메세지는 제외
+    if(notification.notificationType != 'N0'){
+        addNotification(notification); // 실시간 알림 추가
+    }
+      
       showToast(notification)
       notificationSound()
     });
@@ -65,7 +71,10 @@ function renderNotificationList(r) {
             <small class="text-muted">${n.senderVO.name}</small>
         </div>
         `;
-      notificationList.append(li);
+        li.addEventListener('click', (e)=>{
+            readNotification(e, n.linkUrl, n.notificationId)
+         })
+        notificationList.append(li);
 
     })
     notificationList.append(btn);
@@ -91,7 +100,10 @@ function addNotification(notification) {
         <small class="text-muted">${notification.senderVO.name}</small>
       </div>
     `;
-    list.prepend(li);
+    li.addEventListener('click', (e) => {
+        readNotification(e, notification.linkUrl, notification.notificationId)
+    })
+    list.append(li);
     updateBadgeCount(1);
 }
 
@@ -144,6 +156,7 @@ window.addEventListener("load", () => {
     connectStomp(); // 소켓 연결 시작
 });
 
+//시간(몇분 전) 불러오기
 function getRelativeTime(timestamp) {
   const now = new Date();
   const past = new Date(timestamp);
@@ -166,14 +179,17 @@ function showToast(notification) {
     toast.id = toastId;
     toast.role = "alert";
     toast.innerHTML = `
-        <div class="d-flex">
-        <div class="toast-body">
-            <a href="${notification.linkUrl}" class="text-white text-decoration-none">
-            ${notification.message}
-            </a><br>
-            <small class="text-muted">${notification.senderVO.name}</small>
-        </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        <div class="d-flex flex-column">
+            <div class="toast-header bg-dark text-white">
+                <strong class="me-auto">${notification.senderVO.name}</strong>
+                <small class="text-white-50 ms-2">${notification.notificationTitle}</small>
+                <button type="button" class="btn-close btn-close-white ms-2 mb-1" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div><hr>
+            <div class="toast-body">
+                <a href="${notification.linkUrl}" class="text-white text-decoration-none">
+                ${notification.message}
+                </a><br>
+            </div>
         </div>
     `;
 

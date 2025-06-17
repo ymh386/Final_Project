@@ -26,5 +26,7 @@ public interface NotificationDAO {
 	
 	//읽음으로 변경
 	public int updateIsRead(NotificationVO notificationVO) throws Exception;
-
+	
+	//송신자 이름 조회
+	public String getSenderName(String username) throws Exception;
 }
