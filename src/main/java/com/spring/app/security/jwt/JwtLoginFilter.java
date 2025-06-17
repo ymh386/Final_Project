@@ -50,14 +50,11 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		String password = request.getParameter("password");
 		String loginType = request.getParameter("loginType");
 		
-		System.out.println("loginType"+loginType);
-		
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 		
 		Authentication authentication = this.authenticationManager.authenticate(token);
 		
 		String role=authentication.getAuthorities().toString();
-		System.out.println("role:"+role);
 		
 		if (loginType.equals("trainer") && !username.contains("T") && !username.equals("admin")) {
 			throw new AuthenticationServiceException("트레이너 계정이 아닙니다.");
@@ -92,8 +89,6 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		// TODO Auto-generated method stub
 		
 		String loginType = request.getParameter("loginType");
-		
-		System.out.println("왜 안되지"+loginType);
 		
 		if (loginType.equals("member")) {
 			response.sendRedirect("/user/login/login?error=" +

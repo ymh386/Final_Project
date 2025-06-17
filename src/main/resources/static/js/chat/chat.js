@@ -108,6 +108,7 @@ outRoom.addEventListener('click', async ()=>{
   const username = sender.value;
 
   function connect() {
+    console.log("WebSocket 연결 시도")
     const socket = new SockJS("/ws-chat");
     console.log("WebSocket 연결 완료")
     stompClient = Stomp.over(socket);
@@ -165,4 +166,14 @@ function showMessage(msg) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-  window.onload = connect;
+function scrollToBottom() {
+  const marker = document.getElementById("bottom");
+  if (marker) {
+    marker.scrollIntoView({ behavior: "auto", block: "end" });
+  }
+}
+
+window.onload = function() {
+  connect();
+  scrollToBottom();
+}

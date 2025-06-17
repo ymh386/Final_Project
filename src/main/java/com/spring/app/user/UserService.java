@@ -44,7 +44,6 @@ public class UserService implements UserDetailsService {
 		userVO.setUsername(username);
 		try {
 			userVO = userDAO.detail(userVO);
-			System.out.println(userVO);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
