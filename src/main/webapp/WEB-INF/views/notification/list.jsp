@@ -34,7 +34,7 @@
 						        </thead>
 						        <tbody>
 						            <c:forEach var="a" items="${ar}">
-						                <tr class="table-row" onclick="location.href='${a.linkUrl}'">
+						                <tr class="table-row trs" data-id="${a.notificationId}" data-link="${a.linkUrl}">
 						                	
 						                	<c:choose>
 						                    	<c:when test="${a.notificationType eq 'N1'}">
@@ -106,5 +106,6 @@
 		<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 		</div>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="/js/notification/list.js"></script>
 	</body>
 </html>
