@@ -5,7 +5,7 @@ const outRoom = document.getElementById("outRoom");
 
 function makeChat() {
 window.open(
-'http://localhost/chat/chat',
+'http://localhost:81/chat/chat',
 '_blank',
 'width=500,height=700,left=100,top=100,resizable=no'
 );
@@ -13,7 +13,7 @@ window.open(
 
 function makeRoom() {
 window.open(
-'http://localhost/',
+'http://localhost:81/',
 '_blank',
 'width=500,height=700,left=100,top=100,resizable=no'
 );
@@ -21,7 +21,7 @@ window.open(
 
 function openChatRoom(roomId) {
     window.open(
-    'http://localhost/chat/detail/'+roomId,
+    'http://localhost:81/chat/detail/'+roomId,
     '_blank',
     'width=500,height=700,left=100,top=100,resizable=no'
     );
@@ -100,23 +100,26 @@ outRoom.addEventListener('click', async ()=>{
 
     window.close();
 })
-
-if (typeof stompClient === 'undefined') {
-    let stompClient = null;
-}
   let roomId = getRoomId.value;
   const username1 = sender.value;
 
   function connect() {
+    // 이미 연결된 경우 아무것도 하지 않음
+    if (window.stompClient && window.stompClient.connected) {
+        console.log("이미 소켓에 연결됨");
+        return;
+    }
+    
+
     console.log("WebSocket 연결 시도")
     const socket = new SockJS("/ws-chat");
     console.log("WebSocket 연결 완료")
-    stompClient = Stomp.over(socket);
-    stompClient.connect({}, function (frame) {
+    window.stompClient = Stomp.over(socket);
+    window.stompClient.connect({}, function (frame) {
       console.log("Connected: " + frame);
 
       // 메시지 수신 구독
-      stompClient.subscribe(`/topic/chat/${roomId}`, function (message) {
+      window.stompClient.subscribe(`/topic/chat/${roomId}`, function (message) {
         const msg = JSON.parse(message.body);
         showMessage(msg);
       });
@@ -131,7 +134,7 @@ if (typeof stompClient === 'undefined') {
       contents: content,
       messageType: "TEXT"
     };
-    stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(payload));
+    window.stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(payload));
     document.getElementById("msgInput").value="";
   }
 
