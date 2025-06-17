@@ -48,7 +48,7 @@
 </head>
 <body>
     <h2>
-        안녕하세요,
+        
         <c:choose>
             <c:when test="${not empty pageContext.request.userPrincipal}">
                 ${pageContext.request.userPrincipal.name}
@@ -57,7 +57,7 @@
                 손님
             </c:otherwise>
         </c:choose>
-        님
+       님 출/퇴근
     </h2>
 
     <div id="buttons">
