@@ -20,6 +20,8 @@ function connectStomp() {
     stompClient.subscribe('/topic/notify/' + username, function (message) {
       const notification = JSON.parse(message.body);
       addNotification(notification); // 실시간 알림 추가
+      showToast(notification)
+      notificationSound()
     });
   });
 }
@@ -36,13 +38,18 @@ notificationBtn.addEventListener('click', ()=>{
 //알림목록 렌더링
 function renderNotificationList(r) {
     notificationList.innerHTML='';
+
+    const btn = document.createElement("a");
+    btn.innerHTML = '<hr><a href="/notification/list" class="btn" >알림함 이동</a>'
+    notificationList.append(btn);
+
     if(r.length === 0) {
         notificationList.innerHTML = '<li class="dropdown-item text-muted">새로운 알림이 없습니다</li>';
+        notificationList.append(btn);
         return;
     }
 
     r.forEach(n => {
-        console.log(n)
         const li = document.createElement("li");
         li.className = "dropdown-item d-flex align-items-start gap-2 border-bottom py-2";
 
@@ -51,14 +58,17 @@ function renderNotificationList(r) {
         <div class="flex-grow-1">
             <a href="${n.linkUrl}" onclick="readNotification(event, '${n.linkUrl}', ${n.notificationId})"
             class="text-decoration-none text-dark fw-bold d-block">
-            ${n.message}
+            ${n.notificationTitle}
             </a>
+            <p>${n.message}</p>
             <small class="text-muted">${getRelativeTime(n.createdAt)}</small>
             <small class="text-muted">${n.senderVO.name}</small>
         </div>
         `;
       notificationList.append(li);
+
     })
+    notificationList.append(btn);
 }
 
  // 실시간 알림 추가
@@ -74,8 +84,9 @@ function addNotification(notification) {
       <div class="flex-grow-1">
         <a href="${notification.linkUrl}" onclick="readNotification(event, '${notification.linkUrl}', ${notification.notificationId})"
            class="text-decoration-none text-dark fw-bold d-block">
-          ${notification.message}
+          ${notification.notificationTitle}
         </a>
+        <p>${notification.message}</p>
         <small class="text-muted">${getRelativeTime(notification.createdAt)}</small>
         <small class="text-muted">${notification.senderVO.name}</small>
       </div>
@@ -144,4 +155,44 @@ function getRelativeTime(timestamp) {
   if (diff < 2592000) return `${Math.floor(diff / 86400)}일 전`;
   if (diff < 31536000) return `${Math.floor(diff / 2592000)}개월 전`;
   return `${Math.floor(diff / 31536000)}년 전`;
+}
+
+//토스트형 실시간 알림 팝업 호출
+function showToast(notification) {
+    const toastId = `toast-${Date.now()}`; // 고유 ID
+
+    const toast = document.createElement("div");
+    toast.className = "toast align-items-center text-bg-dark border-0 show mb-2";
+    toast.id = toastId;
+    toast.role = "alert";
+    toast.innerHTML = `
+        <div class="d-flex">
+        <div class="toast-body">
+            <a href="${notification.linkUrl}" class="text-white text-decoration-none">
+            ${notification.message}
+            </a><br>
+            <small class="text-muted">${notification.senderVO.name}</small>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+
+    document.getElementById("toastContainer").appendChild(toast);
+
+    // 자동 제거 (5초 후)
+    setTimeout(() => {
+        toast.classList.remove("show");
+        toast.addEventListener("transitionend", () => toast.remove());
+    }, 5000);
+}
+
+//알림소리 재생
+function notificationSound() {
+    const sound = document.getElementById("notificationSound");
+    if (sound) {
+        sound.play().catch(e => {
+            // 보통 사용자 상호작용 없으면 일부 브라우저에서 막히기도 함
+            console.log("알림소리 재생 실패:", e);
+        })
+    }
 }

@@ -20,6 +20,11 @@ public class NotificationService {
 		return notificationDAO.getUnread(userVO);
 	}
 	
+	//로그인한 유저의 알림 리스트 조회
+	public List<NotificationVO> getList(NotificationVO notificationVO) throws Exception {
+		return notificationDAO.getList(notificationVO);
+	}
+	
 	//읽지 않은 알림 수 조회
 	public Long getUnreadCount(NotificationVO notificationVO) throws Exception {
 		return notificationDAO.getUnreadCount(notificationVO);

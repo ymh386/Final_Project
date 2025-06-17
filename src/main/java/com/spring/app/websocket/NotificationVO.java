@@ -20,7 +20,7 @@ public class NotificationVO {
 	private String message;
 	private String linkUrl;
 	private String notificationType;
-	private boolean isRead;
+	private boolean read;
 	private Timestamp createdAt;
 	private String senderId;
 	

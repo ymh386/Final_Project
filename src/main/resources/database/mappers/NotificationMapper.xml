@@ -15,6 +15,19 @@
   		LEFT OUTER JOIN USER S
   		  ON N.SENDER_ID = S.USERNAME
   		WHERE N.USERNAME=#{username} AND IS_READ = 0
+  		ORDER BY CREATED_AT DESC
+  	</select>
+  	
+  	<select id="getList" resultMap="NotificationMap" parameterType="NotificationVO">
+  		SELECT N.*,
+  			   S.NAME AS SENDER_NAME
+  		  FROM NOTIFICATION N
+  		  LEFT OUTER JOIN USER U
+  		  	ON N.USERNAME = U.USERNAME
+  		  LEFT OUTER JOIN USER S
+  		  	ON N.SENDER_ID = S.USERNAME
+  		 WHERE N.USERNAME=#{username}
+  		 ORDER BY IS_READ ASC, CREATED_AT DESC
   	</select>
   	
   	<select id="getDetail" resultMap="NotificationMap" parameterType="NotificationVO">
@@ -35,7 +48,7 @@
   		<result column="NOTIFICATION_TITLE" property="notificationTitle"/>
   		<result column="MESSAGE" property="message"/>
   		<result column="LINK_URL" property="linkUrl"/>
-  		<result column="IS_READ" property="isRead"/>
+  		<result column="IS_READ" property="read"/>
   		<result column="CREATED_AT" property="createdAt"/>
   		<result column="NOTIFICATION_TYPE" property="notificationType"/>
   		<result column="SENDER_ID" property="senderId"/>

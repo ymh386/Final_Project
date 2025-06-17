@@ -4,7 +4,22 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!-- Bootstrap Icons 필요 -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<style>
+    .toast a:hover, #notification a:hover  {
+        text-decoration: underline;
+    }
+    .table-row {
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
 
+    .table-row:hover {
+        background-color: #f2f2f2 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transform: scale(1.01);
+    }
+
+</style>
 
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark justify-content-between">
     <!-- Navbar Brand-->
@@ -28,20 +43,24 @@
             </sec:authorize>
 
             <!-- 알림 아이콘 -->
-             <li class="nav-item">
-                 <div id="notification" data-username="${user.username}" class="dropdown">
-                     <button class="btn btn-light position-relative" id="notificationButton" data-bs-toggle="dropdown" aria-expanded="false">
-                         <i class="bi bi-bell" style="font-size: 1.5rem;"></i>
-                         <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
-                         0
-                         </span>
-                     </button>
-     
-                     <ul id="notificationList" class="dropdown-menu dropdown-menu-end p-2" style="width: 300px; max-height: 400px; overflow-y: auto;">
-                         
-                     </ul>
-                 </div>
-             </li>
+            <li class="nav-item">
+                <div id="notification" data-username="${user.username}" class="dropdown">
+                    <button class="btn btn-light position-relative" id="notificationButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-bell" style="font-size: 1.5rem;"></i>
+                        <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+                        0
+                        </span>
+                    </button>
+    
+                    <ul id="notificationList" class="dropdown-menu dropdown-menu-end p-2" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                        
+                    </ul>
+                </div>
+            </li>
+
+            <!-- Toast Container(실시간 알림 팝업) -->
+            <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+            </div>
 
         </sec:authorize>
         <li class="nav-item dropdown">
@@ -79,4 +98,5 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<audio id="notificationSound" src="/sound/notification.wav" preload="auto"></audio>
 <script src="/js/notification/notification.js"></script>

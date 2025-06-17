@@ -12,6 +12,9 @@ public interface NotificationDAO {
 	//해당 사용자의 안읽은 알림 목록 조회
 	public List<NotificationVO> getUnread(UserVO userVO) throws Exception;
 	
+	//로그인한 유저의 알림 리스트 조회
+	public List<NotificationVO> getList(NotificationVO notificationVO) throws Exception;
+	
 	//알림 디테일 조회
 	public NotificationVO getDetail(NotificationVO notificationVO) throws Exception;
 	
