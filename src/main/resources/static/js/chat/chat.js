@@ -1,4 +1,3 @@
-const createBtn = document.getElementById("createBtn");
 const user2 = document.getElementById("user2");
 const getRoomId = document.getElementById("getRoomId");
 const sender = document.getElementById("sender");
@@ -101,8 +100,6 @@ outRoom.addEventListener('click', async ()=>{
 
     window.close();
 })
-
-
   let roomId = getRoomId.value;
   const username1 = sender.value;
 
