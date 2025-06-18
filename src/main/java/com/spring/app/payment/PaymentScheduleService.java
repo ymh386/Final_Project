@@ -8,6 +8,7 @@ import com.spring.app.user.MemberStateVO;
 import com.spring.app.user.UserController;
 import com.spring.app.user.UserService;
 import com.spring.app.user.UserVO;
+import com.spring.app.websocket.NotificationManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,6 +30,9 @@ public class PaymentScheduleService {
 	@Autowired
 	private UserService userService;
 	
+	@Autowired
+	private NotificationManager notificationManager;
+	
 	@Scheduled(cron = "* * * * * *")
 	public void checkEndPlan() throws Exception {
 		List<SubscriptVO> list = subscriptDAO.getEndingPlan();
@@ -40,12 +44,17 @@ public class PaymentScheduleService {
 			MemberStateVO memberStateVO = userService.checkSubscript(subscriptVO.getUsername());
 			Long stateNum=memberStateVO.getStateNum();
 			LocalDate today = LocalDate.now();
+			LocalDate tommorow = LocalDate.now().plusDays(1);
+			if (subscriptVO.getEndDate().equals(tommorow)) {
+				notificationManager.SubscribeWarningNotification(memberStateVO, subscriptVO.getUsername());
+			}
 			if (subscriptVO.getEndDate().equals(today)) {
 				if (stateNum!=1) {
 					userService.stopSubscript(memberStateVO);
 				}else {
 					subscriptDAO.deleteSubscript(subscriptVO);
-					charge(subscriptVO);													
+					charge(subscriptVO);
+					notificationManager.SubscribePayNotification(memberStateVO, subscriptVO.getUsername());
 				}
 			}
 			

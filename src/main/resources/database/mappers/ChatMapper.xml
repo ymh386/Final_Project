@@ -79,6 +79,8 @@
   		 WHERE ROOM_ID=#{roomId}
   	</update>
   	
+  	<update id="readMessage" parameterType="ChatMessageVO"></update>
+  	
   	<select id="findRoom" resultType="long">
   		SELECT ROOM_ID
   		  FROM CHAT_ROOM_MEMBER

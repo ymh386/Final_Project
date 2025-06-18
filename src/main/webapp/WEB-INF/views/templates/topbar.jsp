@@ -46,7 +46,7 @@
             <li class="nav-item">
                 <div id="notification" data-username="${user.username}" class="dropdown">
                     <button class="btn btn-light position-relative" id="notificationButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-bell" style="font-size: 1.5rem;"></i>
+                        <i class="bi bi-bell"></i>
                         <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
                         0
                         </span>

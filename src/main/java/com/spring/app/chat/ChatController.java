@@ -171,8 +171,6 @@ public class ChatController {
 		
 		ChatRoomVO roomVO=chatService.getRoomDetail(roomId);
 		String host = roomVO.getCreatedBy();
-		System.out.println("host : "+host);
-		System.out.println("login : "+userVO.getUsername());
 		
 		if (!host.equals(userVO.getUsername())) {
 			model.addAttribute("result", "강퇴 권한이 없습니다. 방장에게 문의하세요.");

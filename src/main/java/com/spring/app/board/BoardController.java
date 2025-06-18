@@ -22,8 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.spring.app.board.comment.CommentVO;
 import com.spring.app.board.interaction.InteractionVO;
-import com.spring.app.board.BoardFileVO;
-import com.spring.app.board.BoardVO;
+
 import com.spring.app.home.util.Pager;
 import com.spring.app.user.UserVO;
 
