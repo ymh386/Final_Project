@@ -4,16 +4,23 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+
+import com.spring.app.user.UserDAO;
+import com.spring.app.user.UserVO;
 
 @Service
 public class AttendanceService {
 
 	@Autowired
 	public AttendanceDAO attendanceDAO;
+	
+	@Autowired
+	public UserDAO userDAO;
 	
 	
 	/**
@@ -32,12 +39,12 @@ public class AttendanceService {
         LocalTime nine   = LocalTime.of(9, 0);
         LocalTime nine30 = LocalTime.of(9, 30);
         String status;
-        if (!nowTime.isAfter(nine)) { // nowTime <= nine
-            status = "정상출근";
-        } else if (nowTime.isAfter(nine) && nowTime.isBefore(nine30)) {
-            status = "지각";
+        if (!nowTime.isAfter(nine)) {
+            status = "정상출근"; // 정상출근
+        } else if (nowTime.isBefore(nine30)) {
+            status = "지각";    // 지각
         } else {
-            status = "결근";
+            status = "결근";  // 결근 처리
         }
 
         // ② 오늘자 동일 사용자 기록 조회 (중복 출근 방지)
@@ -114,7 +121,7 @@ public class AttendanceService {
 		  
 	  }
 	  
-	  public List<AttendanceVO> listByDate(LocalDate date){
+	  public List<Map<String, Object>> listByDate(LocalDate date){
 		  
 		  return attendanceDAO.selectByDate(date);
 	  }
@@ -125,7 +132,10 @@ public class AttendanceService {
 	  }
 	  
 	  
-	  
+	  public void updateAttendance(AttendanceVO vo) {
+	        attendanceDAO.updateAttendance(vo);
+	    }
+
 	  
 	  
 	  

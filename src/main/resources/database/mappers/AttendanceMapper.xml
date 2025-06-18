@@ -52,16 +52,46 @@
     ORDER BY ATTENDANCE_DATE DESC, CHECKIN_TIME
   </select>
 
-  <select id="selectByDate" resultType="AttendanceVO" parameterType="java.time.LocalDate">
-    SELECT * FROM ATTENDANCE
-    WHERE ATTENDANCE_DATE = #{attendanceDate}
-    ORDER BY CHECKIN_TIME
-  </select>
+<select id="selectByDate" resultType="map" parameterType="java.time.LocalDate">
+  SELECT 
+    A.ATTENDANCE_ID       AS attendanceId,
+    A.USERNAME             AS username,
+    U.NAME                 AS name,
+    A.CHECKIN_TIME         AS checkinTime,
+    A.CHECKOUT_TIME        AS checkoutTime,
+    A.STATUS               AS status,
+    A.ATTENDANCE_DATE      AS attendanceDate
+  FROM ATTENDANCE A
+  JOIN USER U ON A.USERNAME = U.USERNAME
+  WHERE A.ATTENDANCE_DATE = #{attendanceDate}
+  ORDER BY A.CHECKIN_TIME
+</select>
+  
+  
+  
 
   <select id="selectAll" resultType="AttendanceVO">
     SELECT * FROM ATTENDANCE
     ORDER BY ATTENDANCE_DATE DESC, CHECKIN_TIME
   </select>
+  	
+  	<!-- 관리자가 근태 수정 가능 -->
+  	
+  	<update id="updateAttendance" parameterType="AttendanceVO">
+  	UPDATE ATTENDANCE
+  	SET
+  	CHECKIN_TIME  = #{checkinTime},
+    CHECKOUT_TIME = #{checkoutTime},
+    UPDATE_AT     = NOW(),
+    UPDATE_REASON = #{updateReason}
+  WHERE ATTENDANCE_ID = #{attendanceId}
+  	
+  	
+  	</update>
+  	
+  	
+  	
+  	
   	
   	
   	

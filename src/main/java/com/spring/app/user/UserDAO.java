@@ -48,6 +48,9 @@ public interface UserDAO {
 
 	List<UserVO> selectUsersByUsernamePrefix(@Param("prefix") String prefix);
 	
+	int countUsersByUsernamePrefix(Map<String, Object> params);
+
+	
 	int update(UserVO userVO) throws Exception;
 	
 	//트레이너등급 이상 회원들의 부서정보와 함께 조희

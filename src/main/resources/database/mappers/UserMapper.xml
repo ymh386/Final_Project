@@ -6,6 +6,12 @@
   <mapper namespace="com.spring.app.user.UserDAO">
   
   
+  	<select id="countUsersByUsernamePrefix" parameterType="map" resultType="int">
+	    SELECT COUNT(*) 
+	    FROM USER 
+	    WHERE BINARY USERNAME LIKE #{prefix}
+	</select>
+  
     <select id="selectUsersByUsernamePrefix"
           parameterType="map"
           resultType="UserVO">

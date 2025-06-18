@@ -4,6 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,9 +22,11 @@ public class AttendanceVO {
 	    private LocalDate attendanceDate;
 
 	    /** 출근 시간 */
+	    @JsonFormat(pattern = "HH:mm:ss")
 	    private LocalTime checkinTime;
 
 	    /** 퇴근 시간 */
+	    @JsonFormat(pattern = "HH:mm:ss")
 	    private LocalTime checkoutTime;
 
 	    /** 상태 */
