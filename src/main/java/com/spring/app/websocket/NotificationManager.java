@@ -19,6 +19,7 @@ import com.spring.app.board.notice.NoticeDAO;
 import com.spring.app.chat.ChatMessageVO;
 import com.spring.app.chat.ChatRoomVO;
 import com.spring.app.chat.RoomMemberVO;
+import com.spring.app.user.MemberStateVO;
 import com.spring.app.user.UserVO;
 
 import lombok.extern.slf4j.Slf4j;
@@ -186,6 +187,50 @@ public class NotificationManager {
 		notificationVO.setLinkUrl("/chat/detail/"+chatRoomVO.getRoomId());
 		notificationVO.setNotificationType("N10");
 		notificationVO.setSenderId(chatRoomVO.getCreatedBy());
+		
+		UserVO senderVO = notificationVO.getSenderVO();
+		if (senderVO == null) {
+			senderVO = new UserVO();
+			notificationVO.setSenderVO(senderVO);
+		}
+		senderVO.setName(senderName);
+		
+		this.sendNotification(notificationVO);
+	}
+	
+	//구독권 하루 남았을때 알림
+	public void SubscribeWarningNotification(MemberStateVO memberStateVO, String username) throws Exception {
+		String senderName = notificationDAO.getSenderName(memberStateVO.getUsername());
+		NotificationVO notificationVO = new NotificationVO();
+		
+		notificationVO.setNotificationTitle("구독권 종료 임박");
+		notificationVO.setUsername(username);
+		notificationVO.setMessage("구독권 정기 결제가 하루 남았습니다.");
+		notificationVO.setLinkUrl("/user/mypage");
+		notificationVO.setNotificationType("N2");
+		notificationVO.setSenderId(memberStateVO.getUsername());
+		
+		UserVO senderVO = notificationVO.getSenderVO();
+		if (senderVO == null) {
+			senderVO = new UserVO();
+			notificationVO.setSenderVO(senderVO);
+		}
+		senderVO.setName(senderName);
+		
+		this.sendNotification(notificationVO);
+	}
+	
+	//구독권 결제 완료
+	public void SubscribePayNotification(MemberStateVO memberStateVO, String username) throws Exception {
+		String senderName = notificationDAO.getSenderName(memberStateVO.getUsername());
+		NotificationVO notificationVO = new NotificationVO();
+		
+		notificationVO.setNotificationTitle("구독권 결제 완료");
+		notificationVO.setUsername(username);
+		notificationVO.setMessage("구독권 정기 결제가 완료되었습니다..");
+		notificationVO.setLinkUrl("/user/mypage");
+		notificationVO.setNotificationType("N3");
+		notificationVO.setSenderId(memberStateVO.getUsername());
 		
 		UserVO senderVO = notificationVO.getSenderVO();
 		if (senderVO == null) {
