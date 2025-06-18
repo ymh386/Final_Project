@@ -68,10 +68,14 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public int update(BoardVO boardVO) throws Exception {
+    public int update(BoardVO boardVO, MultipartFile[] files) throws Exception {
+        // 파일 처리 로직이 필요하면 구현!
         return boardDAO.update(boardVO);
     }
 
+    
+    
+    
     @Override
     public int delete(BoardVO boardVO) throws Exception {
         return boardDAO.delete(boardVO);
