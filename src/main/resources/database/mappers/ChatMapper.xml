@@ -32,6 +32,25 @@
   		 WHERE ROOM_ID=#{roomId}
   	</select>
   	
+  	<select id="getUserNotInRoom" resultType="string">
+  		SELECT F.FRIEND_ID
+  		  FROM (
+  		SELECT USER2_ID AS FRIEND_ID
+  		  FROM FRIENDSHIP
+  		 WHERE USER1_ID=#{username}
+  		 UNION
+  		SELECT USER1_ID AS FRIEND_ID
+  		  FROM FRIENDSHIP
+  		 WHERE USER2_ID=#{username}
+  		 	   ) F
+  		 WHERE F.FRIEND_ID 
+  		   NOT IN (
+  		SELECT USERNAME
+  		  FROM CHAT_ROOM_MEMBER
+  		 WHERE ROOM_ID=#{roomId}
+  		          )
+  	</select>
+  	
   	<delete id="outUser" parameterType="RoomMemberVO">
   		DELETE FROM CHAT_ROOM_MEMBER
   		 WHERE USERNAME=#{username} AND ROOM_ID=#{roomId}
@@ -53,6 +72,12 @@
   		 GROUP BY ROOM_ID
   		HAVING COUNT(DISTINCT SENDER_ID)=2
   	</select>
+  	
+  	<update id="changeHost" parameterType="ChatRoomVO">
+  		UPDATE CHAT_ROOM
+  		   SET CREATED_BY=#{createdBy}
+  		 WHERE ROOM_ID=#{roomId}
+  	</update>
   	
   	<select id="findRoom" resultType="long">
   		SELECT ROOM_ID

@@ -45,7 +45,6 @@ public class SocialService extends DefaultOAuth2UserService {
 		if (sns.equals("GOOGLE")) {
 			return this.google(userRequest);
 		} else if (sns.equals("KAKAO")) {
-			System.out.println("kakaosuccess");
 			return this.kakao(userRequest);
 		}
 		
@@ -59,7 +58,6 @@ public class SocialService extends DefaultOAuth2UserService {
 		HttpSession session = request.getSession(false);
 		
 		String url = session.getAttribute("loginType").toString();
-		System.out.println(url);
 		
 		OAuth2User user = super.loadUser(userRequest);
 		
@@ -97,7 +95,6 @@ public class SocialService extends DefaultOAuth2UserService {
 				if ("trainer".equals(url)) {
 					Long code = userDAO.getTrainerCode();
 					userVO.setTrainerCode(code);
-					System.out.println(userVO.getTrainerCode());
 				} else {
 
 				}
@@ -138,8 +135,6 @@ public class SocialService extends DefaultOAuth2UserService {
 		
 		String url = session.getAttribute("loginType").toString();
 		
-		System.out.println("url:"+url);
-		
 		OAuth2User user=super.loadUser(userRequest);
 		
 		Map<String, Object> map=(Map<String, Object>)user.getAttributes().get("properties");
@@ -173,7 +168,6 @@ public class SocialService extends DefaultOAuth2UserService {
 				if ("trainer".equals(url)) {
 					Long code = userDAO.getTrainerCode();
 					userVO.setTrainerCode(code);
-					System.out.println(userVO.getTrainerCode());
 				} else {
 
 				}

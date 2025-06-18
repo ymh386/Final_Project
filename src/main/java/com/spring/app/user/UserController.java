@@ -88,7 +88,6 @@ public class UserController {
 		
 		if (userVO!=null) {
 			String username = userVO.getUsername();
-			System.out.println(username);
 			List<SubscriptVO> list = subscriptService.getSubscriptByUser(username);
 			model.addAttribute("list", list);
 		}
@@ -173,8 +172,6 @@ public class UserController {
 		
 		if (email!=null) {
 			userVO = findInfoService.getUserByEmail(email);
-			
-			System.out.println(userVO.getUsername());
 			
 			String newPassword=findInfoService.randomPassword(12);
 			userVO.setPassword(encoder.encode(newPassword));

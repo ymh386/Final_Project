@@ -5,12 +5,16 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.spring.app.user.friend.FriendVO;
+
 @Mapper
 public interface ChatDAO {
 	
 	List<ChatRoomVO> getRoomList(@Param("username") String username) throws Exception;
 	
 	List<RoomMemberVO> getUserByRoom(@Param("roomId") Long roomId) throws Exception;
+	
+	List<String> getUserNotInRoom(@Param("roomId") Long roomId, @Param("username") String username) throws Exception;
 	
 	List<ChatMessageVO> getLastMsg(@Param("roomId") Long roomId) throws Exception;
 	
@@ -29,6 +33,8 @@ public interface ChatDAO {
 	int insertMember(RoomMemberVO memberVO) throws Exception;
 	
 	int renameRoom(@Param("roomId") Long roomId, @Param("roomName") String roomName) throws Exception;
+	
+	int changeHost(@Param("createdBy") String createdBy, @Param("roomId") Long roomId) throws Exception;
 	
 	Long findRoom(@Param("user1") String user1, @Param("user2") String user2) throws Exception;
 	

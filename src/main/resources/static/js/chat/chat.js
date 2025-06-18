@@ -1,12 +1,14 @@
-const createBtn = document.getElementById("createBtn");
 const user2 = document.getElementById("user2");
 const getRoomId = document.getElementById("getRoomId");
 const sender = document.getElementById("sender");
 const outRoom = document.getElementById("outRoom");
+const host = document.getElementById("host");
+let roomId = getRoomId.value;
+
 
 function makeChat() {
 window.open(
-'http://localhost/chat/chat',
+`${window.baseUrl}/chat/chat`,
 '_blank',
 'width=500,height=700,left=100,top=100,resizable=no'
 );
@@ -14,7 +16,7 @@ window.open(
 
 function makeRoom() {
 window.open(
-'http://localhost/',
+`${window.baseUrl}/`,
 '_blank',
 'width=500,height=700,left=100,top=100,resizable=no'
 );
@@ -22,7 +24,7 @@ window.open(
 
 function openChatRoom(roomId) {
     window.open(
-    'http://localhost/chat/detail/'+roomId,
+    `${window.baseUrl}/chat/detail/`+roomId,
     '_blank',
     'width=500,height=700,left=100,top=100,resizable=no'
     );
@@ -91,31 +93,42 @@ document.getElementById("chatForm").addEventListener("submit", function(e) {
     e.preventDefault();
     sendMessage();
 });
+let hostId=host.value;
+console.log(hostId)
+console.log(sender.value)
+if (hostId != sender.value){
+  outRoom.addEventListener('click', async ()=>{
+      await fetch(`${window.baseUrl}/chat/out`, { method: 'POST' });
+      if (window.opener && !window.opener.closed) {
+        alert('채팅방을 퇴장하였습니다.');
+        window.opener.location.reload();
+      }
+  
+      window.close();
+  })
+}
 
-outRoom.addEventListener('click', async ()=>{
-    await fetch(`/chat/out`, { method: 'POST' });
-    if (window.opener && !window.opener.closed) {
-      alert('채팅방을 퇴장하였습니다.');
-      window.opener.location.reload();
-    }
 
-    window.close();
-})
-
-
-  let stompClient = null;
-  let roomId = getRoomId.value;
-  const username = sender.value;
+    var username1 = sender.value;
+    console.log(username1)
 
   function connect() {
+    // 이미 연결된 경우 아무것도 하지 않음
+    if (window.stompClient && window.stompClient.connected) {
+        console.log("이미 소켓에 연결됨");
+        return;
+    }
+    
+
+    console.log("WebSocket 연결 시도")
     const socket = new SockJS("/ws-chat");
     console.log("WebSocket 연결 완료")
-    stompClient = Stomp.over(socket);
-    stompClient.connect({}, function (frame) {
+    window.stompClient = Stomp.over(socket);
+    window.stompClient.connect({}, function (frame) {
       console.log("Connected: " + frame);
 
       // 메시지 수신 구독
-      stompClient.subscribe(`/topic/chat/${roomId}`, function (message) {
+      window.stompClient.subscribe(`/topic/chat/${roomId}`, function (message) {
         const msg = JSON.parse(message.body);
         showMessage(msg);
       });
@@ -123,14 +136,17 @@ outRoom.addEventListener('click', async ()=>{
   }
 
   function sendMessage() {
+    
     const content = document.getElementById("msgInput").value;
+
+
     const payload = {
       roomId: roomId,
-      senderId: username,
+      senderId: username1,
       contents: content,
       messageType: "TEXT"
     };
-    stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(payload));
+    window.stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(payload));
     document.getElementById("msgInput").value="";
   }
 
@@ -138,7 +154,7 @@ outRoom.addEventListener('click', async ()=>{
 function showMessage(msg) {
     const chatBox = document.getElementById("chatContent");
     const msgDiv = document.createElement("div");
-    if (msg.senderId === username) {
+    if (msg.senderId === username1) {
         msgDiv.innerHTML = `
             <div class="d-flex justify-content-end align-items-end mb-2">
             <input hidden name="contents" value="${msg.contents}">
@@ -165,4 +181,14 @@ function showMessage(msg) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-  window.onload = connect;
+function scrollToBottom() {
+  const marker = document.getElementById("bottom");
+  if (marker) {
+    marker.scrollIntoView({ behavior: "auto", block: "end" });
+  }
+}
+
+window.onload = function() {
+  connect();
+  scrollToBottom();
+}

@@ -8,6 +8,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.spring.app.user.friend.FriendVO;
+
 @Service
 public class ChatService {
 	
@@ -22,6 +24,12 @@ public class ChatService {
 	
 	public List<RoomMemberVO> getUserByRoom(Long roomId) throws Exception {
 		List<RoomMemberVO> list = chatDAO.getUserByRoom(roomId);
+		
+		return list;
+	}
+	
+	public List<String> getUserNotInRoom(Long roomId, String username) throws Exception {
+		List<String> list = chatDAO.getUserNotInRoom(roomId, username);
 		
 		return list;
 	}
@@ -45,13 +53,19 @@ public class ChatService {
 		return list;
 	}
 	
-	public void saveMessage(ChatMessageVO message) throws Exception {
+	public int saveMessage(ChatMessageVO message) throws Exception {
 		
-		chatDAO.insertMessage(message);
+		return chatDAO.insertMessage(message);
 	}
 	
 	public int renameRoom(String roomName, Long roomId) throws Exception {
 		int result = chatDAO.renameRoom(roomId, roomName);
+		
+		return result;
+	}
+	
+	public int changeHost(String createdBy, Long roomId) throws Exception {
+		int result = chatDAO.changeHost(createdBy, roomId);
 		
 		return result;
 	}
@@ -63,7 +77,6 @@ public class ChatService {
 		
 		if (!isGroup && usernames.size()==2) {
 			Long exist = chatDAO.findRoom(usernames.get(0), usernames.get(1));
-			System.out.println("결과 : "+exist);
 			if (exist!=null) {
 				return exist;
 			} else {
@@ -108,9 +121,14 @@ public class ChatService {
 			memberVO.setUsername(username);
 			chatDAO.insertMember(memberVO);
 		}
-		System.out.println("0번째"+usernames.get(0));
 		
 		return chatRoomVO.getRoomId();
+	}
+	
+	public int invite(RoomMemberVO memberVO) throws Exception {
+		int result = chatDAO.insertMember(memberVO);
+		
+		return result;
 	}
 
 }

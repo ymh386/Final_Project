@@ -1,10 +1,6 @@
 package com.spring.app.chat;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,14 +17,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
+import com.spring.app.attendance.AttendanceService;
 import com.spring.app.user.UserVO;
 import com.spring.app.user.friend.FriendService;
 import com.spring.app.user.friend.FriendVO;
+import com.spring.app.websocket.NotificationManager;
 
 @Controller
 @RequestMapping("/chat")
 public class ChatController {
+	
+	@Autowired
+	private NotificationManager notificationManager;
 	
 	@Autowired
 	private FriendService friendService;
@@ -47,7 +47,6 @@ public class ChatController {
 		
 		List<FriendVO> list = friendService.friendList(userVO.getUsername());
 		for (FriendVO friend : list) {
-			System.out.println("friend : "+friend);
 		}
 		model.addAttribute("list", list);
 	}
@@ -60,7 +59,6 @@ public class ChatController {
 		
 		List<FriendVO> list = friendService.friendList(userVO.getUsername());
 		for (FriendVO friend : list) {
-			System.out.println("friend : "+friend);
 		}
 		model.addAttribute("list", list);
 	}
@@ -105,10 +103,16 @@ public class ChatController {
 	public String roomDetail(@AuthenticationPrincipal UserVO userVO,
 			 			   @PathVariable Long roomId, Model model) throws Exception {
 		
+		List<String> friends = chatService.getUserNotInRoom(roomId, userVO.getUsername());
 		ChatRoomVO room = chatService.getRoomDetail(roomId);
 		List<ChatMessageVO> list = chatService.getMessageByRoom(roomId);
 		List<RoomMemberVO> members = chatService.getUserByRoom(roomId);
+		List<FriendVO> notFriends = friendService.notfriendList(userVO.getUsername());
 		
+		System.out.println("host : "+room.getCreatedBy());
+		
+		model.addAttribute("notFriend", notFriends);
+		model.addAttribute("friend", friends);
 		model.addAttribute("members", members);
 		model.addAttribute("room", room);
 		model.addAttribute("msg", list);
@@ -143,14 +147,18 @@ public class ChatController {
 				time=day+" "+hour+":"+min;				
 			}
 		}
-		System.out.println(min);
-		System.out.println(time);
 		
 		message.setCreatedAt(time);
 		message.setMessageType("TEXT");
-		System.out.println("message : "+message);
 		
-		chatService.saveMessage(message);
+		int result = chatService.saveMessage(message);
+		
+		//메세지저장 성공 시 채팅방안 모든 인원에게 메세지 전송
+		if(result > 0) {
+			List<RoomMemberVO> ar = chatService.getUserByRoom(message.getRoomId());
+			notificationManager.messageNotification(message, ar);
+		}
+		
 		messagingTemplate.convertAndSend(
 				"/topic/chat/"+message.getRoomId(), message);
 	}
@@ -159,17 +167,25 @@ public class ChatController {
 	public String kickUser(@AuthenticationPrincipal UserVO userVO, @RequestParam("roomId") Long roomId 
 						 , @RequestParam("username") String username, RoomMemberVO memberVO, Model model) throws Exception {
 		
+		System.out.println("kick컨트롤러진입");
+		
 		ChatRoomVO roomVO=chatService.getRoomDetail(roomId);
 		String host = roomVO.getCreatedBy();
+		System.out.println("host : "+host);
+		System.out.println("login : "+userVO.getUsername());
 		
-		if (host!=userVO.getUsername()) {
+		if (!host.equals(userVO.getUsername())) {
 			model.addAttribute("result", "강퇴 권한이 없습니다. 방장에게 문의하세요.");
 			model.addAttribute("path", "/chat/detail/"+roomId);
 		}else {
 			memberVO.setUsername(username);
 			memberVO.setRoomId(roomId);
 			
-			chatService.outUser(memberVO);
+			int result = chatService.outUser(memberVO);
+			
+			if (result>0) {
+				notificationManager.kickNotification(memberVO, roomVO, username);				
+			}
 			
 			model.addAttribute("result", "강퇴에 성공했습니다.");
 			model.addAttribute("path", "/chat/detail/"+roomId);			
@@ -179,13 +195,83 @@ public class ChatController {
 	}
 	
 	@PostMapping("out")
-	public void out(@AuthenticationPrincipal UserVO userVO, @RequestParam("roomId") Long roomId
+	public String out(@AuthenticationPrincipal UserVO userVO, @RequestParam("roomId") Long roomId
 			        , RoomMemberVO memberVO, Model model) throws Exception {
 		
 		memberVO.setUsername(userVO.getUsername());
 		memberVO.setRoomId(roomId);
 		
-		chatService.outUser(memberVO);
+		ChatRoomVO chatRoomVO=chatService.getRoomDetail(roomId);
+		String host = chatRoomVO.getCreatedBy();
+		
+		if (userVO.getUsername().equals(host)) {
+			model.addAttribute("result", "회원님은 현재 방의 방장입니다. 참여자 목록에서 방장 변경 후 퇴장할 수 있습니다.");
+			model.addAttribute("path", "/chat/detail/"+roomId);
+			
+			return "commons/result";
+		} else {
+			chatService.outUser(memberVO);
+			
+			return "";
+		}
+		
+	}
+	
+	@PostMapping("rename")
+	public String rename(@RequestParam("roomName") String roomName, @RequestParam("roomId") Long roomId
+			          , Model model) throws Exception {
+		
+		chatService.renameRoom(roomName, roomId);
+		
+		model.addAttribute("result", "채팅방 이름을 수정했습니다.");
+		model.addAttribute("path", "/chat/detail/"+roomId);
+		
+		return "commons/result";
+	}
+	
+	@PostMapping("invite")
+	public String invite(@AuthenticationPrincipal UserVO userVO,
+						 @RequestParam("roomId") Long roomId,
+			             @RequestParam("username") String username, Model model) throws Exception {
+		
+		ChatRoomVO chatRoomVO = new ChatRoomVO();
+		
+		chatRoomVO=chatService.getRoomDetail(roomId);
+		
+		RoomMemberVO memberVO = new RoomMemberVO();
+		memberVO.setRoomId(roomId);
+		memberVO.setUsername(username);
+		
+		int result = chatService.invite(memberVO);
+		
+		if (result>0) {
+			notificationManager.inviteNotification(memberVO, chatRoomVO, userVO.getUsername(), username);			
+		}
+		
+		model.addAttribute("result", username+" 님을 초대했습니다.");
+		model.addAttribute("path", "/chat/detail/"+roomId);
+		
+		return "commons/result";
+	}
+	
+	@PostMapping("changeHost")
+	public String changeHost(@RequestParam("createdBy") String createdBy,
+			                 @RequestParam("roomId") Long roomId, Model model) throws Exception {
+		
+		ChatRoomVO chatRoomVO = new ChatRoomVO();
+		
+		chatRoomVO=chatService.getRoomDetail(roomId);
+		
+		int result = chatService.changeHost(createdBy, roomId);
+		
+		if (result>0) {
+			notificationManager.getHostNotification(chatRoomVO, createdBy);			
+		}
+		
+		model.addAttribute("result", "방장 변경 완료");
+		model.addAttribute("path", "/chat/detail/"+roomId);
+		
+		return "commons/result";
 	}
 
 }

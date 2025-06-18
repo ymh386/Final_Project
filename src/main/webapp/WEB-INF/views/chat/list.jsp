@@ -20,7 +20,7 @@
 								<h2 class="mb-0">채팅</h2>
 
 								<div class="d-flex gap-2">
-									<a onclick="makeChat()" class="btn btn-primary btn-sm">채팅 시작</a>
+									<a href="#" onclick="makeChat()" class="btn btn-primary btn-sm">채팅 시작</a>
 								</div>
 								</div>
 								<!-- Chat List Wrapper -->
@@ -60,6 +60,9 @@
 			
 			<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 		</div>
+		<script>
+		window.baseUrl = '${pageContext.request.contextPath}';
+		</script>
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="/js/chat/chat.js"></script>
 	</body>

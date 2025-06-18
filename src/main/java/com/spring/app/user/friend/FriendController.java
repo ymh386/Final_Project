@@ -1,5 +1,6 @@
 package com.spring.app.user.friend;
 
+import java.net.http.HttpRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,15 +13,24 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
+import com.spring.app.user.UserController;
 import com.spring.app.user.UserVO;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping("/friend/*")
 public class FriendController {
+
+    private final UserController userController;
 	
 	@Autowired
 	private FriendService friendService;
+
+    FriendController(UserController userController) {
+        this.userController = userController;
+    }
 	
 	@GetMapping("list")
 	public void friendList(@AuthenticationPrincipal UserVO userVO
@@ -148,15 +158,26 @@ public class FriendController {
 	@PostMapping("suggestList")
 	public String sendRequest(@AuthenticationPrincipal UserVO userVO
 							, @RequestParam("receiverId") String receiverId
-							, FriendRequestVO friendRequestVO, Model model) throws Exception {
+							, FriendRequestVO friendRequestVO, Model model, HttpServletRequest request) throws Exception {
 		if (userVO!=null) {
 			friendRequestVO.setRequesterId(userVO.getUsername());
 			friendRequestVO.setReceiverId(receiverId);
 			friendService.friendRequest(friendRequestVO);
 		}
 		
-		model.addAttribute("result", "친구 요청을 보냈습니다.");
-		model.addAttribute("path", "/friend/suggestList");
+		String url=request.getHeader("referer");
+		
+		
+		if (url.contains("chat")) {
+			String[] u=url.split("/");
+			Long roomId = Long.parseLong(u[5]);
+			System.out.println(roomId);
+			model.addAttribute("result", "친구 요청을 보냈습니다.");
+			model.addAttribute("path", "/chat/detail/"+roomId);
+		} else {
+			model.addAttribute("result", "친구 요청을 보냈습니다.");
+			model.addAttribute("path", "/friend/suggestList");			
+		}
 		
 		return "commons/result";
 	}
