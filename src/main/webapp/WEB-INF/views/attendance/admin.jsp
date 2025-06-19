@@ -240,7 +240,6 @@
                 <button class="btn" onclick="filterData()">검색</button>
             </div>
             <div>
-                <button class="btn btn-success" onclick="exportToExcel()">Excel 내보내기</button>
                 <button class="btn" onclick="loadAttendanceData()">새로고침</button>
             </div>
         </div>
@@ -276,6 +275,9 @@
             </div>
         </div>
     </div>
+    
+            <a href="${pageContext.request.contextPath}/" style="margin-left: 20px; padding: 6px 12px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px;">홈으로 가기</a>
+    
 
     <script>
         let originalData = [];
