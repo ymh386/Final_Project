@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.user.UserService;
 
 import jakarta.servlet.FilterChain;
@@ -28,6 +29,9 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 	private AuthenticationManager authenticationManager;
 	
 	private JwtTokenManager jwtTokenManager;
+	
+	@Autowired
+	private AuditLogService auditLogService;
 	
 	@Autowired
 	private UserService userService;
@@ -79,6 +83,22 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		cookie.setPath("/");
 		cookie.setHttpOnly(true);
 		
+		// 로그/감사 기록용
+		String username = authResult != null && authResult.isAuthenticated() ? authResult.getName() : "anonymous";
+		try {
+			auditLogService.log(
+			        username,
+			        "LOGIN_SUCCESS",
+			        "USER",
+			        username,
+			        username.concat("이 로그인 성공"),
+			        request
+			    );
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		response.addCookie(cookie);
 		response.sendRedirect("/");
 	}
@@ -88,6 +108,21 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 			AuthenticationException failed) throws IOException, ServletException {
 		// TODO Auto-generated method stub
 		
+		// 로그/감사 기록용
+		try {
+			auditLogService.log(
+					"anonymous",
+			        "LOGIN_SUCCESS",
+			        "USER",
+			        "anonymous",
+			        "anonymous이 로그인 실패",
+			        request
+			    );
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+				
 		String loginType = request.getParameter("loginType");
 		
 		if (loginType.equals("member")) {

@@ -8,13 +8,19 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.user.friend.FriendVO;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class ChatService {
 	
 	@Autowired
 	private ChatDAO chatDAO;
+	
+	@Autowired
+	private AuditLogService auditLogService;
 	
 	public List<ChatRoomVO> getRoomList(String username) throws Exception {
 		List<ChatRoomVO> list = chatDAO.getRoomList(username);
@@ -70,7 +76,7 @@ public class ChatService {
 		return result;
 	}
 	
-	public Long insertMemberRoom(List<String> usernames, boolean isGroup) throws Exception {
+	public Long insertMemberRoom(List<String> usernames, boolean isGroup, HttpServletRequest request) throws Exception {
 		
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String user = auth.getName();
@@ -89,10 +95,31 @@ public class ChatService {
 						memberVO.setUsername(user);
 						memberVO.setRoomId(exist2);
 						chatDAO.insertMember(memberVO);
+						
+						// 로그/감사 기록용
+						auditLogService.log(
+								memberVO.getUsername(),
+						        "JOIN_CHAT",
+						        "CHAT_ROOM_MEMBER",
+						        memberVO.getRoomId() + ", " + memberVO.getUsername(),
+						        memberVO.getUsername() + "이 "
+						        + memberVO.getRoomId() + "번방에 입장",
+						        request
+						    );
 					} else if (!list.contains(usernames.get(1))) {
 							memberVO.setUsername(usernames.get(1));
 							memberVO.setRoomId(exist2);
 							chatDAO.insertMember(memberVO);
+							// 로그/감사 기록용
+							auditLogService.log(
+									memberVO.getUsername(),
+							        "JOIN_CHAT",
+							        "CHAT_ROOM_MEMBER",
+							        memberVO.getRoomId() + ", " + memberVO.getUsername(),
+							        memberVO.getUsername() + "이 "
+							        + memberVO.getRoomId() + "번방에 입장",
+							        request
+							    );
 						} else {
 							
 					}
@@ -109,9 +136,31 @@ public class ChatService {
 			chatRoomVO.setCreatedBy(user);
 			chatRoomVO.setRoomName(usernames.get(0)+"님 외 "+person+"명");	
 			chatDAO.makeRoom(chatRoomVO);
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+					chatRoomVO.getCreatedBy(),
+			        "MAKE_ROOM",
+			        "CHAT_ROOM",
+			        chatRoomVO.getRoomId().toString(),
+			        chatRoomVO.getCreatedBy() + "이 "
+			        + chatRoomVO.getRoomId() + "번방 개설",
+			        request
+			    );
 		}else {
 			chatRoomVO.setRoomName(usernames.get(1));
 			chatDAO.makeChat(chatRoomVO);
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+					chatRoomVO.getCreatedBy(),
+			        "MAKE_ROOM",
+			        "CHAT_ROOM",
+			        chatRoomVO.getRoomId().toString(),
+			        chatRoomVO.getCreatedBy() + "이 "
+			        + chatRoomVO.getRoomId() + "번방 개설",
+			        request
+			    );
 		}
 		
 		
@@ -120,6 +169,19 @@ public class ChatService {
 			memberVO.setRoomId(chatRoomVO.getRoomId());
 			memberVO.setUsername(username);
 			chatDAO.insertMember(memberVO);
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+					username,
+			        "JOIN_CHAT",
+			        "CHAT_ROOM_MEMBER",
+			        memberVO.getRoomId() + ", " + memberVO.getUsername(),
+			        username + "이 "
+			        + memberVO.getRoomId() + "번방에 입장",
+			        request
+			    );
+			
+			
 		}
 		
 		return chatRoomVO.getRoomId();

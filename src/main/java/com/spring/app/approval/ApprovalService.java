@@ -9,10 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
+import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.user.UserDAO;
 import com.spring.app.user.UserVO;
 import com.spring.app.websocket.NotificationManager;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -23,6 +25,9 @@ public class ApprovalService {
 	
 	@Autowired
 	private ApprovalDAO approvalDAO;
+	
+	@Autowired
+	private AuditLogService auditLogService;
 	
 	//카테고리 목록 가져오기
 	public List<FormVO> getForms() throws Exception {
@@ -83,9 +88,20 @@ public class ApprovalService {
 		return result;
 	}
 	
-	public void addDocument(DocumentVO documentVO, List<ApprovalVO> approverList) throws Exception {
+	public void addDocument(DocumentVO documentVO, List<ApprovalVO> approverList, HttpServletRequest request) throws Exception {
 		//결재문서 먼저 INSERT
 		int result = approvalDAO.addDocument(documentVO);
+		
+		// 로그/감사 기록용
+		auditLogService.log(
+		        documentVO.getWriterId().toString(),
+		        "CREATE_DOCUMENT",
+		        "DOCUMENT",
+		        documentVO.getDocumentId().toString(),
+		        documentVO.getWriterId().concat("이 전자결재 문서 작성"),
+		        request
+		    );
+		
 		//결재문서 INSERT가 성공했을 때
 		if(result > 0) {
 			//첫 결재자의 parentId는 null
@@ -109,11 +125,21 @@ public class ApprovalService {
 				//2번째 결재자부턴 상태 '미도달'
 				approvalStatus = "AS3";
 			}
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+			        documentVO.getWriterId().toString(),
+			        "SUBMIT_APPROVAL",
+			        "APPROVAL",
+			        approverList.get(0).getApprovalId().toString(),
+			        documentVO.getWriterId().concat("이 ").concat(approverList.get(0).getApproverId()).concat("에게 결재 승인 요청"),
+			        request
+			    );
 		}
 	}
 	
 	//결재문서 삭제
-	public int deleteDocument(DocumentVO documentVO) throws Exception {
+	public int deleteDocument(DocumentVO documentVO, HttpServletRequest request) throws Exception {
 		ApprovalVO approvalVO = new ApprovalVO();
 		approvalVO.setDocumentId(documentVO.getDocumentId());
 		
@@ -122,8 +148,26 @@ public class ApprovalService {
 		
 		//없으면 삭제 실행
 		if(ar.size() <= 0) {
+			// 로그/감사 기록용
+			auditLogService.log(
+			        documentVO.getWriterId().toString(),
+			        "DELETE_DOCUMENT",
+			        "DOCUMENT",
+			        documentVO.getDocumentId().toString(),
+			        documentVO.getWriterId().concat("이 결재 문서 삭제 - 성공"),
+			        request
+			    );
 			return approvalDAO.deleteDocument(documentVO);
 		}else {
+			// 로그/감사 기록용
+			auditLogService.log(
+			        documentVO.getWriterId().toString(),
+			        "DELETE_DOCUMENT",
+			        "DOCUMENT",
+			        documentVO.getDocumentId().toString(),
+			        documentVO.getWriterId().concat("이 결재 문서 삭제 - 실패"),
+			        request
+			    );
 			return 0;
 		}
 		
@@ -151,7 +195,7 @@ public class ApprovalService {
 	}
 	
 	//결재 승인 처리
-	public int approve(ApprovalVO approvalVO, DocumentVO documentVO, UserVO userVO) throws Exception {
+	public int approve(ApprovalVO approvalVO, DocumentVO documentVO, UserVO userVO, HttpServletRequest request) throws Exception {
 		
 		//1. 현재 승인정보의 상태를 승인으로 변경
 		approvalVO.setApprovalStatus("AS1");
@@ -162,6 +206,8 @@ public class ApprovalService {
 			//결재요청자에게 승인알림
 			notificationManager.approvedNotification(documentVO, userVO);
 			
+			
+			
 			//2. 다음 승인정보를 진행중으로 변경
 			approvalVO.setApprovalStatus("AS0");
 			result = approvalDAO.updateChildStatus(approvalVO);
@@ -169,7 +215,17 @@ public class ApprovalService {
 			//승인 시 다음 결재자에게 알림
 			ApprovalVO approvalVO2 = approvalDAO.getChild(approvalVO);
 			if(approvalVO2 != null) {
-				notificationManager.approvalNotification(approvalVO2, userVO);		
+				notificationManager.approvalNotification(approvalVO2, userVO);
+				
+				// 로그/감사 기록용
+				auditLogService.log(
+				        approvalVO.getApproverId(),
+				        "SUBMIT_APPROVAL",
+				        "APPROVAL",
+				        approvalVO2.getApprovalId().toString(),
+				        approvalVO.getApproverId().concat("이 ").concat(approvalVO2.getApproverId()).concat("에게 결재 승인 요청"),
+				        request
+				    );
 			}
 			
 			//2번 실패 시 -> 다음결재자가 없음(최종승인 됨)
@@ -187,6 +243,16 @@ public class ApprovalService {
 					
 					//최종 결과 시 결재 요청자에게 알림
 					notificationManager.appOrRejNotification(documentVO, userVO);
+					
+					// 로그/감사 기록용
+					auditLogService.log(
+					        approvalVO.getApproverId(),
+					        "APPROVE_DOCUMENT",
+					        "DOCUMENT",
+					        documentVO.getDocumentId().toString(),
+					        approvalVO.getApproverId().concat("이 ").concat(documentVO.getWriterId()).concat("이 요청한 결재 최종 승인"),
+					        request
+					    );
 				}
 			}
 		}
@@ -199,7 +265,7 @@ public class ApprovalService {
 		return result;
 	}
 	
-	public int rejection(ApprovalVO approvalVO, DocumentVO documentVO, UserVO userVO) throws Exception {
+	public int rejection(ApprovalVO approvalVO, DocumentVO documentVO, UserVO userVO, HttpServletRequest request) throws Exception {
 		
 		//1. 현재 승인정보의 상태를 반려로 변경
 		approvalVO.setApprovalStatus("AS2");
@@ -220,6 +286,16 @@ public class ApprovalService {
 				
 				//최종 결과 시 결재 요청자에게 알림
 				notificationManager.appOrRejNotification(documentVO, userVO);
+				
+				// 로그/감사 기록용
+				auditLogService.log(
+				        approvalVO.getApproverId(),
+				        "REJECT_DOCUMENT",
+				        "DOCUMENT",
+				        documentVO.getDocumentId().toString(),
+				        approvalVO.getApproverId().concat("이 ").concat(documentVO.getWriterId()).concat("이 요청한 결재 최종 승인"),
+				        request
+				    );
 			}
 		}
 		

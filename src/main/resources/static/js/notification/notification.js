@@ -66,7 +66,7 @@ function renderNotificationList(r) {
             class="text-decoration-none text-dark fw-bold d-block">
             ${n.notificationTitle}
             </a>
-            <p>${n.message}</p>
+            <p>${n.message.replace(/\n/g, "<br>")}</p>
             <small class="text-muted">${getRelativeTime(n.createdAt)}</small>
             <small class="text-muted">${n.senderVO.name}</small>
         </div>
@@ -95,7 +95,7 @@ function addNotification(notification) {
            class="text-decoration-none text-dark fw-bold d-block">
           ${notification.notificationTitle}
         </a>
-        <p>${notification.message}</p>
+        <p>${notification.message.replace(/\n/g, "<br>")}</p>
         <small class="text-muted">${getRelativeTime(notification.createdAt)}</small>
         <small class="text-muted">${notification.senderVO.name}</small>
       </div>
@@ -187,7 +187,9 @@ function showToast(notification) {
             </div><hr>
             <div class="toast-body">
                 <a href="${notification.linkUrl}" class="text-white text-decoration-none">
-                ${notification.message}
+
+                    ${notification.message.replace(/\n/g, "<br>")}
+
                 </a><br>
             </div>
         </div>

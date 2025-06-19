@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.spring.app.auditLog.AuditLogDAO">
+  
+  	<insert id="addAuditLog" parameterType="AuditLogVO">
+  		INSERT INTO AUDIT_LOG (
+  			   USERNAME,
+  			   ACTION_TYPE,
+  			   TARGET_TABLE,
+  			   TARGET_ID,
+  			   DESCRIPTION,
+  			   IP_ADDRESS,
+  			   USER_AGENT.
+  			   CREATED_AT
+  		) VALUES (
+  			   #{username},
+  			   #{actionType}.
+  			   #{targetTable},
+  			   #{targetId},
+  			   #{description},
+  			   #{ipAddress},
+  			   #{userAgent},
+  			   #{createdAt}
+  		)
+  	</insert>
+  
+  </mapper>

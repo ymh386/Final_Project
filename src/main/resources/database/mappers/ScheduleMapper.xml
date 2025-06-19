@@ -82,6 +82,12 @@
       AND REMAINING_SEATS > 0
     ORDER BY SCHEDULE_DATE, START_TIME
   </select>
+  
+  <select id="selectOneUsername" resultType="ScheduleVO" parameterType="java.lang.Long">
+  	SELECT USERNAME
+  	  FROM SCHEDULE
+  	 WHERE SCHEDULE_ID=#{scheduleId}
+  </select>
     
     
     

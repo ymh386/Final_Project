@@ -16,12 +16,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.spring.app.auditLog.AuditLogService;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 @Controller
 @RequestMapping("/attendance")
 public class AttendanceController {
 
 	@Autowired
 	private AttendanceService attendanceService;
+	
+	@Autowired
+	private AuditLogService auditLogService;
 	
 	
 	@GetMapping("/page")
@@ -38,10 +45,28 @@ public class AttendanceController {
 	 @PostMapping("/checkIn")
 	 @PreAuthorize("hasRole('TRAINER')")
 	 @ResponseBody
-	    public ResponseEntity<?> checkIn(Principal principal) {
+	    public ResponseEntity<?> checkIn(Principal principal, HttpServletRequest request) {
 	        String username = principal.getName();
 	        try {
 	            AttendanceVO vo = attendanceService.checkIn(username);
+	            
+	         // 로그/감사 기록용
+				try {
+					auditLogService.log(
+							vo.getUsername(),
+					        "CHECKIN",
+					        "ATTENDANCE",
+					        vo.getAttendanceId().toString(),
+					        vo.getUsername() + "이 "
+					        + vo.getAttendanceDate() + " 날짜의 "
+					        + vo.getCheckinTime() + "에 출근",
+					        request
+					    );
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	            
 	            return ResponseEntity.ok(vo);
 	        } catch (AttendanceException ex) {
 	            // 이미 출근했거나 기타 오류 메시지
@@ -57,9 +82,27 @@ public class AttendanceController {
 	    @PostMapping("/checkOut")
 	    @PreAuthorize("hasRole('TRAINER')")
 	    @ResponseBody
-	    public ResponseEntity<?> checkOut(@RequestParam("attendanceId") Long attendanceId) {
+	    public ResponseEntity<?> checkOut(@RequestParam("attendanceId") Long attendanceId, HttpServletRequest request) {
 	        try {
 	            AttendanceVO vo = attendanceService.checkOut(attendanceId);
+	            
+	         // 로그/감사 기록용
+				try {
+					auditLogService.log(
+							vo.getUsername(),
+					        "CHECKOUT",
+					        "ATTENDANCE",
+					        vo.getAttendanceId().toString(),
+					        vo.getUsername() + "이 "
+					        + vo.getAttendanceDate() + " 날짜의 "
+					        + vo.getCheckinTime() + "에 퇴근",
+					        request
+					    );
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	            
 	            return ResponseEntity.ok(vo);
 	        } catch (AttendanceException ex) {
 	            return ResponseEntity.status(HttpStatus.BAD_REQUEST)

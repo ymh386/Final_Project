@@ -68,7 +68,7 @@
 						                	
 					                        <td>${a.senderVO.name}</td>
 						                    <td>${a.notificationTitle}</td>
-						                    <td>${a.message}</td>
+						                    <td style="white-space: pre-line;">${a.message}</td>
 						                   
 					                    	<c:choose>
 						                    	<c:when test="${a.read}">

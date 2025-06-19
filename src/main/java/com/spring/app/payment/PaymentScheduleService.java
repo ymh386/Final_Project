@@ -59,6 +59,7 @@ public class PaymentScheduleService {
 		subscriptVO.setUsername(paymentResultVO.getUsername());
 		
 		Long id = subscriptVO.getSubscriptionId();
+		
 
 	}
 

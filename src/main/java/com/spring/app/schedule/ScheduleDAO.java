@@ -20,6 +20,9 @@ public interface ScheduleDAO {
 	
     /** 1) 스케줄에 등록된 모든 트레이너 이름(distinct) */
     List<String> selectAllTrainerNames();
+    
+    //트레이너ID 하나 조회
+    public ScheduleVO selectOneUsername(Long scheduleId);
 
 
 }

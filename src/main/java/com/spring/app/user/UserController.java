@@ -25,6 +25,7 @@ import com.spring.app.approval.ApprovalService;
 import com.spring.app.approval.DocumentVO;
 import com.spring.app.approval.FormVO;
 import com.spring.app.approval.UserSignatureVO;
+import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.payment.PaymentService;
 import com.spring.app.subscript.SubscriptService;
 import com.spring.app.subscript.SubscriptVO;
@@ -59,6 +60,9 @@ public class UserController {
 
 	@Autowired
 	private SubscriptService subscriptService;
+	
+	@Autowired
+	private AuditLogService auditLogService;
 
 	
 	@Value("${board.file.path}")
@@ -94,8 +98,18 @@ public class UserController {
 	}
 	
 	@PostMapping("join/memberJoin")
-	String memberJoin(UserVO userVO) throws Exception{
+	String memberJoin(UserVO userVO, HttpServletRequest request) throws Exception{
 		int result = userService.join(userVO);
+		
+		// 로그/감사 기록용
+		auditLogService.log(
+		        userVO.getUsername(),
+		        "CREATE_MEMBER_USER",
+		        "USER",
+		        userVO.getUsername(),
+		        "일반회원 회원가입",
+		        request
+		    );
 		
 		return "redirect:/";
 	}
@@ -107,10 +121,20 @@ public class UserController {
 	}
 	
 	@PostMapping("join/trainerJoin")
-	String trainerJoin(UserVO userVO) throws Exception{
+	String trainerJoin(UserVO userVO, HttpServletRequest request) throws Exception{
 		Long code = userService.getTrainerCode();
 		userVO.setTrainerCode(code);
 		int result = userService.join(userVO);
+		
+		// 로그/감사 기록용
+		auditLogService.log(
+		        userVO.getUsername(),
+		        "CREATE_TRAINER_USER",
+		        "USER",
+		        userVO.getUsername(),
+		        "트레이너 회원가입",
+		        request
+		    );
 		
 		return "redirect:/";
 	}
@@ -143,7 +167,7 @@ public class UserController {
 	void findId() throws Exception{}
 	
 	@PostMapping("findId")
-	String findId(@RequestParam("email") String input, UserVO userVO, Model model) throws Exception {
+	String findId(@RequestParam("email") String input, UserVO userVO, Model model, HttpServletRequest request) throws Exception {
 		
 		String email = findInfoService.getEmail(input);
 		userVO.setEmail(email);
@@ -156,18 +180,39 @@ public class UserController {
 			
 			model.addAttribute("result", "아이디는 "+username+"입니다");
 			model.addAttribute("path", "/user/login/login");
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+			        userVO.getUsername(),
+			        "FIND_ID",
+			        "USER",
+			        userVO.getUsername(),
+			        userVO.getUsername().concat("이 아이디찾기 시도 - 성공"),
+			        request
+			    );
+			return "commons/result";
 		}else {
 			model.addAttribute("result", "입력한 정보로 가입된 회원이 존재하지 않습니다.");
 			model.addAttribute("path", "/user/findId");
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+			        userVO.getUsername(),
+			        "FIND_ID",
+			        "USER",
+			        userVO.getUsername(),
+			        userVO.getUsername().concat("이 아이디찾기 시도 - 실패"),
+			        request
+			    );
+			return "commons/result";
 		}
-		return "commons/result";
 	}
 	
 	@GetMapping("findPwByEmail")
 	void findPwByEmail() throws Exception{}
 	
 	@PostMapping("findPwByEmail")
-	String findPwEmail(@RequestParam("email") String input, Model model, UserVO userVO) throws Exception{
+	String findPwEmail(@RequestParam("email") String input, Model model, UserVO userVO, HttpServletRequest request) throws Exception{
 		String email = findInfoService.getEmail(input);
 		
 		if (email!=null) {
@@ -179,8 +224,27 @@ public class UserController {
 			findInfoService.findPwByEmail(email, newPassword);
 			
 			model.addAttribute("result", "입력하신 이메일로 임시 비밀번호를 발송했습니다.");
+			// 로그/감사 기록용
+			auditLogService.log(
+			        userVO.getUsername(),
+			        "FIND_PW_EMAIL",
+			        "USER",
+			        userVO.getUsername(),
+			        userVO.getUsername().concat("이 비밀번호 찾기 시도(이메일) - 성공"),
+			        request
+			    );
+			return "commons/result";
 		}else {
 			model.addAttribute("result", "입력한 정보로 가입된 회원이 존재하지 않습니다.");
+			// 로그/감사 기록용
+			auditLogService.log(
+			        userVO.getUsername(),
+			        "FIND_PW_EMAIL",
+			        "USER",
+			        userVO.getUsername(),
+			        userVO.getUsername().concat("이 비밀번호 찾기 시도(이메일) - 실패"),
+			        request
+			    );
 		}
 		
 		List<MemberRoleVO> list = userService.getRole(userVO.getUsername());
@@ -200,7 +264,7 @@ public class UserController {
 	void findPwByPhone() throws Exception{}
 	
 	@PostMapping("findPwByPhone")
-	String findPwByPhone(@RequestParam("phone") String input, Model model, UserVO userVO) throws Exception {
+	String findPwByPhone(@RequestParam("phone") String input, Model model, UserVO userVO, HttpServletRequest request) throws Exception {
 		
 		String phone = findInfoService.getPhone(input);
 		
@@ -213,9 +277,29 @@ public class UserController {
 			
 			findInfoService.findPwByPhone(phone, newPassword);
 			
-			model.addAttribute("result", "입력하신 전화번호로 임시 비밀번호를 발송했습니다.");			
+			model.addAttribute("result", "입력하신 전화번호로 임시 비밀번호를 발송했습니다.");	
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+			        userVO.getUsername(),
+			        "FIND_PW_PHONE",
+			        "USER",
+			        userVO.getUsername(),
+			        userVO.getUsername().concat("이 비밀번호 찾기 시도(폰번호) - 성공"),
+			        request
+			    );
 		}else {
 			model.addAttribute("result", "입력한 정보로 가입된 회원이 존재하지 않습니다.");
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+			        userVO.getUsername(),
+			        "FIND_PW_PHONE",
+			        "USER",
+			        userVO.getUsername(),
+			        userVO.getUsername().concat("이 비밀번호 찾기 시도(폰번호) - 실패"),
+			        request
+			    );
 		}
 		
 		
@@ -244,7 +328,7 @@ public class UserController {
 	}
 	
 	@GetMapping("update")
-	String update(Model model, UserVO userVO) throws Exception {
+	String update(Model model, UserVO userVO, HttpServletRequest request) throws Exception {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		
 		String username = auth.getName();
@@ -254,11 +338,21 @@ public class UserController {
 		
 		model.addAttribute("user", userVO);
 		
+		// 로그/감사 기록용
+		auditLogService.log(
+		        userVO.getUsername(),
+		        "UPDATE_USER",
+		        "USER",
+		        userVO.getUsername(),
+		        userVO.getUsername().concat("이 회원정보 수정"),
+		        request
+		    );
+		
 		return "user/update";
 	}
 	
 	@PostMapping("update")
-	String update(@ModelAttribute UserVO updateUser) throws Exception {
+	String update(@ModelAttribute UserVO updateUser, HttpServletRequest request) throws Exception {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String username = auth.getName();
 		UserVO userVO = new UserVO();
@@ -273,6 +367,16 @@ public class UserController {
 		
 		int result = userService.update(userVO);
 		
+		// 로그/감사 기록용
+		auditLogService.log(
+		        userVO.getUsername(),
+		        "UPDATE_USER",
+		        "USER",
+		        userVO.getUsername(),
+		        userVO.getUsername().concat("이 유저정보 수정"),
+		        request
+		    );
+
 		return "redirect:./mypage";
 	}
 	
