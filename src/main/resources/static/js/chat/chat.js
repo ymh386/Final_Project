@@ -6,6 +6,89 @@ const host = document.getElementById("host");
 let roomId = getRoomId.value;
 
 
+function makeChat() {
+window.open(
+`${window.baseUrl}/chat/chat`,
+'_blank',
+'width=500,height=700,left=100,top=100,resizable=no'
+);
+}
+
+function makeRoom() {
+window.open(
+`${window.baseUrl}/`,
+'_blank',
+'width=500,height=700,left=100,top=100,resizable=no'
+);
+}
+
+function openChatRoom(roomId) {
+    window.open(
+    `${window.baseUrl}/chat/detail/`+roomId,
+    '_blank',
+    'width=500,height=700,left=100,top=100,resizable=no'
+    );
+}
+
+function createSingleChat(targetUsername) {
+  fetch("/chat/makeChat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ target: targetUsername })
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("1:1 채팅 생성 실패");
+    return res.json();
+  })
+  .then(data => {
+    openChatRoom(`${data.roomId}`);
+    if (window.opener && !window.opener.closed) {
+      window.opener.location.reload();
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("오류가 발생했습니다.");
+  });
+}
+
+function createGroupChat() {
+    console.log("생성 시도")
+  const selected = [];
+  document.querySelectorAll(".user-checkbox:checked").forEach(cb => {
+    selected.push(cb.value);
+  });
+
+  if (selected.length < 2) {
+    alert("2명 이상 선택해주세요.");
+    return;
+  }
+
+  fetch("/chat/makeRoom", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ users: selected })
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("채팅방 생성 실패");
+    return res.json();
+  })
+  .then(data => {
+    if (window.opener && !window.opener.closed) {
+      window.opener.location.reload();
+    }
+    openChatRoom(`${data.roomId}`)
+  })
+  .catch(err => {
+    console.error(err);
+    alert("오류가 발생했습니다.");
+  });
+}
+
 document.getElementById("chatForm").addEventListener("submit", function(e) {
     e.preventDefault();
     sendMessage();

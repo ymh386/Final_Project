@@ -17,8 +17,5 @@ public class FriendRequestVO {
 	private String status;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
-	
-	private String sns;
-	private String fileName;
 
 }

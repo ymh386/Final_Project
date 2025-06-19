@@ -10,10 +10,7 @@
 		  FROM CHAT_ROOM CR
 		 INNER JOIN CHAT_ROOM_MEMBER CRM
 		 USING (ROOM_ID)
-		 INNER JOIN CHAT_MESSAGE CM
-		 USING (ROOM_ID)
 		 WHERE USERNAME=#{username}
-		 ORDER BY MESSAGE_ID DESC
   	</select>
   	
   	<select id="getRoomDetail" resultType="ChatRoomVO">
@@ -26,14 +23,12 @@
   		SELECT *
   		  FROM CHAT_MESSAGE
   		 WHERE ROOM_ID=#{roomId}
-  		 ORDER BY MESSAGE_ID ASC
+  		 ORDER BY CREATED_AT ASC
   	</select>
   	
-  	<select id="getUserByRoom" resultMap="userMap">
-  		SELECT USERNAME, ROOM_ID, SNS, FILE_NAME
-  		  FROM USER
-  		 INNER JOIN CHAT_ROOM_MEMBER
-  		 USING (USERNAME)
+  	<select id="getUserByRoom" resultType="RoomMemberVO">
+  		SELECT USERNAME, ROOM_ID
+  		  FROM CHAT_ROOM_MEMBER
   		 WHERE ROOM_ID=#{roomId}
   	</select>
   	
@@ -54,24 +49,6 @@
   		  FROM CHAT_ROOM_MEMBER
   		 WHERE ROOM_ID=#{roomId}
   		          )
-  	</select>
-  	
-  	<select id="getUserImgInRoom" resultType="string">
-  		SELECT DISTINCT FILE_NAME
-  		  FROM USER U
-  		 INNER JOIN CHAT_MESSAGE C
-  		    ON U.USERNAME=C.SENDER_ID
-  		 WHERE U.USERNAME=#{username}
-  		   AND C.ROOM_ID=#{roomId}
-  	</select>
-  	
-  	<select id="getUserSnsInRoom" resultType="string">
-  		SELECT DISTINCT SNS
-  		  FROM USER U
-  		 INNER JOIN CHAT_MESSAGE C
-  		    ON U.USERNAME=C.SENDER_ID
-  		 WHERE U.USERNAME=#{username}
-  		   AND C.ROOM_ID=#{roomId}
   	</select>
   	
   	<delete id="outUser" parameterType="RoomMemberVO">
@@ -102,58 +79,7 @@
   		 WHERE ROOM_ID=#{roomId}
   	</update>
   	
-  	<update id="readMessage" parameterType="RoomMemberVO">
-  		UPDATE CHAT_ROOM_MEMBER
-  		   SET LAST_READ_MESSAGE=(
-  		SELECT MAX(MESSAGE_ID)
-  		  FROM CHAT_MESSAGE
-  		 WHERE ROOM_ID=#{roomId}   
-  		   )
-  		 WHERE ROOM_ID=#{roomId}
-  		   AND USERNAME=#{username}
-  	</update>
-  	
-  	<select id="getUnreadMessage" resultType="long">
-  		SELECT COUNT(*) AS unreadCount
-  		  FROM CHAT_MESSAGE cm
-  		  JOIN CHAT_ROOM_MEMBER rm
-  		    ON cm.ROOM_ID=rm.ROOM_ID
-  		 WHERE cm.ROOM_ID=#{roomId}
-  		   AND rm.USERNAME=#{username}
-  		   AND cm.MESSAGE_ID>COALESCE(rm.LAST_READ_MESSAGE, 0); 
-  	</select>
-  	
-  	<select id="getUnreadMember" resultType="long">
-  		SELECT COUNT(*)-(
-  		SELECT COUNT(*) AS otherReadCount
-  		  FROM CHAT_ROOM_MEMBER rm
-  		 WHERE rm.ROOM_ID=#{roomId}
-  		   AND rm.LAST_READ_MESSAGE>=#{messageId}
-  		) FROM CHAT_ROOM_MEMBER
-  		 WHERE ROOM_ID=#{roomId}
-  	</select>
-  	
-  	<select id="getLastMessageTime" resultType="String">
-  		SELECT CREATED_AT
-  		  FROM CHAT_MESSAGE
-  		 WHERE ROOM_ID=#{roomId}
-  		   AND MESSAGE_ID=(
-  		SELECT MAX(MESSAGE_ID)
-  		  FROM CHAT_MESSAGE
-  		 WHERE ROOM_ID=#{roomId}
-  		 )
-  	</select>
-  	
-  	<select id="getLastMessage" resultType="String">
-  		SELECT CONTENTS
-  		  FROM CHAT_MESSAGE
-  		 WHERE ROOM_ID=#{roomId}
-  		   AND MESSAGE_ID=(
-  		SELECT MAX(MESSAGE_ID)
-  		  FROM CHAT_MESSAGE
-  		 WHERE ROOM_ID=#{roomId}
-  		)
-  	</select>
+  	<update id="readMessage" parameterType="ChatMessageVO"></update>
   	
   	<select id="findRoom" resultType="long">
   		SELECT ROOM_ID
@@ -198,23 +124,6 @@
 			<result column="JOINED_AT" property="joinedAt"/>
 			<result column="LAST_READ_MESSAGE" property="lastReadMessage"/>
 		</association>
-		<association property="chatMessageVO" javaType="ChatMessageVO">
-			<id column="MESSAGE_ID" property="messageId"/>
-			<result column="SENDER_ID" property="senderId"/>
-			<result column="CONTENTS" property="contents"/>
-			<result column="MESSAGE_TYPE" property="messageType"/>
-			<result column="CREATED_AT" property="createdAt"/>
-			<result column="READSTATUS" property="readStatus"/>
-		</association>
-  	</resultMap>
-  	
-  	<resultMap type="UserVO" id="userMap">
-  		<id column="USERNAME" property="username"/>
-  		<result column="SNS" property="sns"/>
-  		<result column="FILE_NAME" property="fileName"/>
-  		<association property="chatRoomVO" javaType="ChatRoomVO">
-  			<id column="ROOM_ID" property="roomId"/>
-  		</association>
   	</resultMap>
   	
   	<insert id="makeChat" parameterType="ChatRoomVO" useGeneratedKeys="true" keyProperty="roomId">

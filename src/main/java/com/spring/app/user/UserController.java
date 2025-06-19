@@ -1,12 +1,9 @@
 package com.spring.app.user;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,13 +20,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.app.approval.ApprovalService;
 import com.spring.app.approval.DocumentVO;
 import com.spring.app.approval.FormVO;
 import com.spring.app.approval.UserSignatureVO;
-import com.spring.app.files.FileManager;
 import com.spring.app.payment.PaymentService;
 import com.spring.app.subscript.SubscriptService;
 import com.spring.app.subscript.SubscriptVO;
@@ -45,8 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/user/*")
 @Slf4j
 public class UserController {
-	
-	private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList(".png", ".jpg", ".jpeg", ".gif");
 
     private final WebSecurityCustomizer custom;
 
@@ -54,9 +47,6 @@ public class UserController {
 	
 	@Autowired
 	private PasswordEncoder encoder;
-	
-	@Autowired
-	private FileManager fileManager;
 	
 	@Autowired
 	private UserService userService;
@@ -104,35 +94,7 @@ public class UserController {
 	}
 	
 	@PostMapping("join/memberJoin")
-	String memberJoin(UserVO userVO, MultipartFile img, Model model) throws Exception{
-		
-		String oriName = img.getOriginalFilename().toString();
-		
-		if (oriName!="") {
-			String file = oriName.substring(oriName.lastIndexOf(".")).toLowerCase();			
-			if(!ALLOWED_EXTENSIONS.contains(file)){
-				model.addAttribute("result", "이미지 파일(.png, .jpg, .jpeg, .gif)만 업로드할 수 있습니다.");
-				model.addAttribute("path", "./registerSign");
-				
-				return "commons/result";
-			}
-			System.out.println("oriName : "+oriName);
-			
-			//랜덤 문자열 가져오기
-			String uuid = UUID.randomUUID().toString();
-			//가져온 랜덤 문자열로 파일이름 만들기
-			String fileName = uuid.concat(userVO.getUsername()).concat(".png");
-			String file2=fileManager.saveFile(path.concat("user"), img);
-			userVO.setFileName(file2);
-			userVO.setOriName(oriName);
-		}else {
-			oriName="default.png";
-			userVO.setFileName("default");
-			userVO.setOriName(oriName);
-		}
-		
-		
-		
+	String memberJoin(UserVO userVO) throws Exception{
 		int result = userService.join(userVO);
 		
 		return "redirect:/";

@@ -22,7 +22,6 @@ public class ChatRoomVO {
 	private Long lastReadMessage;
 	
 	private RoomMemberVO roomMemberVO;
-	private ChatMessageVO chatMessageVO;
 	
 	private List<ChatMessageVO> messgaeList;
 	private List<RoomMemberVO> roomMemberList;

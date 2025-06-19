@@ -5,9 +5,9 @@
   
   <mapper namespace="com.spring.app.user.friend.FriendDAO">
   
-  <select id="friendList" resultType="FriendVO">
+  <select id="friendList" resultMap="friendMap">
 		SELECT
-		  u.USERNAME AS user2, u.SNS, u.FILE_NAME
+		  u.USERNAME
 		FROM FRIENDSHIP f
 		JOIN USER u
 		  ON u.USERNAME = CASE
@@ -29,7 +29,7 @@
   
   <select id="notFriendList" resultType="FriendVO">
 	  SELECT
-	    u.USERNAME AS user2, u.FILE_NAME, u.SNS
+	    u.USERNAME AS user2
 	  FROM `USER` u
 	  LEFT JOIN (
 	    SELECT CASE
@@ -47,8 +47,6 @@
 	    AND r.request_id   IS NULL
 	    AND u.USERNAME    != #{username}
   </select>
-  
-
   
   <select id="receiveList" resultType="FriendRequestVO">
   	SELECT REQUESTER_ID, CREATED_AT
