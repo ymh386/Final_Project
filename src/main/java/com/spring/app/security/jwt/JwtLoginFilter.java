@@ -85,6 +85,8 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		
 		// 로그/감사 기록용
 		String username = authResult != null && authResult.isAuthenticated() ? authResult.getName() : "anonymous";
+		String ip ="";
+		String userAgent="login";
 		try {
 			auditLogService.log(
 			        username,
@@ -92,7 +94,8 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 			        "USER",
 			        username,
 			        username.concat("이 로그인 성공"),
-			        request
+			        ip,
+			        userAgent
 			    );
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -109,6 +112,8 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		// TODO Auto-generated method stub
 		
 		// 로그/감사 기록용
+		String ip ="";
+		String userAgent="login";
 		try {
 			auditLogService.log(
 					"anonymous",
@@ -116,7 +121,8 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 			        "USER",
 			        "anonymous",
 			        "anonymous이 로그인 실패",
-			        request
+			        ip,
+			        userAgent
 			    );
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

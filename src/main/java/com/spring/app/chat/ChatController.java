@@ -270,14 +270,28 @@ public class ChatController {
 	}
 	
 	@PostMapping("invite")
-	public String invite(@RequestParam("roomId") Long roomId,
-			             @RequestParam("username") String username, Model model) throws Exception {
+	public String invite(@AuthenticationPrincipal UserVO userVO, @RequestParam("roomId") Long roomId,
+			             @RequestParam("username") String username, Model model, HttpServletRequest request) throws Exception {
 		
 		RoomMemberVO memberVO = new RoomMemberVO();
 		memberVO.setRoomId(roomId);
 		memberVO.setUsername(username);
 		
-		chatService.invite(memberVO);
+		int result = chatService.invite(memberVO);
+		
+		// 로그/감사 기록용
+		if(result > 0) {
+			auditLogService.log(
+					userVO.getUsername(),
+					"INVITE_CHAT",
+					"CHAT_ROOM_MEMBER",
+					memberVO.getRoomId().toString() + ", " + memberVO.getUsername(),
+					userVO.getUsername() + "이 "
+					+ memberVO.getRoomId() + "번방에 "
+					+ memberVO.getUsername() + "를 초대",
+					request
+					);	
+		}
 		
 		
 		
