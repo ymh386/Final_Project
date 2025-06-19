@@ -116,7 +116,7 @@ public class NotificationManager {
 			notificationVO.setNotificationTitle("채팅 메세지");
 			notificationVO.setUsername(roomMemberVO.getUsername());
 			notificationVO.setMessage(chatMessageVO.getContents());
-			notificationVO.setLinkUrl("/chat/detail/".concat(chatMessageVO.getRoomId().toString()));
+			notificationVO.setLinkUrl("/chat/list");
 			notificationVO.setNotificationType("N0");
 			notificationVO.setSenderId(chatMessageVO.getSenderId());
 			
@@ -162,7 +162,7 @@ public class NotificationManager {
 		notificationVO.setNotificationTitle("초대 알림");
 		notificationVO.setUsername(username);
 		notificationVO.setMessage("채팅에 초대되었습니다.");
-		notificationVO.setLinkUrl("/chat/detail/"+chatRoomVO.getRoomId());
+		notificationVO.setLinkUrl("/chat/list");
 		notificationVO.setNotificationType("N1");
 		notificationVO.setSenderId(sender);
 		
