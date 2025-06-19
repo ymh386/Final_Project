@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,25 +11,41 @@
     body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
     .container { max-width: 800px; margin: auto; background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     h2 { margin-top: 0; }
-    .meta { color: #777; margin-bottom: 12px; font-size: 0.9em; }
-    .content { white-space: pre-wrap; line-height: 1.6; margin: 16px 0; }
-    .files a { display: inline-block; margin-right: 12px; color: #0066cc; text-decoration: none; }
+    .meta { color: #777; margin-bottom: 12px; font-size: 0.95em; }
+    .content { white-space: pre-wrap; line-height: 1.6; margin: 18px 0; }
+    .files a { display: inline-block; margin-right: 12px; color: #2663eb; text-decoration: none; font-weight: 500; }
     .files a:hover { text-decoration: underline; }
-    .heart-btn { font-size: 1.4em; border: none; background: none; cursor: pointer; vertical-align: middle; }
+    .heart-btn { font-size: 1.3em; border: none; background: none; cursor: pointer; vertical-align: middle; }
     .comments { margin-top: 32px; }
     .comment-header { display: flex; justify-content: space-between; align-items: center; }
     .comment-list { list-style: none; padding: 0; }
-    .comment-item { background: #fafafa; padding: 12px; border-radius: 6px; margin-bottom: 12px; position: relative; }
-    .comment-meta { color: #555; font-size: 0.85em; margin-bottom: 6px; }
+    .comment-item { background: #f8f9fa; padding: 12px; border-radius: 6px; margin-bottom: 12px; position: relative; }
+    .comment-meta { color: #555; font-size: 0.87em; margin-bottom: 6px; }
     .comment-actions { position: absolute; top: 12px; right: 12px; }
     .comment-actions form { display: inline; }
-    .comment-actions button { background: none; border: none; color: #888; cursor: pointer; font-size: 0.9em; margin-left: 8px; }
+    .comment-actions button { background: none; border: none; color: #888; cursor: pointer; font-size: 0.95em; margin-left: 8px; }
     #commentForm textarea { width: 100%; height: 80px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-    #commentForm button { margin-top: 8px; padding: 8px 16px; background: #0066cc; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-    #commentForm button:hover { background: #005bb5; }
-    .actions { margin-top: 24px; }
-    .actions a { margin-right: 12px; color: #0066cc; text-decoration: none; }
-    .actions a:hover { text-decoration: underline; }
+    #commentForm button { margin-top: 8px; padding: 8px 16px; background: #2663eb; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    #commentForm button:hover { background: #1d51bc; }
+    .actions { margin-top: 32px; text-align: right; }
+    .actions a, .actions form button {
+      display: inline-block;
+      padding: 9px 25px;
+      font-size: 15px;
+      border-radius: 5px;
+      border: none;
+      text-decoration: none;
+      margin-left: 7px;
+      font-weight: 500;
+      transition: background .18s;
+      cursor: pointer;
+    }
+    .actions .list-btn { background: #e0e3ef; color: #444; }
+    .actions .list-btn:hover { background: #d3d6e0; }
+    .actions .edit-btn { background: #2663eb; color: #fff; }
+    .actions .edit-btn:hover { background: #1d51bc; }
+    .actions .delete-btn { background: #d32f2f; color: #fff; }
+    .actions .delete-btn:hover { background: #a72323; }
     .secret-form input[type="password"] { padding: 6px; border: 1px solid #bbb; border-radius: 3px; }
     .secret-form button { padding: 6px 12px; border-radius: 3px; border: 1px solid #bbb; background: #f5f5f5; cursor: pointer; }
     .secret-form button:hover { background: #e0e0e0; }
@@ -153,13 +170,19 @@
         </div>
       </c:otherwise>
     </c:choose>
-    <div class="actions">
-      <a href="${pageContext.request.contextPath}/board/list">목록</a>
-      <c:if test="${detail.userName == sessionScope.userName}">
-        <a href="${pageContext.request.contextPath}/board/update?boardNum=${detail.boardNum}">수정</a>
-        <a href="${pageContext.request.contextPath}/board/delete?boardNum=${detail.boardNum}" onclick="return confirm('정말 삭제하시겠습니까?');">삭제</a>
-      </c:if>
-    </div>
+	<div class="actions">
+  	<a href="${pageContext.request.contextPath}/board/list" class="list-btn">목록</a>
+  	<c:if test="${sessionScope.userName == detail.userName || (not empty sessionScope.roleList && fn:contains(sessionScope.roleList, 'ADMIN'))}">
+   	 <a href="${pageContext.request.contextPath}/board/update?boardNum=${detail.boardNum}" class="edit-btn">수정</a>
+    	<form action="${pageContext.request.contextPath}/board/delete" method="post" style="display:inline;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+      	<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+      	<input type="hidden" name="boardNum" value="${detail.boardNum}"/>
+      	<button type="submit" class="delete-btn">삭제</button>
+    	</form>
+	</c:if>
+</div>
+
+
     <input type="hidden" id="boardNum" value="${detail.boardNum}"/>
   </div>
   <script>
