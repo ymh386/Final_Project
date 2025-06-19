@@ -13,11 +13,11 @@
   			   TARGET_ID,
   			   DESCRIPTION,
   			   IP_ADDRESS,
-  			   USER_AGENT.
+  			   USER_AGENT,
   			   CREATED_AT
   		) VALUES (
   			   #{username},
-  			   #{actionType}.
+  			   #{actionType},
   			   #{targetTable},
   			   #{targetId},
   			   #{description},

@@ -7,6 +7,7 @@ import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -192,7 +193,7 @@ public class ScheduleController {
     @PostMapping("/create")
     @ResponseBody
     @PreAuthorize("hasRole('ADMIN')")
-    public Map<String, Object> createSchedule(@RequestBody ScheduleVO vo, HttpServletRequest request) {
+    public Map<String, Object> createSchedule(@AuthenticationPrincipal UserVO userVO, @RequestBody ScheduleVO vo, HttpServletRequest request) {
         // 일정 생성
         scheduleService.createSchedule(vo);
         
@@ -206,7 +207,7 @@ public class ScheduleController {
 			
 			// 로그/감사 기록용
 			auditLogService.log(
-					"admin",
+					userVO.getUsername(),
 			        "CREATE_SCHEDULE",
 			        "SCHEDULE",
 			        vo.getScheduleId().toString(),
@@ -232,7 +233,7 @@ public class ScheduleController {
     @DeleteMapping("/delete/{id}")
     @ResponseBody
     @PreAuthorize("hasRole('ADMIN')")
-    public String deleteSchedule(@PathVariable("id") Long id, HttpServletRequest request) {
+    public String deleteSchedule(@AuthenticationPrincipal UserVO userVO, @PathVariable("id") Long id, HttpServletRequest request) {
     	ScheduleVO scheduleVO = scheduleService.selectOneUsername(id);
     	
     	// 일정 취소 시 알림 전송
@@ -241,10 +242,10 @@ public class ScheduleController {
 			
 			// 로그/감사 기록용
 			auditLogService.log(
-					"admin",
+					userVO.getUsername(),
 			        "DELETE_SCHEDULE",
 			        "SCHEDULE",
-			        scheduleVO.getScheduleId().toString(),
+			        id.toString(),
 			        "admin이 " + scheduleVO.getScheduleDate() + "에 "
 			        + scheduleVO.getUsername() + "의 일정을 취소",
 			        request

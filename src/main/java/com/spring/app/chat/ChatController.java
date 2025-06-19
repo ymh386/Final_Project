@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -127,7 +128,7 @@ public class ChatController {
 	}
 	
 	@MessageMapping("/chat.sendMessage")
-	public void sendMessage(ChatMessageVO message, @AuthenticationPrincipal UserVO userVO, HttpServletRequest request) throws Exception {
+	public void sendMessage(ChatMessageVO message, @AuthenticationPrincipal UserVO userVO ) throws Exception {
 		
 		LocalDateTime now = LocalDateTime.now();
 		
@@ -164,15 +165,18 @@ public class ChatController {
 			notificationManager.messageNotification(message, ar);
 			
 			// 로그/감사 기록용
+			String ip = "";
+			String userAgent = "WebSocket-Client";
 			auditLogService.log(
-					userVO.getUsername(),
+					message.getSenderId(),
 			        "SEND_MESSAGE",
 			        "CHAT_MESSAGE",
 			        message.getMessageId().toString(),
 			        userVO.getUsername() + "이 "
 			        + message.getRoomId() + "번방에서 "
 			        + "\"" + message.getContents() + "\"" + "메세지를 작성",
-			        request
+			        ip,
+			        userAgent
 			    );
 		}
 		

@@ -1,6 +1,7 @@
 package com.spring.app.interceptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -12,11 +13,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-public class AuditLogIntercepter implements HandlerInterceptor{
+public class AuditLogInterceptor implements HandlerInterceptor{
 	
 	
-	@Autowired
 	private AuditLogService auditLogService;
+	
+
+    public AuditLogInterceptor(@Lazy AuditLogService auditLogService) {
+        this.auditLogService = auditLogService;
+    }
 	
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -27,6 +32,7 @@ public class AuditLogIntercepter implements HandlerInterceptor{
 	        if (uri.startsWith("/admin") || uri.contains("/delete")) {
 	            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 	            String username = auth != null && auth.isAuthenticated() ? auth.getName() : "anonymous";
+	            System.out.println("interceptor");
 
 	            auditLogService.log(
 	                username,

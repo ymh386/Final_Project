@@ -37,6 +37,26 @@ public class AuditLogService {
 		auditLogDAO.addAuditLog(auditLogVO);
 	}
 	
+	// WebSocket 등 HttpServletRequest 없는 환경에서 호출
+	public void log(String username, String actionType, String targetTable,
+	                String targetId, String description, String ipAddress, String userAgent) throws Exception {
+	    AuditLogVO auditLogVO = new AuditLogVO();
+
+	    auditLogVO.setUsername(username);
+	    auditLogVO.setActionType(actionType);
+	    auditLogVO.setTargetTable(targetTable);
+	    auditLogVO.setTargetId(targetId);
+	    auditLogVO.setDescription(description);
+	    auditLogVO.setIpAddress(ipAddress);
+	    auditLogVO.setUserAgent(userAgent);
+	    
+	    LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+		Timestamp timestamp = Timestamp.valueOf(now);
+		auditLogVO.setCreatedAt(timestamp);
+
+	    auditLogDAO.addAuditLog(auditLogVO);
+	}
+	
 	//행위자 Ip주소 가져오기
 	private String getClientIp(HttpServletRequest request) {
 		String ip = request.getHeader("X-Forwarded-For");

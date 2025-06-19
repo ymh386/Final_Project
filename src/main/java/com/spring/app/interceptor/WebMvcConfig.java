@@ -9,12 +9,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebMvcConfig implements WebMvcConfigurer {
 	
 	@Autowired
-	private AuditLogIntercepter auditLogIntercepter;
+	private AuditLogInterceptor auditLogInterceptor;
 	
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(auditLogIntercepter)
-				.addPathPatterns("/**");
+//		registry.addInterceptor(auditLogInterceptor)
+//				.addPathPatterns("/**");
 	}
 
 }

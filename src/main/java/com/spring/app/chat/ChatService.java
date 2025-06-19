@@ -153,7 +153,7 @@ public class ChatService {
 			
 			// 로그/감사 기록용
 			auditLogService.log(
-					chatRoomVO.getCreatedBy(),
+					usernames.get(0),
 			        "MAKE_ROOM",
 			        "CHAT_ROOM",
 			        chatRoomVO.getRoomId().toString(),
