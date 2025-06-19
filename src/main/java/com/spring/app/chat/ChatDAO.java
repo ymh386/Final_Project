@@ -48,6 +48,10 @@ public interface ChatDAO {
 	
 	String getLastMessageTime(@Param("roomId") Long roomId) throws Exception;
 	
-	String getLastMessage(@Param("roomId") Long roomId) throws Exception;
+	String getLastMessage(@Param("roomId") Long roomId) throws Exception;	
+	
+	String getUserImgInRoom(@Param("username") String username, Long roomId) throws Exception;
+	
+	String getUserSnsInRoom(@Param("username") String username, Long roomId) throws Exception;
 	
 }

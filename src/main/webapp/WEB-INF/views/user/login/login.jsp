@@ -50,7 +50,7 @@
 											</div>
 											<div style="margin: 10px auto;">
 												<button style="width: 400px; margin-top: 10px; margin-bottom: 10px;" class="btn btn-dark d-block mx-auto" type="submit">login</button>
-												<button style="width: 400px;" class="btn btn-dark d-block mx-auto" type="submit">join</button>
+												<a style="width: 400px;" class="btn btn-dark d-block mx-auto" href="/user/join/join">join</a>
 											</div>
 											<div class="d-flex justify-content-center gap-3">
 											<a href="/oauth2/authorization/kakao?redirect=" class="d-block">

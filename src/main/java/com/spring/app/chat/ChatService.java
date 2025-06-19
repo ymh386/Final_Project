@@ -34,6 +34,18 @@ public class ChatService {
 		return list;
 	}
 	
+	public String getUserImgInRoom(String username, Long roomId) throws Exception {
+		String userImg = chatDAO.getUserImgInRoom(username, roomId);
+		
+		return userImg;
+	}
+	
+	public String getUserSnsInRoom(String username, Long roomId) throws Exception {
+		String sns = chatDAO.getUserImgInRoom(username, roomId);
+		
+		return sns;
+	}	
+	
 	int outUser(RoomMemberVO memberVO) throws Exception {
 		int result = chatDAO.outUser(memberVO);
 		

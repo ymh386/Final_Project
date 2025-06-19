@@ -102,8 +102,14 @@ function createGroupChat() {
       if (!item) return;
       item.querySelector('.last-message').innerText=message;
       item.querySelector('.chat-time').innerText=createdAt;
-      
-      if (senderId != myUsername.value) {
+      //window.location.reload();
+
+      console.log("보낸 사람"+senderId)
+      console.log("나"+myUsername.value)
+      if (senderId==myUsername.value){
+
+      }
+      else if (senderId != myUsername.value) {
         const badge = item.querySelector('.unread');
         if (!badge) {
           const span = document.createElement('span');

@@ -29,9 +29,11 @@
   		 ORDER BY MESSAGE_ID ASC
   	</select>
   	
-  	<select id="getUserByRoom" resultType="RoomMemberVO">
-  		SELECT USERNAME, ROOM_ID
-  		  FROM CHAT_ROOM_MEMBER
+  	<select id="getUserByRoom" resultMap="userMap">
+  		SELECT USERNAME, ROOM_ID, SNS, FILE_NAME
+  		  FROM USER
+  		 INNER JOIN CHAT_ROOM_MEMBER
+  		 USING (USERNAME)
   		 WHERE ROOM_ID=#{roomId}
   	</select>
   	
@@ -52,6 +54,24 @@
   		  FROM CHAT_ROOM_MEMBER
   		 WHERE ROOM_ID=#{roomId}
   		          )
+  	</select>
+  	
+  	<select id="getUserImgInRoom" resultType="string">
+  		SELECT DISTINCT FILE_NAME
+  		  FROM USER U
+  		 INNER JOIN CHAT_MESSAGE C
+  		    ON U.USERNAME=C.SENDER_ID
+  		 WHERE U.USERNAME=#{username}
+  		   AND C.ROOM_ID=#{roomId}
+  	</select>
+  	
+  	<select id="getUserSnsInRoom" resultType="string">
+  		SELECT DISTINCT SNS
+  		  FROM USER U
+  		 INNER JOIN CHAT_MESSAGE C
+  		    ON U.USERNAME=C.SENDER_ID
+  		 WHERE U.USERNAME=#{username}
+  		   AND C.ROOM_ID=#{roomId}
   	</select>
   	
   	<delete id="outUser" parameterType="RoomMemberVO">
@@ -186,6 +206,15 @@
 			<result column="CREATED_AT" property="createdAt"/>
 			<result column="READSTATUS" property="readStatus"/>
 		</association>
+  	</resultMap>
+  	
+  	<resultMap type="UserVO" id="userMap">
+  		<id column="USERNAME" property="username"/>
+  		<result column="SNS" property="sns"/>
+  		<result column="FILE_NAME" property="fileName"/>
+  		<association property="chatRoomVO" javaType="ChatRoomVO">
+  			<id column="ROOM_ID" property="roomId"/>
+  		</association>
   	</resultMap>
   	
   	<insert id="makeChat" parameterType="ChatRoomVO" useGeneratedKeys="true" keyProperty="roomId">

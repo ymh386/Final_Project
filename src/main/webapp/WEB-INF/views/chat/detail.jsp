@@ -122,10 +122,24 @@
                   <a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
                     <input hidden name="roomId" value="${mem.roomId}">
                     <div class="d-flex align-items-center">
-                    <img src="/img/default.png" 
-                      class="rounded-circle me-3" 
-                      width="48" height="48" 
-                      alt="avatar">
+                    <c:if test="${mem.sns eq null and mem.fileName ne 'default'}">
+                    	<img src="/files/user/${mem.fileName}"
+                    		 class="rouned-circle me-3"
+                    		 width="48" height="48"
+                    		 alt="avatar">
+                    </c:if>
+                    <c:if test="${mem.sns ne null}">
+                    	<img src="${mem.fileName}"
+                    		 class="rouned-circle me-3"
+                    		 width="48" height="48"
+                    		 alt="avatar">
+                    </c:if>
+                    <c:if test="${mem.sns eq null and mem.fileName eq 'default'}">
+	                    <img src="/img/default.png" 
+	                      class="rounded-circle me-3" 
+	                      width="48" height="48" 
+	                      alt="avatar">
+                    </c:if>
                     <div>
                       <c:if test="${user.username ne mem.username}">
                         <div class="fw-bold">${mem.username}</div>
@@ -220,10 +234,6 @@
             <input hidden name="messageId" value="${msg.messageId}">
             <div class="d-flex justify-content-end align-items-end mb-2">
               <div class="d-flex flex-column align-items-end me-2">
-              	<c:if test="${map.notRead[status.index] eq 0}"></c:if>
-              	<c:if test="${map.notRead[status.index] ne 0}">
-	                <div class="small text-muted ms-2" style="font-size:0.6rem; padding:0.15rem 0.3rem;">${map.notRead[status.index]}</div>
-              	</c:if>
                 <div class="small text-muted">${msg.createdAt}</div>
               </div>
               <div class="bg-primary text-dark rounded px-3 py-2 shadow-sm" style="max-width: 60%;">
@@ -233,20 +243,40 @@
           </c:when>
 
           <c:otherwise>
-            <div class="d-flex flex-column align-items-start mb-1">
-              <input hidden name="messageId" value="${msg.messageId}">
-              <div class="small text-muted mb-1 fw-bold">${msg.senderId}</div>
-              <div class="d-flex align-items-end">
-                <div class="bg-white border rounded px-3 py-2 shadow-sm">${msg.contents}</div>
-                <div class="d-flex flex-column align-items-start me-2">
-              	<c:if test="${map.notRead[status.index] eq 0}"></c:if>
-              	<c:if test="${map.notRead[status.index] ne 0}">
-	                <div class="small text-muted ms-2" style="font-size:0.6rem; padding:0.15rem 0.3rem;">${map.notRead[status.index]}</div>
-              	</c:if>
-	                <div class="small text-muted me-2" style="padding-left: 10px;">${msg.createdAt}</div>
-	            </div>
-              </div>
-            </div>
+      <div class="d-flex flex-column align-items-start mb-1">
+        <input hidden name="messageId" value="${msg.messageId}">
+        <div class="small text-muted mb-1 fw-bold">${msg.senderId}</div>
+
+        <div class="d-flex align-items-end">
+          <img 
+            src="${map.img[status.index]}" 
+            alt="avatar" 
+            class="rounded-circle me-2" 
+            width="32" height="32"
+          />
+
+          <!-- ② 말풍선 안에 텍스트 or 이미지 분기 -->
+          <div class="bg-white border rounded px-3 py-2 shadow-sm" style="max-width: 60%;">
+            <c:choose>
+              <c:when test="${msg.messageType == 'IMAGE'}">
+                <img 
+                  src="${msg.mediaUrl}" 
+                  alt="첨부 이미지" 
+                  style="max-width:100%; border-radius:.5rem"
+                />
+              </c:when>
+              <c:otherwise>
+                ${msg.contents}
+              </c:otherwise>
+            </c:choose>
+          </div>
+
+          <!-- ③ 보낸 시간 -->
+          <div class="d-flex flex-column align-items-start ms-2">
+            <div class="small text-muted">${msg.createdAt}</div>
+          </div>
+        </div>
+      </div>
           </c:otherwise>
         </c:choose>
       </c:forEach>

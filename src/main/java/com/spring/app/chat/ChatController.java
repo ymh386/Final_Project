@@ -186,11 +186,17 @@ public class ChatController {
 		List<RoomMemberVO> members = chatService.getUserByRoom(roomId);
 		List<FriendVO> notFriends = friendService.notfriendList(userVO.getUsername());
 		List<Long> notRead = new ArrayList<>();
+		List<String> img = new ArrayList<>();
+		List<String> sns = new ArrayList<>();
 		Map<String, Object> map = new HashMap<>();
 		
 		for (ChatMessageVO messageVO : list) {
 			Long count = chatService.getUnreadMember(roomId, messageVO.getMessageId());
 			notRead.add(count);
+			String userSns = chatService.getUserSnsInRoom(messageVO.getSenderId(), roomId);
+			String userImg = chatService.getUserImgInRoom(messageVO.getSenderId(), roomId);
+			img.add(userImg);
+			sns.add(userSns);
 			}
 		
 		map.put("notFriend", notFriends);
@@ -200,6 +206,8 @@ public class ChatController {
 		map.put("msg", list);                
 		map.put("host", room.getCreatedBy());
 		map.put("notRead", notRead);
+		map.put("sns", sns);
+		map.put("img", img);
 		
 		model.addAttribute("map", map);
 		
