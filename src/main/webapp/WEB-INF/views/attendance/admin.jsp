@@ -240,7 +240,6 @@
                 <button class="btn" onclick="filterData()">검색</button>
             </div>
             <div>
-                <button class="btn btn-success" onclick="exportToExcel()">Excel 내보내기</button>
                 <button class="btn" onclick="loadAttendanceData()">새로고침</button>
             </div>
         </div>
@@ -276,6 +275,9 @@
             </div>
         </div>
     </div>
+    
+            <a href="${pageContext.request.contextPath}/" style="margin-left: 20px; padding: 6px 12px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px;">홈으로 가기</a>
+    
 
     <script>
         let originalData = [];
@@ -391,20 +393,25 @@
             $('#absentCount').text(absentCount);
         }
 
-        function getAttendanceStatus(checkinTime, checkoutTime) {
-            if (!checkinTime) return 'absent';
-            
-            // checkinTime이 문자열 형태의 시간이라고 가정 (예: "09:30:00")
+                function getAttendanceStatus(checkinTime, checkoutTime) {
+            if (!checkinTime) return 'absent'; // 출근 기록 없으면 결근
+
             const timeStr = checkinTime.toString();
             const timeParts = timeStr.split(':');
             const hour = parseInt(timeParts[0]);
             const minute = parseInt(timeParts[1]);
-            
-            // 9시 이후면 지각, 그 전이면 정상출근
-            if (hour > 9 || (hour === 9 && minute > 0)) {
-                return 'late';
+
+            const checkinMinutes = hour * 60 + minute;
+            const nineAM = 9 * 60;         // 540분
+            const nineThirty = 9 * 60 + 30; // 570분
+
+            if (checkinMinutes <= nineAM) {
+                return 'present'; // 정상출근
+            } else if (checkinMinutes <= nineThirty) {
+                return 'late';    // 지각
+            } else {
+                return 'absent';  // 결근
             }
-            return 'present';
         }
 
         function getStatusBadge(status) {
