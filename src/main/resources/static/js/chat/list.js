@@ -102,7 +102,6 @@ function createGroupChat() {
       if (!item) return;
       item.querySelector('.last-message').innerText=message;
       item.querySelector('.chat-time').innerText=createdAt;
-      window.location.reload();
       if (senderId==myUsername.value){
 
       }
