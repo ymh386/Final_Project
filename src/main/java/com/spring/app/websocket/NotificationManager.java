@@ -160,20 +160,6 @@ public class NotificationManager {
 		this.sendNotification(notificationVO);
 	}
 	
-	//일정 부여 알림
-	public void scheduleNotification(ScheduleVO scheduleVO) throws Exception {
-		NotificationVO notificationVO = new NotificationVO();
-		notificationVO.setNotificationTitle("일정 추가");
-		notificationVO.setUsername(scheduleVO.getUsername());
-		notificationVO.setMessage("일정이 추가되었습니다. 확인해주세요.\n"
-				+ scheduleVO.getScheduleDate() + " " + scheduleVO.getStartTime() + " ~ " + scheduleVO.getEndTime());
-		notificationVO.setLinkUrl("/schedule/page");
-		notificationVO.setNotificationType("N11");
-		notificationVO.setSenderId("admin");
-		
-		this.sendNotification(notificationVO);
-	}
-	
 	//초대 알림
 	public void inviteNotification(RoomMemberVO memberVO, ChatRoomVO chatRoomVO, String sender, String username) throws Exception {
 		String senderName = notificationDAO.getSenderName(sender);
@@ -218,6 +204,36 @@ public class NotificationManager {
 		this.sendNotification(notificationVO);
 	}
 	
+	//일정 부여 알림
+	public void scheduleNotification(ScheduleVO scheduleVO) throws Exception {
+		NotificationVO notificationVO = new NotificationVO();
+		notificationVO.setNotificationTitle("일정 추가");
+		notificationVO.setUsername(scheduleVO.getUsername());
+		notificationVO.setMessage("일정이 추가되었습니다. 확인해주세요.\n"
+				+ scheduleVO.getScheduleDate() + " " + scheduleVO.getStartTime() + " ~ " + scheduleVO.getEndTime());
+		notificationVO.setLinkUrl("/schedule/page");
+		notificationVO.setNotificationType("N11");
+		notificationVO.setSenderId("admin");
+		
+		this.sendNotification(notificationVO);
+	}
+	
+	//일정 취소 알림
+	public void cancelScheduleNotification(ScheduleVO scheduleVO) throws Exception {
+		NotificationVO notificationVO = new NotificationVO();
+		notificationVO.setNotificationTitle("일정 취소");
+		notificationVO.setUsername(scheduleVO.getUsername());
+		notificationVO.setMessage("일정이 취소되었습니다. 확인해주세요.\n"
+				+ scheduleVO.getScheduleDate() + " " + scheduleVO.getStartTime() + " ~ " + scheduleVO.getEndTime());
+		notificationVO.setLinkUrl("/schedule/page");
+		notificationVO.setNotificationType("N12");
+		notificationVO.setSenderId("admin");
+		
+		this.sendNotification(notificationVO);
+	}
+	
+	
+	
 	//수업 예약
 	public void reserveNotification(ReservationVO reservationVO) throws Exception {
 		NotificationVO notificationVO = null;
@@ -252,6 +268,48 @@ public class NotificationManager {
 				+ "- 시설명 : " + reservationVO.getFacilityVO().getName() + "(" + reservationVO.getFacilityVO().getLocation() + ")");
 		notificationVO.setLinkUrl("/schedule/page");
 		notificationVO.setNotificationType("N4");
+		notificationVO.setSenderId(reservationVO.getUsername());
+		
+		this.sendNotification(notificationVO);
+	}
+	
+	//수업 예약 취소
+	public void cancelReserveNotification(ReservationVO reservationVO) throws Exception {
+		
+		NotificationVO notificationVO = null;
+		
+		//예약자에게 알림
+		notificationVO = new NotificationVO();
+		
+		notificationVO.setNotificationTitle("수업 예약 취소");
+		notificationVO.setUsername(reservationVO.getUsername());
+		notificationVO.setMessage("수업 예약이 취소되었습니다.\n"
+				+ "예약정보\n"
+				+ "- 예약자명 : " + reservationVO.getUserVO().getName() + "\n"
+				+ "- " + reservationVO.getScheduleVO().getScheduleDate() + " " + reservationVO.getScheduleVO().getStartTime() + " ~ " + reservationVO.getScheduleVO().getEndTime() +"\n"
+				+ "- 트레이너명 : " + reservationVO.getScheduleVO().getUserVO().getName() + "\n"
+				+ "- 시설명 : " + reservationVO.getFacilityVO().getName() + "(" + reservationVO.getFacilityVO().getLocation() + ")\n\n"
+				+ "취소 사유 : " + reservationVO.getCanceledReason());
+		notificationVO.setLinkUrl("/reservation/my");
+		notificationVO.setNotificationType("N5");
+		notificationVO.setSenderId(reservationVO.getScheduleVO().getUsername());
+		
+		this.sendNotification(notificationVO);
+
+		
+		//트레이너에게 알림
+		notificationVO = new NotificationVO();
+		
+		notificationVO.setNotificationTitle("수업 예약 취소");
+		notificationVO.setUsername(reservationVO.getScheduleVO().getUsername());
+		notificationVO.setMessage("수업 예약이 취소되었습니다.\n"
+				+ "예약자명 : " + reservationVO.getUserVO().getName() + "\n"
+				+ "- " + reservationVO.getScheduleVO().getScheduleDate() + " " + reservationVO.getScheduleVO().getStartTime() + " ~ " + reservationVO.getScheduleVO().getEndTime() +"\n"
+				+ "- 트레이너명 : " + reservationVO.getScheduleVO().getUserVO().getName() + "\n"
+				+ "- 시설명 : " + reservationVO.getFacilityVO().getName() + "(" + reservationVO.getFacilityVO().getLocation() + ")\n\n"
+				+ "취소 사유 : " + reservationVO.getCanceledReason());
+		notificationVO.setLinkUrl("/schedule/page");
+		notificationVO.setNotificationType("N5");
 		notificationVO.setSenderId(reservationVO.getUsername());
 		
 		this.sendNotification(notificationVO);
@@ -297,47 +355,6 @@ public class NotificationManager {
 			notificationVO.setSenderVO(senderVO);
 		}
 		senderVO.setName(senderName);
-		
-		this.sendNotification(notificationVO);
-	}
-	//수업 예약 취소
-	public void cancelReserveNotification(ReservationVO reservationVO) throws Exception {
-		
-		NotificationVO notificationVO = null;
-		
-		//예약자에게 알림
-		notificationVO = new NotificationVO();
-		
-		notificationVO.setNotificationTitle("수업 예약 취소");
-		notificationVO.setUsername(reservationVO.getUsername());
-		notificationVO.setMessage("수업 예약이 취소되었습니다.\n"
-				+ "예약정보\n"
-				+ "- 예약자명 : " + reservationVO.getUserVO().getName() + "\n"
-				+ "- " + reservationVO.getScheduleVO().getScheduleDate() + " " + reservationVO.getScheduleVO().getStartTime() + " ~ " + reservationVO.getScheduleVO().getEndTime() +"\n"
-				+ "- 트레이너명 : " + reservationVO.getScheduleVO().getUserVO().getName() + "\n"
-				+ "- 시설명 : " + reservationVO.getFacilityVO().getName() + "(" + reservationVO.getFacilityVO().getLocation() + ")\n\n"
-				+ "취소 사유 : " + reservationVO.getCanceledReason());
-		notificationVO.setLinkUrl("/reservation/my");
-		notificationVO.setNotificationType("N5");
-		notificationVO.setSenderId(reservationVO.getScheduleVO().getUsername());
-		
-		this.sendNotification(notificationVO);
-
-		
-		//트레이너에게 알림
-		notificationVO = new NotificationVO();
-		
-		notificationVO.setNotificationTitle("수업 예약 취소");
-		notificationVO.setUsername(reservationVO.getScheduleVO().getUsername());
-		notificationVO.setMessage("수업 예약이 취소되었습니다.\n"
-				+ "예약자명 : " + reservationVO.getUserVO().getName() + "\n"
-				+ "- " + reservationVO.getScheduleVO().getScheduleDate() + " " + reservationVO.getScheduleVO().getStartTime() + " ~ " + reservationVO.getScheduleVO().getEndTime() +"\n"
-				+ "- 트레이너명 : " + reservationVO.getScheduleVO().getUserVO().getName() + "\n"
-				+ "- 시설명 : " + reservationVO.getFacilityVO().getName() + "(" + reservationVO.getFacilityVO().getLocation() + ")\n\n"
-				+ "취소 사유 : " + reservationVO.getCanceledReason());
-		notificationVO.setLinkUrl("/schedule/page");
-		notificationVO.setNotificationType("N5");
-		notificationVO.setSenderId(reservationVO.getUsername());
 		
 		this.sendNotification(notificationVO);
 	}
