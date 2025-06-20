@@ -53,12 +53,13 @@ public interface BoardDAO {
     long getInteractionCount(InteractionVO interactionVO) throws Exception;
 
     /** 16) 좋아요 중복 여부 확인 */
-   boolean isLiked(InteractionVO interactionVO) throws Exception;
-   /** 11) 좋아요 추가 */
-   int addInteraction(InteractionVO vo) throws Exception;
-
+    boolean isLiked(InteractionVO interactionVO) throws Exception;
+   
+    /** 11) 좋아요 추가 */
+    int addInteraction(InteractionVO vo) throws Exception;
+     
    /** 12) 좋아요 삭제 */
-   int removeInteraction(InteractionVO vo) throws Exception;
+    int removeInteraction(InteractionVO vo) throws Exception;
 
     /** 17) 좋아요 수 증가 */
     int increaseLikeCount(Long boardNum) throws Exception;
@@ -87,4 +88,7 @@ public interface BoardDAO {
 	void decreaseCommentCount(Long boardNum);
 
 	void increaseCommentCount(Long boardNum);
+
+	CommentVO getCommentById(Long commentNum) throws Exception;
+	
 }
