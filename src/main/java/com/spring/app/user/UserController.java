@@ -108,7 +108,7 @@ public class UserController {
 	}
 	
 	@PostMapping("join/memberJoin")
-	String memberJoin(UserVO userVO, MultipartFile img, Model model) throws Exception{
+	String memberJoin(UserVO userVO, MultipartFile img, Model model, HttpServletRequest request) throws Exception{
 		
 		String oriName = img.getOriginalFilename().toString();
 		
@@ -136,14 +136,9 @@ public class UserController {
 			
 			
 		}
-		return "redirect:/";
-	}
 		
-		
-		
-	String memberJoin(UserVO userVO, HttpServletRequest request) throws Exception{
 		int result = userService.join(userVO);
-		
+				
 		// 로그/감사 기록용
 		auditLogService.log(
 		        userVO.getUsername(),
@@ -155,7 +150,11 @@ public class UserController {
 		    );
 		
 		return "redirect:/";
+
 	}
+		
+		
+		
 	
 	@GetMapping("join/trainerJoin")
 	void trainerJoin(Model model) throws Exception {
@@ -185,7 +184,10 @@ public class UserController {
 	@GetMapping("login/login")
 	String memberLogin(@AuthenticationPrincipal UserVO userVO, @RequestParam(value = "error", required = false) String error, Model model) {
 		if (userVO != null) {
+			
 			return "redirect:/";
+			
+			
 		}
 		if (error != null) {
 			model.addAttribute("error", error);
@@ -197,6 +199,7 @@ public class UserController {
 	@GetMapping("login/trainerLogin")
 	String trainerLogin(@AuthenticationPrincipal UserVO userVO, @RequestParam(value = "error", required = false) String error, Model model) {
 		if (userVO != null) {
+			
 			return "redirect:/";
 		}
 		if (error != null) {
@@ -240,11 +243,11 @@ public class UserController {
 			
 			// 로그/감사 기록용
 			auditLogService.log(
-			        userVO.getUsername(),
+			        null,
 			        "FIND_ID",
 			        "USER",
-			        userVO.getUsername(),
-			        userVO.getUsername().concat("이 아이디찾기 시도 - 실패"),
+			        "anonymous",
+			        "anonymous이 아이디찾기 시도 - 실패",
 			        request
 			    );
 			return "commons/result";
@@ -281,11 +284,11 @@ public class UserController {
 			model.addAttribute("result", "입력한 정보로 가입된 회원이 존재하지 않습니다.");
 			// 로그/감사 기록용
 			auditLogService.log(
-			        userVO.getUsername(),
+			        null,
 			        "FIND_PW_EMAIL",
 			        "USER",
-			        userVO.getUsername(),
-			        userVO.getUsername().concat("이 비밀번호 찾기 시도(이메일) - 실패"),
+			        "anonymous",
+			        "anonymous이 비밀번호 찾기 시도(이메일) - 성공",
 			        request
 			    );
 		}
@@ -336,11 +339,11 @@ public class UserController {
 			
 			// 로그/감사 기록용
 			auditLogService.log(
-			        userVO.getUsername(),
+			        null,
 			        "FIND_PW_PHONE",
 			        "USER",
-			        userVO.getUsername(),
-			        userVO.getUsername().concat("이 비밀번호 찾기 시도(폰번호) - 실패"),
+			        "anonymous",
+			        "anonymous이 비밀번호 찾기 시도(폰번호) - 성공",
 			        request
 			    );
 		}

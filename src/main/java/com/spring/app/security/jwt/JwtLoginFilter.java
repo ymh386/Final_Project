@@ -30,15 +30,15 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 	
 	private JwtTokenManager jwtTokenManager;
 	
-	@Autowired
 	private AuditLogService auditLogService;
 	
 	@Autowired
 	private UserService userService;
 	
-	public JwtLoginFilter(JwtTokenManager jwtTokenManager, AuthenticationManager authenticationManager) {
+	public JwtLoginFilter(JwtTokenManager jwtTokenManager, AuthenticationManager authenticationManager, AuditLogService auditLogService) {
 		this.authenticationManager=authenticationManager;
 		this.jwtTokenManager=jwtTokenManager;
+		this.auditLogService=auditLogService;
 		this.setFilterProcessesUrl("/users/login");
 	}
 
@@ -84,9 +84,8 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		cookie.setHttpOnly(true);
 		
 		// 로그/감사 기록용
-		String username = authResult != null && authResult.isAuthenticated() ? authResult.getName() : "anonymous";
-		String ip ="";
-		String userAgent="login";
+		String username = authResult.getName();
+		
 		try {
 			auditLogService.log(
 			        username,
@@ -94,8 +93,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 			        "USER",
 			        username,
 			        username.concat("이 로그인 성공"),
-			        ip,
-			        userAgent
+			        request
 			    );
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -112,17 +110,17 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		// TODO Auto-generated method stub
 		
 		// 로그/감사 기록용
+		String username = request.getParameter("username");
 		String ip ="";
 		String userAgent="login";
 		try {
 			auditLogService.log(
-					"anonymous",
-			        "LOGIN_SUCCESS",
+					null,
+			        "LOGIN_FAIL",
 			        "USER",
 			        "anonymous",
-			        "anonymous이 로그인 실패",
-			        ip,
-			        userAgent
+			        "anonymous이 " + username + "으로 로그인하려다 실패",
+			        request
 			    );
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

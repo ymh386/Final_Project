@@ -14,7 +14,8 @@
   		  ON N.USERNAME = U.USERNAME
   		LEFT OUTER JOIN USER S
   		  ON N.SENDER_ID = S.USERNAME
-  		WHERE N.USERNAME=#{username} AND IS_READ = 0
+  		WHERE N.USERNAME=#{username} 
+  		  AND IS_READ = 0
   		ORDER BY CREATED_AT DESC
   	</select>
   	

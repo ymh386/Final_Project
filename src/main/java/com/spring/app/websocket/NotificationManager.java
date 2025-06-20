@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component;
 
 import com.spring.app.approval.ApprovalVO;
 import com.spring.app.approval.DocumentVO;
+import com.spring.app.board.BoardVO;
+import com.spring.app.board.comment.CommentVO;
+import com.spring.app.board.interaction.InteractionVO;
 import com.spring.app.board.notice.NoticeDAO;
 import com.spring.app.chat.ChatMessageVO;
 import com.spring.app.chat.ChatRoomVO;
@@ -406,5 +409,36 @@ public class NotificationManager {
 		notificationVO.setSenderId("admin");
 		
 		this.sendNotification(notificationVO);
+	}
+	
+	//게시글 좋아요 알림
+	public void likeNotification(InteractionVO interactionVO, BoardVO boardVO) throws Exception {
+		NotificationVO notificationVO = new NotificationVO();
+		notificationVO.setNotificationTitle("좋아요");
+		notificationVO.setUsername(boardVO.getUserName());
+		notificationVO.setMessage(interactionVO.getUserName() + "님께서 회원님의 게시글을 좋아합니다 : "
+				+ boardVO.getBoardTitle());
+		notificationVO.setLinkUrl("/board/detail?boardNum=".concat(boardVO.getBoardNum().toString()));
+		notificationVO.setNotificationType("N15");
+		notificationVO.setSenderId(interactionVO.getUserName());
+		
+		this.sendNotification(notificationVO);
+		
+	}
+	
+	//게시글 댓글 알림
+	public void commentNotification(CommentVO commentVO, BoardVO boardVO) throws Exception {
+		NotificationVO notificationVO = new NotificationVO();
+		notificationVO.setNotificationTitle("댓글");
+		notificationVO.setUsername(boardVO.getUserName());
+		notificationVO.setMessage(commentVO.getUserName() + "님께서 회원님의 게시글에 댓글을 작성했습니다 : "
+				+ boardVO.getBoardTitle() + "\n - "
+				+ commentVO.getCommentContents());
+		notificationVO.setLinkUrl("/board/detail?boardNum=".concat(boardVO.getBoardNum().toString()));
+		notificationVO.setNotificationType("N16");
+		notificationVO.setSenderId(commentVO.getUserName());
+		
+		this.sendNotification(notificationVO);
+		
 	}
 }

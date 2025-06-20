@@ -30,6 +30,7 @@ import com.spring.app.user.UserVO;
 import com.spring.app.user.friend.FriendService;
 import com.spring.app.user.friend.FriendVO;
 import com.spring.app.websocket.NotificationManager;
+import com.spring.app.websocket.StompSessionEventListener;
 
 import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,6 +53,9 @@ public class ChatController {
 	
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
+	
+	@Autowired
+	private StompSessionEventListener sessionEventListener;
 
     ChatController(AttendanceController attendanceController) {
         this.attendanceController = attendanceController;
@@ -258,19 +262,21 @@ public class ChatController {
 			notificationManager.messageNotification(message, ar);
 			
 			// 로그/감사 기록용
-			String ip = "";
-			String userAgent = "WebSocket-Client";
-			auditLogService.log(
-					message.getSenderId(),
-			        "SEND_MESSAGE",
-			        "CHAT_MESSAGE",
-			        message.getMessageId().toString(),
-			        message.getSenderId() + "이 "
-			        + message.getRoomId() + "번방에서 "
-			        + "\"" + message.getContents() + "\"" + "메세지를 작성",
-			        ip,
-			        userAgent
-			    );
+			String ip = sessionEventListener.getUserIp(principal.getName());
+			String userAgent = sessionEventListener.getUserAgent(principal.getName());
+			if(ip != null && userAgent != null) {
+				auditLogService.log(
+						principal.getName(),
+						"SEND_MESSAGE",
+						"CHAT_MESSAGE",
+						message.getMessageId().toString(),
+						message.getSenderId() + "이 "
+								+ message.getRoomId() + "번방에서 "
+								+ "\"" + message.getContents() + "\"" + "메세지를 작성",
+								ip,
+								userAgent
+						);	
+			}
 		}
 		
 		messagingTemplate.convertAndSend(

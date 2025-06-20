@@ -19,6 +19,7 @@ import com.spring.app.board.comment.CommentVO;
 import com.spring.app.board.interaction.InteractionVO;
 import com.spring.app.home.util.Pager;
 import com.spring.app.user.UserVO;
+import com.spring.app.websocket.NotificationManager;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,6 +37,9 @@ public class BoardController {
     @Autowired
     private BoardService boardService;
 
+    @Autowired
+    private NotificationManager notificationManager;
+    
     @Value("${board.file.path}")
     private String uploadDir;
 
@@ -247,7 +251,21 @@ public class BoardController {
         vo.setBoardNum(boardNum);
         vo.setUserName(user.getUsername());
         vo.setType("LIKE");
-        boardService.addInteraction(vo);
+        int result = boardService.addInteraction(vo);
+        
+        if(result > 0) {   
+        	
+        	//좋아요 알림
+        	BoardVO boardVO = new BoardVO();
+        	boardVO.setBoardNum(boardNum);
+        	boardVO = boardService.getDetail(boardVO);
+        	
+        	//자기자신 제외
+        	if(!user.getUsername().equals(boardVO.getUserName())) {
+        		notificationManager.likeNotification(vo, boardVO);	
+        	}
+        }
+        
         rttr.addAttribute("boardNum", boardNum);
         return "redirect:/board/detail";
     }
@@ -281,7 +299,21 @@ public class BoardController {
         vo.setBoardNum(boardNum);
         vo.setCommentContents(commentContents);
         vo.setUserName(user.getUsername());
-        boardService.addComment(vo);
+        int result = boardService.addComment(vo);
+        
+        if(result > 0) {        	
+        	//좋아요 알림
+        	BoardVO boardVO = new BoardVO();
+        	boardVO.setBoardNum(boardNum);
+        	boardVO = boardService.getDetail(boardVO);
+        	
+        	//자기자신 제외
+        	if(!user.getUsername().equals(boardVO.getUserName())) {
+        		notificationManager.commentNotification(vo, boardVO);	
+        	}
+        	
+        }
+        
         rttr.addAttribute("boardNum", boardNum);
         return "redirect:/board/detail";
     }

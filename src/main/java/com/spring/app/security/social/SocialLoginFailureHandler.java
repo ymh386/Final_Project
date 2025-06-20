@@ -14,6 +14,7 @@ import com.spring.app.auditLog.AuditLogService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 public class SocialLoginFailureHandler extends SimpleUrlAuthenticationFailureHandler {
@@ -26,20 +27,7 @@ public class SocialLoginFailureHandler extends SimpleUrlAuthenticationFailureHan
 			AuthenticationException exception) throws IOException, ServletException {
 		// TODO Auto-generated method stub
 		
-		// 감사/로그 기록용
-		try {
-			auditLogService.log(
-					"anonymous",
-			        "SOCIAL_LOGIN_FAIL",
-			        "USER",
-			        "anonymous",
-			        "anonymous이 소셜 로그인 실패",
-			        request
-			    );
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 		
 		String error = URLEncoder.encode(exception.getMessage(), StandardCharsets.UTF_8);
 		setDefaultFailureUrl("/user/login/trainerLogin?error="+error);

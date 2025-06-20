@@ -219,11 +219,11 @@ public class ApprovalService {
 				
 				// 로그/감사 기록용
 				auditLogService.log(
-				        approvalVO.getApproverId(),
+				        userVO.getUsername(),
 				        "SUBMIT_APPROVAL",
 				        "APPROVAL",
 				        approvalVO2.getApprovalId().toString(),
-				        approvalVO.getApproverId().concat("이 ").concat(approvalVO2.getApproverId()).concat("에게 결재 승인 요청"),
+				        userVO.getUsername().concat("이 ").concat(approvalVO2.getApproverId()).concat("에게 결재 승인 요청"),
 				        request
 				    );
 			}
@@ -246,11 +246,11 @@ public class ApprovalService {
 					
 					// 로그/감사 기록용
 					auditLogService.log(
-					        approvalVO.getApproverId(),
+					        userVO.getUsername(),
 					        "APPROVE_DOCUMENT",
 					        "DOCUMENT",
 					        documentVO.getDocumentId().toString(),
-					        approvalVO.getApproverId().concat("이 ").concat(documentVO.getWriterId()).concat("이 요청한 결재 최종 승인"),
+					        userVO.getUsername().concat("이 ").concat(documentVO.getWriterId()).concat("이 요청한 결재 최종 승인"),
 					        request
 					    );
 				}
@@ -289,11 +289,11 @@ public class ApprovalService {
 				
 				// 로그/감사 기록용
 				auditLogService.log(
-				        approvalVO.getApproverId(),
+				        userVO.getUsername(),
 				        "REJECT_DOCUMENT",
 				        "DOCUMENT",
 				        documentVO.getDocumentId().toString(),
-				        approvalVO.getApproverId().concat("이 ").concat(documentVO.getWriterId()).concat("이 요청한 결재 최종 승인"),
+				        userVO.getUsername().concat("이 ").concat(documentVO.getWriterId()).concat("이 요청한 결재 반려"),
 				        request
 				    );
 			}
