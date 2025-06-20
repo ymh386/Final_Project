@@ -48,6 +48,14 @@
 		<a href="/">home</a>
     <h1>My Page</h1>
     <sec:authorize access="isAuthenticated()">
+		<c:if test="${user.sns eq null and user.fileName ne 'default'}">
+			<img src="/files/user/${user.fileName}">
+		</c:if>
+		<c:if test="${user.sns ne null}">
+		</c:if>
+		<c:if test="${user.sns eq null and user.fileName eq 'default'}">
+			<img src="/img/default.png">
+		</c:if>
 	    <h2>${user.username}</h2>
 	    <h2>${user.name}</h2>
 	    <h2>${user.email}</h2>

@@ -35,10 +35,24 @@
 									<form action="/friend/suggestList" method="post">
 										<a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
 											<div class="d-flex align-items-center">
-											<img src="/img/default.png" 
+											<c:if test="${l.sns eq null and l.fileName ne 'default'}">
+												<img src="/files/user/${l.fileName}"
+													class="rouned-circle me-3"
+													width="48" height="48"
+													alt="avatar">
+											</c:if>
+											<c:if test="${l.sns ne null}">
+												<img src="${l.fileName}"
+													class="rouned-circle me-3"
+													width="48" height="48"
+													alt="avatar">
+											</c:if>
+											<c:if test="${l.sns eq null and l.fileName eq 'default'}">
+												<img src="/img/default.png" 
 												class="rounded-circle me-3" 
 												width="48" height="48" 
 												alt="avatar">
+											</c:if>
 											<div>
 												<div class="fw-bold">${l.user2}</div>
 												<input hidden name="receiverId" value="${l.user2}">
