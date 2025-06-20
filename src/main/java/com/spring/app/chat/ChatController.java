@@ -1,14 +1,19 @@
 package com.spring.app.chat;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.spring.app.attendance.AttendanceController;
 import com.spring.app.attendance.AttendanceService;
 import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.user.UserVO;
@@ -25,11 +31,15 @@ import com.spring.app.user.friend.FriendService;
 import com.spring.app.user.friend.FriendVO;
 import com.spring.app.websocket.NotificationManager;
 
+import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/chat")
+@Slf4j
 public class ChatController {
+
+    private final AttendanceController attendanceController;
 	
 	@Autowired
 	private NotificationManager notificationManager;
@@ -42,6 +52,10 @@ public class ChatController {
 	
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
+
+    ChatController(AttendanceController attendanceController) {
+        this.attendanceController = attendanceController;
+    }
 	
 	@Autowired
 	private AuditLogService	auditLogService;
@@ -98,37 +112,116 @@ public class ChatController {
 	
 	@GetMapping("list")
 	public void roomList(@AuthenticationPrincipal UserVO userVO, Model model
-			           , ChatRoomVO chatRoomVO, ChatMessageVO chatMessageVO) throws Exception {
+			           , ChatRoomVO chatRoomVO) throws Exception {
 		
 		chatRoomVO.setUsername(userVO.getUsername());
 		List<ChatRoomVO> list = chatService.getRoomList(userVO.getUsername());
+		List<ChatListVO> ar = new ArrayList<>();
 		
-		model.addAttribute("list", list);
+		for (ChatRoomVO roomVO : list) {
+			ChatListVO chatListVO = new ChatListVO();
+			chatListVO.setRoomId(roomVO.getRoomId());
+			
+			if (roomVO.getRoomType().equals("1:1 채팅")) {
+				if (roomVO.getRoomName().contains(userVO.getUsername())) {
+					String roomName = roomVO.getRoomName();
+					String result = roomName.replace(userVO.getUsername(), "");
+					chatListVO.setRoomName(result);
+				}			
+			}
+			else {
+				if (roomVO.getRoomName().contains(userVO.getUsername())) {
+					String roomName = roomVO.getRoomName();
+					List<RoomMemberVO> member = chatService.getUserByRoom(roomVO.getRoomId());
+					for (RoomMemberVO vo : member) {
+						while (true) {
+							roomName=vo.getUsername();
+							if (vo.getUsername()!=userVO.getUsername()) {
+								break;
+							}
+						}
+						int length = member.size()-1;
+						chatListVO.setRoomName(roomName+"님 외 "+length+"명");
+					}
+				}else {
+					chatListVO.setRoomName(roomVO.getRoomName());
+				}
+			}
+			chatListVO.setMessage(chatService.getLastMessage(roomVO.getRoomId()));
+			chatListVO.setCreatedAt(chatService.getLastMessageTime(roomVO.getRoomId()));
+			chatListVO.setUnread(chatService.getUnreadMessage(userVO.getUsername(), roomVO.getRoomId()));
+			
+			ar.add(chatListVO);
+		}
+		
+		model.addAttribute("list", ar);
 	}
 	
 	@GetMapping("detail/{roomId}")
 	public String roomDetail(@AuthenticationPrincipal UserVO userVO,
 			 			   @PathVariable Long roomId, Model model) throws Exception {
 		
+		chatService.readMessage(userVO.getUsername(), roomId);
+		
 		List<String> friends = chatService.getUserNotInRoom(roomId, userVO.getUsername());
 		ChatRoomVO room = chatService.getRoomDetail(roomId);
+		if (room.getRoomType().equals("1:1 채팅")) {
+			if (room.getRoomName().contains(userVO.getUsername())) {
+				String roomName = room.getRoomName();
+				String result = roomName.replace(userVO.getUsername(), "");
+				room.setRoomName(result);
+			}			
+		}
+		if (room.getRoomType().equals("그룹 채팅")) {
+			if (room.getRoomName().contains(userVO.getUsername())) {
+				String roomName = room.getRoomName();
+				List<RoomMemberVO> member = chatService.getUserByRoom(room.getRoomId());
+				for (RoomMemberVO vo : member) {
+					while (true) {
+						roomName=vo.getUsername();
+						if (vo.getUsername()!=userVO.getUsername()) {
+							break;
+						}
+					}
+				}
+				int length = member.size()-1;
+				room.setRoomName(roomName+"님 외 "+length+"명");
+			}
+		}
 		List<ChatMessageVO> list = chatService.getMessageByRoom(roomId);
 		List<RoomMemberVO> members = chatService.getUserByRoom(roomId);
 		List<FriendVO> notFriends = friendService.notfriendList(userVO.getUsername());
-
+		List<Long> notRead = new ArrayList<>();
+		List<String> img = new ArrayList<>();
+		List<String> sns = new ArrayList<>();
+		Map<String, Object> map = new HashMap<>();
 		
-		model.addAttribute("notFriend", notFriends);
-		model.addAttribute("friend", friends);
-		model.addAttribute("members", members);
-		model.addAttribute("room", room);
-		model.addAttribute("msg", list);
-		model.addAttribute("host", room.getCreatedBy());
+		for (ChatMessageVO messageVO : list) {
+			Long count = chatService.getUnreadMember(roomId, messageVO.getMessageId());
+			notRead.add(count);
+			String userSns = chatService.getUserSnsInRoom(messageVO.getSenderId(), roomId);
+			String userImg = chatService.getUserImgInRoom(messageVO.getSenderId(), roomId);
+			img.add(userImg);
+			sns.add(userSns);
+			}
+		
+		map.put("notFriend", notFriends);
+		map.put("friend", friends);          
+		map.put("members", members);         
+		map.put("room", room);               
+		map.put("msg", list);                
+		map.put("host", room.getCreatedBy());
+		map.put("notRead", notRead);
+		map.put("sns", sns);
+		map.put("img", img);
+		
+		model.addAttribute("map", map);
 		
 		return "chat/detail";
 	}
 	
 	@MessageMapping("/chat.sendMessage")
-	public void sendMessage(ChatMessageVO message, @AuthenticationPrincipal UserVO userVO ) throws Exception {
+	public void sendMessage(ChatMessageVO message, Principal principal) throws Exception {
 		
 		LocalDateTime now = LocalDateTime.now();
 		
@@ -182,6 +275,21 @@ public class ChatController {
 		
 		messagingTemplate.convertAndSend(
 				"/topic/chat/"+message.getRoomId(), message);
+		
+		ChatListVO chatListVO = new ChatListVO();
+		
+		ChatRoomVO chatRoomVO = new ChatRoomVO();
+		
+		chatRoomVO=chatService.getRoomDetail(message.getRoomId());
+		
+		chatListVO.setRoomId(message.getRoomId());
+		chatListVO.setRoomName(chatRoomVO.getRoomName());
+		chatListVO.setMessage(message.getContents());
+		chatListVO.setCreatedAt(message.getCreatedAt());
+		chatListVO.setSenderId(message.getSenderId());
+		chatListVO.setUnread(chatService.getUnreadMessage(principal.getName(), message.getRoomId()));
+		
+		messagingTemplate.convertAndSend("/topic/chat/list", chatListVO);
 	}
 	
 	@PostMapping("kick")
@@ -192,8 +300,6 @@ public class ChatController {
 		
 		ChatRoomVO roomVO=chatService.getRoomDetail(roomId);
 		String host = roomVO.getCreatedBy();
-		System.out.println("host : "+host);
-		System.out.println("login : "+userVO.getUsername());
 		
 		if (!host.equals(userVO.getUsername())) {
 			model.addAttribute("result", "강퇴 권한이 없습니다. 방장에게 문의하세요.");
@@ -202,7 +308,11 @@ public class ChatController {
 			memberVO.setUsername(username);
 			memberVO.setRoomId(roomId);
 			
-			chatService.outUser(memberVO);
+			int result = chatService.outUser(memberVO);
+			
+			if (result>0) {
+				notificationManager.kickNotification(memberVO, roomVO, username);				
+			}
 			
 			// 로그/감사 기록용
 			auditLogService.log(
@@ -273,12 +383,19 @@ public class ChatController {
 	public String invite(@AuthenticationPrincipal UserVO userVO, @RequestParam("roomId") Long roomId,
 			             @RequestParam("username") String username, Model model, HttpServletRequest request) throws Exception {
 		
+		ChatRoomVO chatRoomVO = new ChatRoomVO();
+		
+		chatRoomVO=chatService.getRoomDetail(roomId);
+		
 		RoomMemberVO memberVO = new RoomMemberVO();
 		memberVO.setRoomId(roomId);
 		memberVO.setUsername(username);
 		
 		int result = chatService.invite(memberVO);
 		
+		if (result>0) {
+			notificationManager.inviteNotification(memberVO, chatRoomVO, userVO.getUsername(), username);			
+		}
 		// 로그/감사 기록용
 		if(result > 0) {
 			auditLogService.log(
@@ -305,7 +422,15 @@ public class ChatController {
 	public String changeHost(@RequestParam("createdBy") String createdBy,
 			                 @RequestParam("roomId") Long roomId, Model model) throws Exception {
 		
-		chatService.changeHost(createdBy, roomId);
+		ChatRoomVO chatRoomVO = new ChatRoomVO();
+		
+		chatRoomVO=chatService.getRoomDetail(roomId);
+		
+		int result = chatService.changeHost(createdBy, roomId);
+		
+		if (result>0) {
+			notificationManager.getHostNotification(chatRoomVO, createdBy);			
+		}
 		
 		model.addAttribute("result", "방장 변경 완료");
 		model.addAttribute("path", "/chat/detail/"+roomId);

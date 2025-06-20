@@ -87,6 +87,9 @@
       </c:forEach>	
     </div>
   </div>
-	<script src="/js/chat/chat.js"></script>   
+		<script>
+		window.baseUrl = '${pageContext.request.contextPath}';
+		</script>  
+	<script src="/js/chat/list.js"></script>   
 </body>
 </html>

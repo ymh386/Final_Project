@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.spring.app.chat.ChatRoomVO;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -50,6 +51,9 @@ public class UserVO implements UserDetails, OAuth2User {
 	private Map<String, Object> attributes;
 	@JsonIgnore
 	private String accessToken;
+	
+	private ChatRoomVO chatRoomVO;
+	private Long roomId;
 	
 	@JsonIgnore
 	@Override

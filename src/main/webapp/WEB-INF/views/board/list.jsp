@@ -102,7 +102,7 @@
             <c:choose>
               <c:when test="${b.isSecret}">
                 <span class="secret-lock">&#128274;</span>
-                비밀글입니다
+                비밀글 입니다.
               </c:when>
               <c:otherwise>
                 <c:out value="${b.boardTitle}"/>

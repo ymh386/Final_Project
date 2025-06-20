@@ -43,7 +43,7 @@ public class NoticeController {
         if (!isAdmin) {
             model.addAttribute("msg", "등록 권한이 없습니다. 관리자만 등록할 수 있습니다.");
             model.addAttribute("path", "/notice/list");
-            return "common/result";
+            return "commons/result";
         }
         return "notice/add";
     }
@@ -58,7 +58,7 @@ public class NoticeController {
         if (!isAdmin) {
             model.addAttribute("msg", "등록 권한이 없습니다. 관리자만 등록할 수 있습니다.");
             model.addAttribute("path", "/notice/list");
-            return "common/result";
+            return "commons/result";
         }
         noticeVO.setUserName(user.getUsername());
         noticeService.add(noticeVO);

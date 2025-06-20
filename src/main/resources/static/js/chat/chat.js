@@ -2,106 +2,32 @@ const user2 = document.getElementById("user2");
 const getRoomId = document.getElementById("getRoomId");
 const sender = document.getElementById("sender");
 const outRoom = document.getElementById("outRoom");
+const host = document.getElementById("host");
+let roomId = getRoomId.value;
 
-function makeChat() {
-window.open(
-'http://localhost:81/chat/chat',
-'_blank',
-'width=500,height=700,left=100,top=100,resizable=no'
-);
-}
-
-function makeRoom() {
-window.open(
-'http://localhost:81/',
-'_blank',
-'width=500,height=700,left=100,top=100,resizable=no'
-);
-}
-
-function openChatRoom(roomId) {
-    window.open(
-    'http://localhost:81/chat/detail/'+roomId,
-    '_blank',
-    'width=500,height=700,left=100,top=100,resizable=no'
-    );
-}
-
-function createSingleChat(targetUsername) {
-  fetch("/chat/makeChat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ target: targetUsername })
-  })
-  .then(res => {
-    if (!res.ok) throw new Error("1:1 채팅 생성 실패");
-    return res.json();
-  })
-  .then(data => {
-    openChatRoom(`${data.roomId}`);
-    if (window.opener && !window.opener.closed) {
-      window.opener.location.reload();
-    }
-  })
-  .catch(err => {
-    console.error(err);
-    alert("오류가 발생했습니다.");
-  });
-}
-
-function createGroupChat() {
-    console.log("생성 시도")
-  const selected = [];
-  document.querySelectorAll(".user-checkbox:checked").forEach(cb => {
-    selected.push(cb.value);
-  });
-
-  if (selected.length < 2) {
-    alert("2명 이상 선택해주세요.");
-    return;
-  }
-
-  fetch("/chat/makeRoom", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ users: selected })
-  })
-  .then(res => {
-    if (!res.ok) throw new Error("채팅방 생성 실패");
-    return res.json();
-  })
-  .then(data => {
-    if (window.opener && !window.opener.closed) {
-      window.opener.location.reload();
-    }
-    openChatRoom(`${data.roomId}`)
-  })
-  .catch(err => {
-    console.error(err);
-    alert("오류가 발생했습니다.");
-  });
-}
 
 document.getElementById("chatForm").addEventListener("submit", function(e) {
     e.preventDefault();
     sendMessage();
 });
+let hostId=host.value;
+console.log(hostId)
+console.log(sender.value)
+if (hostId != sender.value){
+  outRoom.addEventListener('click', async ()=>{
+      await fetch(`${window.baseUrl}/chat/out`, { method: 'POST' });
+      if (window.opener && !window.opener.closed) {
+        alert('채팅방을 퇴장하였습니다.');
+        window.opener.location.reload();
+      }
+  
+      window.close();
+  })
+}
 
-outRoom.addEventListener('click', async ()=>{
-    await fetch(`/chat/out`, { method: 'POST' });
-    if (window.opener && !window.opener.closed) {
-      alert('채팅방을 퇴장하였습니다.');
-      window.opener.location.reload();
-    }
 
-    window.close();
-})
-  let roomId = getRoomId.value;
-  const username1 = sender.value;
+    var username1 = sender.value;
+    console.log(username1)
 
   function connect() {
     // 이미 연결된 경우 아무것도 하지 않음
@@ -127,7 +53,10 @@ outRoom.addEventListener('click', async ()=>{
   }
 
   function sendMessage() {
+    
     const content = document.getElementById("msgInput").value;
+
+
     const payload = {
       roomId: roomId,
       senderId: username1,

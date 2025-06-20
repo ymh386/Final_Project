@@ -264,6 +264,7 @@
             );
 
             calendar.render();
+            
 
             // Modal 초기화 (관리자/트레이너만 접근 가능)
             if (isAdmin || isTrainer) {

@@ -337,6 +337,8 @@ public class ApprovalController {
 	public String saveSign(@AuthenticationPrincipal UserVO userVO, @RequestParam("imageData") String imageData, HttpServletRequest request) throws Exception {
 		UserSignatureVO userSignatureVO = new UserSignatureVO();
 		
+		System.out.println(imageData);
+		
 		//data:image/png;base64,.... 형식의 문자열에서 base64 부분만 추출
 		String base64Image = imageData.split(",")[1];
 		//Base64로 디코딩하여 이미지로 변환 가능한 byte[] 배열로 만듬

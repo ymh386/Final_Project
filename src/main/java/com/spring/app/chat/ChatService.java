@@ -40,6 +40,18 @@ public class ChatService {
 		return list;
 	}
 	
+	public String getUserImgInRoom(String username, Long roomId) throws Exception {
+		String userImg = chatDAO.getUserImgInRoom(username, roomId);
+		
+		return userImg;
+	}
+	
+	public String getUserSnsInRoom(String username, Long roomId) throws Exception {
+		String sns = chatDAO.getUserImgInRoom(username, roomId);
+		
+		return sns;
+	}	
+	
 	int outUser(RoomMemberVO memberVO) throws Exception {
 		int result = chatDAO.outUser(memberVO);
 		
@@ -76,10 +88,18 @@ public class ChatService {
 		return result;
 	}
 	
+	public int readMessage(String username, Long roomId) throws Exception {
+		int result = chatDAO.readMessage(username, roomId);
+		
+		return result;
+	}
+	
+	public Long insertMemberRoom(List<String> usernames, boolean isGroup) throws Exception {
 	public Long insertMemberRoom(List<String> usernames, boolean isGroup, HttpServletRequest request) throws Exception {
 		
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String user = auth.getName();
+		ChatRoomVO chatRoomVO = new ChatRoomVO();
 		
 		if (!isGroup && usernames.size()==2) {
 			Long exist = chatDAO.findRoom(usernames.get(0), usernames.get(1));
@@ -128,10 +148,8 @@ public class ChatService {
 			}
 		}
 		
-		ChatRoomVO chatRoomVO = new ChatRoomVO();
 		
 		if (isGroup) {
-			
 			int person = usernames.size()-1;
 			chatRoomVO.setCreatedBy(user);
 			chatRoomVO.setRoomName(usernames.get(0)+"님 외 "+person+"명");	
@@ -148,7 +166,7 @@ public class ChatService {
 			        request
 			    );
 		}else {
-			chatRoomVO.setRoomName(usernames.get(1));
+			chatRoomVO.setRoomName(usernames.get(1)+usernames.get(0));
 			chatDAO.makeChat(chatRoomVO);
 			
 			// 로그/감사 기록용
@@ -162,7 +180,6 @@ public class ChatService {
 			        request
 			    );
 		}
-		
 		
 		for (String username : usernames) {
 			RoomMemberVO memberVO = new RoomMemberVO();
@@ -187,10 +204,35 @@ public class ChatService {
 		return chatRoomVO.getRoomId();
 	}
 	
+	public Long getUnreadMessage(String username, Long roomId) throws Exception {
+		Long count = chatDAO.getUnreadMessage(username, roomId);
+		
+		return count;
+	}
+	
+	public Long getUnreadMember(Long roomId, Long messageId) throws Exception {
+		Long count = chatDAO.getUnreadMember(roomId, messageId);
+		
+		return count;
+	}
+	
+	public String getLastMessageTime(Long roomId) throws Exception {
+		String time = chatDAO.getLastMessageTime(roomId);
+		
+		return time;
+	}
+	
+	public String getLastMessage(Long roomId) throws Exception {
+		String msg = chatDAO.getLastMessage(roomId);
+		
+		return msg;
+	}
+	
 	public int invite(RoomMemberVO memberVO) throws Exception {
 		int result = chatDAO.insertMember(memberVO);
 		
 		return result;
 	}
+	
 
 }

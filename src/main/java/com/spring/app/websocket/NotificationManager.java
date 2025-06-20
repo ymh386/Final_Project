@@ -17,7 +17,9 @@ import com.spring.app.approval.ApprovalVO;
 import com.spring.app.approval.DocumentVO;
 import com.spring.app.board.notice.NoticeDAO;
 import com.spring.app.chat.ChatMessageVO;
+import com.spring.app.chat.ChatRoomVO;
 import com.spring.app.chat.RoomMemberVO;
+import com.spring.app.user.MemberStateVO;
 import com.spring.app.equipment.EquipmentFaultVO;
 import com.spring.app.reservation.ReservationVO;
 import com.spring.app.schedule.ScheduleVO;
@@ -56,6 +58,7 @@ public class NotificationManager {
 			//해당 경로로 메세지를 보내면, 그 사용자에게 알림이 도착
 			messagingTemplate.convertAndSend("/topic/notify/".concat(notificationVO.getUsername()), notificationVO);	
 		}
+		System.out.println(notificationVO);
 		
 	}
 	
@@ -108,7 +111,9 @@ public class NotificationManager {
 	public void messageNotification(ChatMessageVO chatMessageVO, List<RoomMemberVO> ar) throws Exception {
 		String senderName = notificationDAO.getSenderName(chatMessageVO.getSenderId());
 		NotificationVO notificationVO = null;
+		
 		for(RoomMemberVO roomMemberVO : ar) {
+			
 			if(chatMessageVO.getSenderId().equals(roomMemberVO.getUsername())) {
 				continue;
 			}
@@ -117,7 +122,7 @@ public class NotificationManager {
 			notificationVO.setNotificationTitle("채팅 메세지");
 			notificationVO.setUsername(roomMemberVO.getUsername());
 			notificationVO.setMessage(chatMessageVO.getContents());
-			notificationVO.setLinkUrl("/chat/detail/".concat(chatMessageVO.getRoomId().toString()));
+			notificationVO.setLinkUrl("/chat/list");
 			notificationVO.setNotificationType("N0");
 			notificationVO.setSenderId(chatMessageVO.getSenderId());
 			
@@ -133,6 +138,24 @@ public class NotificationManager {
 		
 	}
 	
+	//강퇴 알림
+	public void kickNotification(RoomMemberVO memberVO, ChatRoomVO chatRoomVO, String username) throws Exception {
+		String senderName = notificationDAO.getSenderName(chatRoomVO.getCreatedBy());
+		NotificationVO notificationVO = new NotificationVO();
+		
+		notificationVO.setNotificationTitle("강퇴 알림");
+		notificationVO.setUsername(username);
+		notificationVO.setMessage("방장에 의해 강퇴당했습니다.");
+		notificationVO.setLinkUrl("/chat/list");
+		notificationVO.setNotificationType("N9");
+		notificationVO.setSenderId(chatRoomVO.getCreatedBy());
+		
+		UserVO senderVO = notificationVO.getSenderVO();
+		if (senderVO == null) {
+			senderVO = new UserVO();
+			notificationVO.setSenderVO(senderVO);
+		}
+		senderVO.setName(senderName);
 	//일정 부여 알림
 	public void scheduleNotification(ScheduleVO scheduleVO) throws Exception {
 		NotificationVO notificationVO = new NotificationVO();
@@ -147,20 +170,46 @@ public class NotificationManager {
 		this.sendNotification(notificationVO);
 	}
 	
-	//일정 취소 알림
-	public void cancelScheduleNotification(ScheduleVO scheduleVO) throws Exception {
+	//초대 알림
+	public void inviteNotification(RoomMemberVO memberVO, ChatRoomVO chatRoomVO, String sender, String username) throws Exception {
+		String senderName = notificationDAO.getSenderName(sender);
 		NotificationVO notificationVO = new NotificationVO();
-		notificationVO.setNotificationTitle("일정 취소");
-		notificationVO.setUsername(scheduleVO.getUsername());
-		notificationVO.setMessage("일정이 취소되었습니다. 확인해주세요.\n"
-				+ scheduleVO.getScheduleDate() + " " + scheduleVO.getStartTime() + " ~ " + scheduleVO.getEndTime());
-		notificationVO.setLinkUrl("/schedule/page");
-		notificationVO.setNotificationType("N12");
-		notificationVO.setSenderId("admin");
+		
+		notificationVO.setNotificationTitle("초대 알림");
+		notificationVO.setUsername(username);
+		notificationVO.setMessage("채팅에 초대되었습니다.");
+		notificationVO.setLinkUrl("/chat/list");
+		notificationVO.setNotificationType("N1");
+		notificationVO.setSenderId(sender);
+		
+		UserVO senderVO = notificationVO.getSenderVO();
+		if (senderVO == null) {
+			senderVO = new UserVO();
+			notificationVO.setSenderVO(senderVO);
+		}
+		senderVO.setName(senderName);
 		
 		this.sendNotification(notificationVO);
 	}
 	
+	//방장 위임 알림
+	public void getHostNotification(ChatRoomVO chatRoomVO, String username) throws Exception {
+		String senderName = notificationDAO.getSenderName(chatRoomVO.getCreatedBy());
+		NotificationVO notificationVO = new NotificationVO();
+		
+		notificationVO.setNotificationTitle("방장 권한 위임");
+		notificationVO.setUsername(username);
+		notificationVO.setMessage("방장에 대한 권한을 위임받았습니다.");
+		notificationVO.setLinkUrl("/chat/detail/"+chatRoomVO.getRoomId());
+		notificationVO.setNotificationType("N10");
+		notificationVO.setSenderId(chatRoomVO.getCreatedBy());
+		
+		UserVO senderVO = notificationVO.getSenderVO();
+		if (senderVO == null) {
+			senderVO = new UserVO();
+			notificationVO.setSenderVO(senderVO);
+		}
+		senderVO.setName(senderName);
 	//수업 예약
 	public void reserveNotification(ReservationVO reservationVO) throws Exception {
 		NotificationVO notificationVO = null;
@@ -200,6 +249,49 @@ public class NotificationManager {
 		this.sendNotification(notificationVO);
 	}
 	
+	//구독권 하루 남았을때 알림
+	public void SubscribeWarningNotification(MemberStateVO memberStateVO, String username) throws Exception {
+		String senderName = notificationDAO.getSenderName(memberStateVO.getUsername());
+		NotificationVO notificationVO = new NotificationVO();
+		
+		notificationVO.setNotificationTitle("구독권 종료 임박");
+		notificationVO.setUsername(username);
+		notificationVO.setMessage("구독권 정기 결제가 하루 남았습니다.");
+		notificationVO.setLinkUrl("/user/mypage");
+		notificationVO.setNotificationType("N2");
+		notificationVO.setSenderId(memberStateVO.getUsername());
+		
+		UserVO senderVO = notificationVO.getSenderVO();
+		if (senderVO == null) {
+			senderVO = new UserVO();
+			notificationVO.setSenderVO(senderVO);
+		}
+		senderVO.setName(senderName);
+		
+		this.sendNotification(notificationVO);
+	}
+	
+	//구독권 결제 완료
+	public void SubscribePayNotification(MemberStateVO memberStateVO, String username) throws Exception {
+		String senderName = notificationDAO.getSenderName(memberStateVO.getUsername());
+		NotificationVO notificationVO = new NotificationVO();
+		
+		notificationVO.setNotificationTitle("구독권 결제 완료");
+		notificationVO.setUsername(username);
+		notificationVO.setMessage("구독권 정기 결제가 완료되었습니다..");
+		notificationVO.setLinkUrl("/user/mypage");
+		notificationVO.setNotificationType("N3");
+		notificationVO.setSenderId(memberStateVO.getUsername());
+		
+		UserVO senderVO = notificationVO.getSenderVO();
+		if (senderVO == null) {
+			senderVO = new UserVO();
+			notificationVO.setSenderVO(senderVO);
+		}
+		senderVO.setName(senderName);
+		
+		this.sendNotification(notificationVO);
+	}
 	//수업 예약 취소
 	public void cancelReserveNotification(ReservationVO reservationVO) throws Exception {
 		

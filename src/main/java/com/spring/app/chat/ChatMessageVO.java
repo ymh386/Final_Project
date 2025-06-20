@@ -19,6 +19,7 @@ public class ChatMessageVO {
 	private String messageType;
 	private String createdAt;
 	private String senderId;
+	private Long readStatus;
 	
 
 }

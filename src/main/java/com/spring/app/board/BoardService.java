@@ -21,7 +21,7 @@ public interface BoardService {
     int add(BoardVO boardVO, MultipartFile[] files) throws Exception;
 
     /** 5) 글 수정 */
-    int update(BoardVO boardVO) throws Exception;
+    int update(BoardVO boardVO, MultipartFile[] files) throws Exception;
 
     /** 6) 글 삭제 */
     int delete(BoardVO boardVO) throws Exception;

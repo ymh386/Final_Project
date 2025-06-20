@@ -126,6 +126,12 @@ public class UserService implements UserDetailsService {
     public List<UserVO> getUsersByUsernamePrefix(String prefix) {
         return userDAO.selectUsersByUsernamePrefix(prefix);
     }
+    // 트레이너 카운트
+    public int getTrainerCount() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("prefix", "T%");
+        return userDAO.countUsersByUsernamePrefix(params);
+    }
 
 
 
