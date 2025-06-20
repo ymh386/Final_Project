@@ -94,7 +94,6 @@ public class ChatService {
 		return result;
 	}
 	
-	public Long insertMemberRoom(List<String> usernames, boolean isGroup) throws Exception {
 	public Long insertMemberRoom(List<String> usernames, boolean isGroup, HttpServletRequest request) throws Exception {
 		
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();

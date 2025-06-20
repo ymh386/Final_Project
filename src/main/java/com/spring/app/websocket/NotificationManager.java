@@ -156,6 +156,10 @@ public class NotificationManager {
 			notificationVO.setSenderVO(senderVO);
 		}
 		senderVO.setName(senderName);
+		
+		this.sendNotification(notificationVO);
+	}
+	
 	//일정 부여 알림
 	public void scheduleNotification(ScheduleVO scheduleVO) throws Exception {
 		NotificationVO notificationVO = new NotificationVO();
@@ -210,6 +214,10 @@ public class NotificationManager {
 			notificationVO.setSenderVO(senderVO);
 		}
 		senderVO.setName(senderName);
+		
+		this.sendNotification(notificationVO);
+	}
+	
 	//수업 예약
 	public void reserveNotification(ReservationVO reservationVO) throws Exception {
 		NotificationVO notificationVO = null;

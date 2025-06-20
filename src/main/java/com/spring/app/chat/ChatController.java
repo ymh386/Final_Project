@@ -265,7 +265,7 @@ public class ChatController {
 			        "SEND_MESSAGE",
 			        "CHAT_MESSAGE",
 			        message.getMessageId().toString(),
-			        userVO.getUsername() + "이 "
+			        message.getSenderId() + "이 "
 			        + message.getRoomId() + "번방에서 "
 			        + "\"" + message.getContents() + "\"" + "메세지를 작성",
 			        ip,

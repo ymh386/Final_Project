@@ -133,7 +133,11 @@ public class UserController {
 			oriName="default.png";
 			userVO.setFileName("default");
 			userVO.setOriName(oriName);
+			
+			
 		}
+		return "redirect:/";
+	}
 		
 		
 		
