@@ -15,5 +15,8 @@ public class RoomMemberVO {
 	private String username;
 	private LocalDateTime joinedAt;
 	private Long lastReadMessage;
+	
+	private String sns;
+	private String fileName;
 
 }

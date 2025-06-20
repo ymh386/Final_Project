@@ -53,6 +53,7 @@ public class NotificationManager {
 			//해당 경로로 메세지를 보내면, 그 사용자에게 알림이 도착
 			messagingTemplate.convertAndSend("/topic/notify/".concat(notificationVO.getUsername()), notificationVO);	
 		}
+		System.out.println(notificationVO);
 		
 	}
 	

@@ -159,8 +159,8 @@
 
   <!-- 13) 파일 업로드 -->
   <insert id="addFile" parameterType="com.spring.app.board.BoardFileVO" useGeneratedKeys="true" keyProperty="fileNum" keyColumn="FILE_NUM">
-    INSERT INTO IMAGES (BOARD_NUM, FILE_NAME, OLD_NAME)
-    VALUES (#{boardNum}, #{fileName}, #{oldName})
+    INSERT INTO IMAGES (BOARD_NUM, FILE_NAME, ORI_NAME)
+    VALUES (#{boardNum}, #{fileName}, #{oriName})
   </insert>
 
   <!-- 14) 파일 목록 -->

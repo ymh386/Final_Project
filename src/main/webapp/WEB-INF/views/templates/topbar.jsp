@@ -216,6 +216,7 @@ body {
 
 <div class="sports-topbar">
     <a href="/" class="sports-logo">SPORTS CLUB</a>
+    <sec:authentication property="principal" var="user"></sec:authentication>
 
     <div class="sports-actions">
         <sec:authorize access="isAuthenticated()">
@@ -242,6 +243,7 @@ body {
                 </button>
                 <ul id="notificationList" class="sports-notify-list"></ul>
             </div>
+            
 
             <!-- Toast Container(실시간 알림 팝업) -->
             <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;"></div>
