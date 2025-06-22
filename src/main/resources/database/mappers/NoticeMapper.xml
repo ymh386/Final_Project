@@ -79,12 +79,12 @@
       AND #{userName} = 'admin'
   </update>
 
-  <!-- 6) 공지글 삭제 (관리자만 삭제 가능) -->
-  <delete id="delete" parameterType="com.spring.app.board.notice.NoticeVO">
-    DELETE FROM NOTICE
-    WHERE BOARD_NUM = #{boardNum}
-      AND #{userName} = 'admin'
-  </delete>
+<delete id="delete" parameterType="com.spring.app.board.notice.NoticeVO">
+  DELETE FROM NOTICE
+  WHERE BOARD_NUM = #{boardNum}
+    AND #{userName} = 'admin'   <!-- 관리자 체크 조건 -->
+</delete>
+
 
   <!-- 7) 조회수 증가 -->
   <update id="hitUpdate" parameterType="com.spring.app.board.notice.NoticeVO">

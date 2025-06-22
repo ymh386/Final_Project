@@ -68,5 +68,12 @@ public interface BoardService {
     /** 20) 비밀글 비밀번호 검증 */
     boolean validateSecret(BoardVO boardVO) throws Exception;
 
+    CommentVO getCommentById(Long commentNum) throws Exception;
+
+	void decreaseCommentCount(Long boardNum) throws Exception;
+
+	
+
+
 
 }

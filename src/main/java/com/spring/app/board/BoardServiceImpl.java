@@ -151,4 +151,16 @@ public class BoardServiceImpl implements BoardService {
             && stored.getSecretPassword() != null
             && stored.getSecretPassword().equals(boardVO.getSecretPassword());
     }
-}
+
+    @Override
+    public CommentVO getCommentById(Long commentNum) throws Exception {
+        return boardDAO.getCommentById(commentNum);
+    }
+    @Override
+    public void decreaseCommentCount(Long boardNum) throws Exception {
+        boardDAO.decreaseCommentCount(boardNum);
+    }
+    
+}  
+
+
