@@ -40,6 +40,13 @@
         <label for="boardContents">내용</label>
         <textarea id="boardContents" name="boardContents" required>${board.boardContents}</textarea>
         
+        
+    <label for="category">카테고리</label>
+    <select id="category" name="category" required>
+        <option value="">-- 선택하세요 --</option>
+        <option value="1" <c:if test="${board.category == 1}">selected</c:if>>자유게시판</option>
+        <option value="2" <c:if test="${board.category == 2}">selected</c:if>>QnA</option>
+        </select>
         <!-- 파일 첨부(선택) -->
         <label for="files">첨부파일 (선택, 여러 개 가능)</label>
         <input type="file" name="files" id="files" multiple />

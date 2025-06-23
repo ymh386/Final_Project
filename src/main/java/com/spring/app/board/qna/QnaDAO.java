@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * QnaDAO: MyBatis Mapper를 호출하여 CRUD를 담당하는 계층입니다.
@@ -15,7 +16,8 @@ public interface QnaDAO {
     void insertQna(QnaVO vo) throws Exception;
 
     /** 답글 작성 전 같은 그룹 내 step 밀어내기 */
-    void updateStepForReply(QnaVO vo) throws Exception;
+    void updateStepForReply(@Param("boardRef") Long boardRef, @Param("boardStep") Long boardStep) throws Exception;
+
 
     /** 전체 게시물 수 조회 (페이징용) */
     int selectQnaCount() throws Exception;
