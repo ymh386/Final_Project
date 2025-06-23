@@ -3,9 +3,12 @@ package com.spring.app.auditLog;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.spring.app.home.util.Pager;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -63,5 +66,17 @@ public class AuditLogService {
 		if(ip == null) ip = request.getRemoteAddr();
 		return ip;
 	}
+	
+	//감사 기록 리스트
+	public List<AuditLogVO> getList(Pager pager) throws Exception {
+		//LIMIT 절에 사용할 startRow, pageSize 계산
+		pager.makeRow();
+		//감사 기록 총 개수(해당 카테고리의 검색어 기준)
+		Long totalCount = auditLogDAO.getAuditLogCount(pager);
+		//총 개수를 토대로 페이지 생성
+		pager.makePage(totalCount);
+		return auditLogDAO.getList(pager);
+	}
+
 
 }

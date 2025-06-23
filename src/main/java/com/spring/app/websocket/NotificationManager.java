@@ -55,7 +55,6 @@ public class NotificationManager {
 			notificationVO = notificationDAO.getDetail(notificationVO);
 		}
 		
-		log.info("알림VO : {}", notificationVO);
 		
 		if(result > 0) {
 			//해당 경로로 메세지를 보내면, 그 사용자에게 알림이 도착

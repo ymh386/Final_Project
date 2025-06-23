@@ -7,6 +7,7 @@ import javax.management.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.spring.app.home.util.Pager;
 import com.spring.app.user.UserVO;
 
 @Service
@@ -21,7 +22,16 @@ public class NotificationService {
 	}
 	
 	//로그인한 유저의 알림 리스트 조회
-	public List<NotificationVO> getList(NotificationVO notificationVO) throws Exception {
+	public List<NotificationVO> getList(NotificationVO notificationVO, Pager pager) throws Exception {
+		//LIMIT 절에 사용할 startRow, pageSize 계산
+		pager.makeRow();
+		//감사 기록 총 개수(해당 카테고리의 검색어 기준)
+		notificationVO.setPager(pager);
+		Long totalCount = notificationDAO.getNotificationCount(notificationVO);
+		//총 개수를 토대로 페이지 생성
+		pager.makePage(totalCount);
+		notificationVO.setPager(pager);
+		
 		return notificationDAO.getList(notificationVO);
 	}
 	

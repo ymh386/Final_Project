@@ -27,8 +27,65 @@
   		  	ON N.USERNAME = U.USERNAME
   		  LEFT OUTER JOIN USER S
   		  	ON N.SENDER_ID = S.USERNAME
-  		 WHERE N.USERNAME=#{username}
+  		 <where>
+  		 	N.USERNAME=#{username}
+  		 	<if test="pager.searchWord != null and pager.searchWord != ''">
+		        <choose>
+		            <when test="pager.searchField == 'S.NAME'">
+		                AND S.NAME LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		            <when test="pager.searchField == 'NOTIFICATION_TITLE'">
+		                AND N.NOTIFICATION_TITLE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		            <when test="pager.searchField == 'MESSAGE'">
+		                AND N.MESSAGE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		        </choose>
+		    </if>
+		    
+		    <if test="read != null">
+		        AND N.IS_READ = 
+		        <choose>
+		            <when test="read == true">1</when>
+		            <otherwise>0</otherwise>
+		        </choose>
+    		</if>
+  		 </where>
   		 ORDER BY IS_READ ASC, CREATED_AT DESC
+  		 LIMIT #{pager.startRow}, #{pager.pageSize}
+  	</select>
+  	
+  	<select id="getNotificationCount" parameterType="NotificationVO" resultType="java.lang.Long">
+  		SELECT COUNT(*)
+  		  FROM NOTIFICATION N
+  		  LEFT OUTER JOIN USER U
+  		  	ON N.USERNAME = U.USERNAME
+  		  LEFT OUTER JOIN USER S
+  		  	ON N.SENDER_ID = S.USERNAME
+  		 <where>
+  		 	N.USERNAME=#{username}
+  		 	<if test="pager.searchWord != null and pager.searchWord != ''">
+		        <choose>
+		            <when test="pager.searchField == 'S.NAME'">
+		                AND S.NAME LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		            <when test="pager.searchField == 'NOTIFICATION_TITLE'">
+		                AND N.NOTIFICATION_TITLE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		            <when test="pager.searchField == 'MESSAGE'">
+		                AND N.MESSAGE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		        </choose>
+		    </if>
+		    
+		    <if test="read != null">
+		        AND N.IS_READ = 
+		        <choose>
+		            <when test="read == true">1</when>
+		            <otherwise>0</otherwise>
+		        </choose>
+    		</if>
+  		 </where>
   	</select>
   	
   	<select id="getDetail" resultMap="NotificationMap" parameterType="NotificationVO">

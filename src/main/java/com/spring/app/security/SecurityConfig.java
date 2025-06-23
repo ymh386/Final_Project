@@ -74,6 +74,7 @@ public class SecurityConfig {
 				.requestMatchers("/user/getDocuments", "/user/getDocument").hasAnyRole("ADMIN", "TRAINER")
 				.requestMatchers("/ws-chat/**").permitAll()
 				.requestMatchers("/user/admin/**").hasRole("ADMIN")
+				.requestMatchers("/admin/**").hasRole("ADMIN")
 				.requestMatchers("/approval/form**").hasRole("ADMIN")
 				.requestMatchers("/approval/**").hasAnyRole("ADMIN", "TRAINER")		
 				.requestMatchers("/user/getDocuments", "/user/getDocument").hasAuthority("APPROVE")
