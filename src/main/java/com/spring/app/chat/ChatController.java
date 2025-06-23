@@ -144,6 +144,7 @@ public class ChatController {
 			chatListVO.setMessage(chatService.getLastMessage(roomVO.getRoomId()));
 			chatListVO.setCreatedAt(chatService.getLastMessageTime(roomVO.getRoomId()));
 			chatListVO.setUnread(chatService.getUnreadMessage(userVO.getUsername(), roomVO.getRoomId()));
+			System.out.println(chatListVO.getUnread());
 			
 			ar.add(chatListVO);
 		}

@@ -43,6 +43,13 @@
       border-top: 1px solid #ccc;
       background-color: #f8f9fa;
     }
+    .member .badge { 
+      display: none; 
+    }
+    
+    .member.online .badge { 
+      display: inline-block; 
+    }
     </style>
 </head>
 <body>
@@ -245,7 +252,7 @@
           <c:otherwise>
       <div class="d-flex flex-column align-items-start mb-1">
         <input hidden name="messageId" value="${msg.messageId}">
-        <div class="small text-muted mb-1 fw-bold">${msg.senderId}</div>
+        <div class="small text-muted mb-1 fw-bold member" data-sender-id="${msg.senderId}">${msg.senderId}<span class="badge">🟢</span></div>
 
         <div class="d-flex align-items-end">
           <img 

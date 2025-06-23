@@ -120,6 +120,7 @@
   		    ON cm.ROOM_ID=rm.ROOM_ID
   		 WHERE cm.ROOM_ID=#{roomId}
   		   AND rm.USERNAME=#{username}
+  		   AND cm.SENDER_ID!=#{username}
   		   AND cm.MESSAGE_ID>COALESCE(rm.LAST_READ_MESSAGE, 0); 
   	</select>
   	

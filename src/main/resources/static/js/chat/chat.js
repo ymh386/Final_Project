@@ -49,7 +49,21 @@ if (hostId != sender.value){
         const msg = JSON.parse(message.body);
         showMessage(msg);
       });
+
+      window.stompClient.subscribe(`/topic/chat/${roomId}/presence`, function (message) {
+        const online = JSON.parse(message.body);
+        console.log(online)
+        renderOnline(online);
+      })
     });
+  }
+
+  function renderOnline (online) {
+    console.log("렌더링 함수 진입")
+    document.querySelectorAll('.member').forEach(el => {
+      const name = el.dataset.senderId;
+      el.classList.toggle('online', online.includes(name));
+    })
   }
 
   function sendMessage() {
