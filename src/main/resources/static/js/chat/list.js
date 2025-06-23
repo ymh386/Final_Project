@@ -102,10 +102,6 @@ function createGroupChat() {
       if (!item) return;
       item.querySelector('.last-message').innerText=message;
       item.querySelector('.chat-time').innerText=createdAt;
-      //window.location.reload();
-
-      console.log("보낸 사람"+senderId)
-      console.log("나"+myUsername.value)
       if (senderId==myUsername.value){
 
       }
