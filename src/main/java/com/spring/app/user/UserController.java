@@ -116,7 +116,6 @@ public class UserController {
 				
 				return "commons/result";
 			}
-			System.out.println("oriName : "+oriName);
 			
 			//랜덤 문자열 가져오기
 			String uuid = UUID.randomUUID().toString();
@@ -190,7 +189,6 @@ public class UserController {
 			userVO=findInfoService.getUserByEmail(email);
 			String username = userVO.getUsername();
 			username=findInfoService.maskEmail(username, 3, 6);
-			System.out.println(username);
 			
 			model.addAttribute("result", "아이디는 "+username+"입니다");
 			model.addAttribute("path", "/user/login/login");

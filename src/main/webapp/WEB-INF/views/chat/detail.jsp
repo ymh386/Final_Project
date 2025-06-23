@@ -13,6 +13,26 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
   <style>
+    .chat-footer {
+      border-top: 1px solid #ddd;
+      position: sticky;
+      bottom: 0;
+      background: #f8f9fa;
+      z-index: 100;
+    }
+
+    #msgInput {
+      height: 40px; /* 버튼과 높이 맞춤 */
+    }
+
+    #chatForm button {
+      height: 40px; /* 입력창과 버튼 높이 맞춤 */
+    }
+
+    form {
+      margin: 0; /* form 기본 margin 제거 */
+    }
+
     html, body {
       height: 100%;
       margin: 0;
@@ -131,18 +151,21 @@
                     <div class="d-flex align-items-center">
                     <c:if test="${mem.sns eq null and mem.fileName ne 'default'}">
                     	<img src="/files/user/${mem.fileName}"
+                         id="senderimg"
                     		 class="rouned-circle me-3"
                     		 width="48" height="48"
                     		 alt="avatar">
                     </c:if>
                     <c:if test="${mem.sns ne null}">
                     	<img src="${mem.fileName}"
+                         id="senderimg"
                     		 class="rouned-circle me-3"
                     		 width="48" height="48"
                     		 alt="avatar">
                     </c:if>
                     <c:if test="${mem.sns eq null and mem.fileName eq 'default'}">
-	                    <img src="/img/default.png" 
+	                    <img src="/img/default.png"
+                         id="senderimg" 
 	                      class="rounded-circle me-3" 
 	                      width="48" height="48" 
 	                      alt="avatar">
@@ -228,7 +251,7 @@
 
         </div>
         
-        <input hidden id="getRoomId" value="${map.room.roomId}">
+        <input hidden id="getRoomId" data-room-id="${map.room.roomId}" value="${map.room.roomId}">
       </div>
     </form>
     
@@ -244,7 +267,18 @@
                 <div class="small text-muted">${msg.createdAt}</div>
               </div>
               <div class="bg-primary text-dark rounded px-3 py-2 shadow-sm" style="max-width: 60%;">
-                ${msg.contents}
+                <c:choose>
+                  <c:when test="${msg.messageType == 'IMAGE'}">
+                    <img 
+                      src="/files/chat/${msg.mediaUrl}" 
+                      alt="첨부 이미지" 
+                      style="max-width:100%; border-radius:.5rem"
+                    />
+                  </c:when>
+                  <c:otherwise>                
+                    ${msg.contents}
+                  </c:otherwise>
+                </c:choose>                    
               </div>
             </div>
           </c:when>
@@ -267,7 +301,7 @@
             <c:choose>
               <c:when test="${msg.messageType == 'IMAGE'}">
                 <img 
-                  src="${msg.mediaUrl}" 
+                  src="/files/chat/${msg.mediaUrl}" 
                   alt="첨부 이미지" 
                   style="max-width:100%; border-radius:.5rem"
                 />
@@ -290,15 +324,28 @@
        <span id="bottom"></span>
     </div>
 
-      <div class="chat-footer bg-light border-top px-3 py-2 position-sticky bottom-0" style="z-index: 100; border-top: 1px solid #ddd;">
-        <form id="chatForm" class="d-flex align-items-center gap-2" enctype="multipart/form-data">
-          
-          <label for="imageInput" class="btn btn-outline-secondary mb-0 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+      <div class="chat-footer d-flex align-items-center gap-2 p-2" style="border-top: 1px solid #ddd; position: sticky; bottom: 0; background: #f8f9fa; z-index: 100;">
+        <form style="flex: 0 0 auto; margin: 0;" id="imgForm" enctype="multipart/form-data">
+          <label for="fileInput" class="btn btn-outline-secondary mb-0 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
             <i class="bi bi-image"></i>
-          </label>
-          <input type="file" id="imageInput" accept="image/*" hidden />
+            </label>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;" multiple />
+            
+            <div id="fileModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
+                background:white; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.2); padding:20px; width:320px; z-index:1000;">
+              <h5>파일 전송</h5>
+              <div id="previewContainer" style="max-height:300px; overflow-y:auto; margin-bottom:10px;">
+                <!-- 선택한 이미지 썸네일 목록이 여기에 표시됨 -->
+              </div>
+              <button id="sendBtn">전송</button>
+              <button id="cancelBtn">취소</button>
+            </div>
+            <div id="modalBackdrop" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh;
+              background:rgba(0,0,0,0.3); z-index:900;"></div>
+        </form>
 
-          <input type="text" id="msgInput" style="width: 74%;" class="form-control" placeholder="메시지 입력" autocomplete="off" />
+        <form id="chatForm" class="d-flex align-items-center gap-2 flex-grow-1" enctype="multipart/form-data" style="margin: 0;">
+          <input type="text" id="msgInput" style="width: 84%;" class="form-control" placeholder="메시지 입력" autocomplete="off" />
 
           <button type="submit" class="btn btn-primary px-3">전송</button>
 
