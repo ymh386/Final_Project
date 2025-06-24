@@ -7,6 +7,8 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.spring.app.chart.AttendanceStatVO;
+
 @Mapper
 public interface AttendanceDAO {
 
@@ -24,6 +26,13 @@ public interface AttendanceDAO {
     public AttendanceVO selectById(@Param("attendanceId") Long attendanceId);
     
     public void updateAttendance(AttendanceVO Vo);
+    
+    // 전체 근태율 통계
+    public List<AttendanceStatVO> getAllMonthlyStats(Integer year) throws Exception;
+    // 부서별 근태율 통계
+    public List<AttendanceStatVO> getDeptMonthlyStats(Integer year, Long departmentId) throws Exception;
+    // 사용자별 근태율 통계
+    public List<AttendanceStatVO> getUserMonthlyStats(Integer year, String username) throws Exception;
 	
 	
 }

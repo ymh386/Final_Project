@@ -191,6 +191,30 @@
  		WHERE MR.ROLE_NUM=2 AND MS.STATE_NUM=1 AND U.DEPARTMENT_ID IS NOT NULL
  	</select>
  	
+ 	<select id="getUsersOfDepartment" parameterType="DepartmentVO" resultMap="usersWithDepartmentMap">
+ 		SELECT 
+ 			U.USERNAME,
+ 			U.NAME,
+ 			U.POSITION,
+ 			U.PARENT,
+ 			D.DEPARTMENT_ID,
+ 			D.DEPARTMENT_NAME,
+ 			R.ROLE_NUM,
+ 			S.STATE_NUM
+ 		FROM USER U
+ 		INNER JOIN MEMBER_ROLE MR
+ 		ON U.USERNAME=MR.USERNAME
+ 		INNER JOIN ROLE R
+		USING (ROLE_NUM)
+		INNER JOIN MEMBER_STATE MS
+		ON U.USERNAME=MS.USERNAME
+		INNER JOIN STATE S
+		USING (STATE_NUM)
+ 		LEFT OUTER JOIN DEPARTMENT D
+ 		ON U.DEPARTMENT_ID=D.DEPARTMENT_ID
+ 		WHERE MR.ROLE_NUM=2 AND MS.STATE_NUM=1 AND U.DEPARTMENT_ID = #{departmentId}
+ 	</select>
+ 	
  	<select id="getUsersInTrainer" resultMap="usersWithDepartmentMap">
  		SELECT 
  			U.USERNAME,
@@ -245,15 +269,59 @@
  		FROM DOCUMENT D
  		INNER JOIN FORM F
  		ON D.FORM_ID=F.FORM_ID
- 		WHERE
- 		<choose>
- 			<when test="formId != null">
- 				D.WRITER_ID=#{writerId} AND D.FORM_ID=#{formId}
- 			</when>
- 			<otherwise>
- 				D.WRITER_ID=#{writerId}
- 			</otherwise>
- 		</choose>
+ 		
+ 		<where>
+		    D.WRITER_ID  = #{writerId}
+		    
+		    <if test="pager.searchWord != null and pager.searchWord != ''">
+		    	<choose>
+		            <when test="pager.searchField == 'D.DOCUMENT_TITLE'">
+		                AND D.DOCUMENT_TITLE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		            <when test="pager.searchField == 'F.FORM_TITLE'">
+		                AND F.FORM_TITLE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		        </choose>
+		    </if>
+		    
+		    <choose>
+		    	<when test="documentStatus == 'D0'">AND D.DOCUMENT_STATUS = 'D0'</when>
+	            <when test="documentStatus == 'D1'">AND D.DOCUMENT_STATUS = 'D1'</when>
+	            <when test="documentStatus == 'D2'">AND D.DOCUMENT_STATUS = 'D2'</when>
+	        </choose>
+	        
+		</where>
+		ORDER BY D.CREATED_AT DESC
+  		LIMIT #{pager.startRow}, #{pager.pageSize}
+ 	</select>
+ 	
+ 	<select id="getDocumentCount" resultType="java.lang.Long" parameterType="DocumentVO">
+ 		SELECT COUNT(*)
+ 		FROM DOCUMENT D
+ 		INNER JOIN FORM F
+ 		ON D.FORM_ID=F.FORM_ID
+ 		
+ 		<where>
+		    D.WRITER_ID  = #{writerId}
+		    
+		    <if test="pager.searchWord != null and pager.searchWord != ''">
+		    	<choose>
+		            <when test="pager.searchField == 'D.DOCUMENT_TITLE'">
+		                AND D.DOCUMENT_TITLE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		            <when test="pager.searchField == 'F.FORM_TITLE'">
+		                AND F.FORM_TITLE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		        </choose>
+		    </if>
+		    
+		    <choose>
+		    	<when test="documentStatus == 'D0'">AND D.DOCUMENT_STATUS = 'D0'</when>
+	            <when test="documentStatus == 'D1'">AND D.DOCUMENT_STATUS = 'D1'</when>
+	            <when test="documentStatus == 'D2'">AND D.DOCUMENT_STATUS = 'D2'</when>
+	        </choose>
+	        
+		</where>
  	</select>
  	
  	<select id="getDocument" resultMap="getDocumentsMap" parameterType="DocumentVO">

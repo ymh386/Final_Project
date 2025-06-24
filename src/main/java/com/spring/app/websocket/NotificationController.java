@@ -58,7 +58,6 @@ public class NotificationController {
 	@GetMapping("list")
 	public String getList(@AuthenticationPrincipal UserVO userVO, NotificationVO notificationVO, Pager pager, Model model) throws Exception {
 		notificationVO.setUsername(userVO.getUsername());
-		System.out.println("read " + notificationVO.getRead());
 		
 		List<NotificationVO> ar = notificationService.getList(notificationVO, pager);
 		model.addAttribute("ar", ar);

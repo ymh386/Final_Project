@@ -35,7 +35,7 @@
 						        <input type="text" name="searchWord" class="form-control me-2" value="${pager.searchWord}" placeholder="검색어">
 
 								<!-- 읽음 여부 선택 -->
-								<select name="read" class="form-select w-auto me-2">
+								<select onchange="this.form.submit()" name="read" class="form-select w-auto me-2">
 									<option value="" ${read == null ? 'selected' : ''}>전체</option>
 									<option value="false" ${read eq 'false' ? 'selected' : ''}>안 읽음</option>
 									<option value="true" ${read eq 'true' ? 'selected' : ''}>읽음</option>
@@ -107,9 +107,10 @@
 
 
 
-					<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+					
 					</div>
 				</main>
+				<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 			</div>
 		</div>
 					
@@ -117,8 +118,6 @@
 	
 	
 	
-		<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
-		</div>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="/js/notification/list.js"></script>
 	</body>

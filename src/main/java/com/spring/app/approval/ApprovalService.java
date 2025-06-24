@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import com.spring.app.auditLog.AuditLogService;
+import com.spring.app.home.util.Pager;
 import com.spring.app.user.UserDAO;
 import com.spring.app.user.UserVO;
 import com.spring.app.websocket.NotificationManager;
@@ -303,12 +304,18 @@ public class ApprovalService {
 	}
 	
 	//로그인한 유저의 승인내역 리스트
-	public List<ApprovalVO> getList(ApprovalVO approvalVO, String search) throws Exception {
-		Map<String, Object> map = new HashMap<>();
-		map.put("approvalVO", approvalVO);
-		map.put("search", search);
+	public List<ApprovalVO> getList(ApprovalVO approvalVO, Pager pager) throws Exception {
+		//LIMIT 절에 사용할 startRow, pageSize 계산
+		pager.makeRow();
+		//승인내역 총 개수(해당 카테고리의 검색어 기준)
+		approvalVO.setPager(pager);
+		Long totalCount = approvalDAO.getApprovalCount(approvalVO);
+		//총 개수를 토대로 페이지 생성
+		pager.makePage(totalCount);
+		approvalVO.setPager(pager);
 		
-		return approvalDAO.getList(map);
+		
+		return approvalDAO.getList(approvalVO);
 	}
 	
 	//로그인한 유저의 승인내역 디테일

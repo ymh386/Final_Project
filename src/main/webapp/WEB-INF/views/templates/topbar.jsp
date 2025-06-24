@@ -12,6 +12,18 @@ body {
     font-family: 'Montserrat', 'Orbitron', 'Bebas Neue', Arial, sans-serif;
 }
 
+.sports-topbar { 
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 64px !important;
+    border-bottom: 4px solid #ffe600 !important;
+    margin-top: 0 !important;
+    box-shadow: none !important;
+    z-index: 1100 !important;
+  }
+
 .sports-topbar {
     width: 100%;
     background: #18191d;

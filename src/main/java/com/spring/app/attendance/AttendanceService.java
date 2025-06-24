@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import com.spring.app.chart.AttendanceStatVO;
 import com.spring.app.user.UserDAO;
 import com.spring.app.user.UserVO;
 
@@ -136,6 +137,8 @@ public class AttendanceService {
 	        attendanceDAO.updateAttendance(vo);
 	    }
 
+	  
+	  
 	  
 	  
 	  

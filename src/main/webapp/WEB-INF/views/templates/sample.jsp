@@ -23,25 +23,23 @@
 			<div id="layoutSidenav_content" class="d-flex flex-column flex-grow-1">
                 <main class="flex-grow-1">
                     <div class="container">
+						<div class="container mt-4">
 							<!-- contents -->
 						
 
 
 
 
-
-					<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+						</div>
+					
 					</div>
 				</main>
+				<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 			</div>
 		</div>
 					
 	
 	
-	
-	
-		<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
-		</div>
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	</body>
 </html>
