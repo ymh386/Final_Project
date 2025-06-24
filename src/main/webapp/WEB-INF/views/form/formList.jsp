@@ -9,19 +9,6 @@
 <title>Insert title here</title>
 <c:import url="/WEB-INF/views/templates/header.jsp"></c:import>
 
-<style>
-  .sports-topbar { 
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    height: 64px !important;
-    border-bottom: 4px solid #ffe600 !important;
-    margin-top: 0 !important;
-    box-shadow: none !important;
-    z-index: 1100 !important;
-  }
-</style>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jstree@3.3.15/dist/themes/default/style.min.css" />
@@ -37,38 +24,50 @@
 			<main class="flex-grow-1">
 				<div class="container">
 					<!-- contents -->
-					<h2>양식 목록</h2>
+					 <div class="container mt-4">
 
-					<c:if test="${not empty ar}">
-						<table class="table table-hover">
-							<thead>
-								<tr>
-									<th scope="col">양식번호</th>
-									<th scope="col">양식이름</th>
-									<th scope="col">제작일시</th>
-								</tr>
-							</thead>
-							<tbody>
-								<c:forEach var="a" items="${ar}">
-									<tr class="table-row" onclick="location.href='./formDetail?formId=${a.formId}'">
-										<th scope="row">${a.formId}</th>
-										<td>${a.formTitle}</td>
-										<td>${a.createdAt}</td>
-									</tr>
-								</c:forEach>
-							</tbody>
-						</table>
-					</c:if>
-					<c:if test="${empty ar}">
-						<h3>조회된 양식이 없습니다.</h3>
-					</c:if>
-					<div>
-						<a href="./formRegister" class="btn">양식 등록</a>
+						<sec:authorize access="hasRole('ADMIN')">
+							<h2>양식 목록</h2>
+							
+
+							<c:if test="${not empty ar}">
+
+								<table class="table table-hover table-bordered">
+									<thead class="table-dark">
+										<tr>
+											<th scope="col">양식번호</th>
+											<th scope="col">양식이름</th>
+											<th scope="col">제작일시</th>
+										</tr>
+									</thead>
+									<tbody>
+										<c:forEach var="a" items="${ar}">
+											<tr class="table-row" onclick="location.href='./formDetail?formId=${a.formId}'">
+												<th scope="row">${a.formId}</th>
+												<td>${a.formTitle}</td>
+												<td>${a.createdAt}</td>
+											</tr>
+										</c:forEach>
+									</tbody>
+								</table>
+							</c:if>
+							<c:if test="${empty ar}">
+								<h3>조회된 양식이 없습니다.</h3>
+							</c:if>
+
+							
+							<a href="./formRegister" class="btn btn-dark">양식 등록</a>
+							
+						</sec:authorize>
+						
+						<sec:authorize access="!hasRole('ADMIN')">
+							<h3>관리자만 이용 가능합니다.</h3>
+						</sec:authorize>
 					</div>
-
-					<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+					
 				</div>
 			</main>
+			<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 		</div>
 	</div>
 

@@ -22,66 +22,94 @@
                 <main class="flex-grow-1">
                     <div class="container">
 							<!-- contents -->
-						<h2>내 결재함</h2>
-						<label>카테고리</label><br>
-						<form method="get">
-							<!-- 내용을 변경할때 마다 submit 시킴 -> 양식변경시 재렌더링 위함 -->
-							<select onchange="this.form.submit()" id="formSelect" name="formId">
-								<!-- 선택한 formId(양식)가 없을 때 모두 보기가 selected-->
-								<option value="" ${empty selectedFormId ? 'selected' : ''}>모두 보기</option>
-								<c:forEach var="f" items="${forms}">
-									<!-- 선택한 formId(양식)가 있을 때 해당 양식목록이 selected-->
-									<option value="${f.formId}" ${f.formId eq selectedFormId ? 'selected' : ''}>${f.formTitle}</option>
-								</c:forEach>
-							</select>
-						</form><br><br>
-						<c:if test="${not empty ar}">
-							<table class="table table-hover">
-								<thead>
-									<tr>
-										<th scope="col">#</th>
-										<th scope="col">종류</th>
-										<th scope="col">작성자</th>
-										<th scope="col">제목</th>
-										<th scope="col">진행상태</th>
-										<th scope="col">작성일시</th>
-									</tr>
-								</thead>
-								<tbody>
-									<c:forEach var="a" items="${ar}">
-										<tr class="table-row" onclick="location.href='./getDocument?documentId=${a.documentId}'">
-											<th scope="row">${a.documentId}</th>
-											<td>${a.formVO.formTitle}</a></td>
-											<td>${a.writerId}</td>
-											<td>${a.documentTitle}</td>
-											<c:choose>
-												<c:when test="${a.documentStatus eq 'D1'}">
-													<td style="color: blue;">승인</td>
-												</c:when>
-												<c:when test="${a.documentStatus eq 'D2'}">
-													<td style="color: red;">반려</td>
-												</c:when>
-												<c:otherwise>
-													<td>진행중</td>
-												</c:otherwise>
-											</c:choose>
-											<td>${a.createdAt}</td>
+						<div class="container mt-4">
+							<h3 class="mb-3">내 결재함</h3>
+
+							<form method="get" class="d-flex mb-3">
+								<select name="searchField" class="form-select w-auto me-2">
+									<option value="D.DOCUMENT_TITLE" ${pager.searchField eq 'D.DOCUMENT_TITLE' ? 'selected' : ''}>제목</option>
+									<option value="F.FORM_TITLE" ${pager.searchField eq 'F.FORM_TITLE' ? 'selected' : ''}>문서 양식</option>
+								</select>
+
+								<!-- 검색어 -->
+								<input type="text" name="searchWord" class="form-control me-2" value="${pager.searchWord}" placeholder="검색어">
+
+								<!-- 내용을 변경할때 마다 submit 시킴 -> 양식변경시 재렌더링 위함 -->
+								<!-- 승인 여부 선택 -->
+								<select onchange="this.form.submit()" name="documentStatus" class="form-select w-auto me-2">
+									<option value="" ${documentStatus == null ? 'selected' : ''}>전체</option>
+									<option value="D0" ${documentStatus eq 'D0' ? 'selected' : ''}>진행 중</option>
+									<option value="D1" ${documentStatus eq 'D1' ? 'selected' : ''}>승인</option>
+									<option value="D2" ${documentStatus eq 'D2' ? 'selected' : ''}>반려</option>
+								</select>
+								<button type="submit" class="btn btn-dark">검색</button>
+							</form>
+
+							<c:if test="${not empty ar}">
+
+								<table class="table table-hover table-bordered">
+									<thead class="table-dark">
+										<tr>
+											<th scope="col">#</th>
+											<th scope="col">문서 양식</th>
+											<th scope="col">작성자</th>
+											<th scope="col">제목</th>
+											<th scope="col">진행상태</th>
+											<th scope="col">작성 일시</th>
 										</tr>
+									</thead>
+									<tbody>
+										<c:forEach var="a" items="${ar}">
+											<tr class="table-row" onclick="location.href='./getDocument?documentId=${a.documentId}'">
+												<th scope="row">${a.documentId}</th>
+												<td>${a.formVO.formTitle}</a></td>
+												<td>${a.writerId}</td>
+												<td>${a.documentTitle}</td>
+												<c:choose>
+													<c:when test="${a.documentStatus eq 'D1'}">
+														<td style="color: blue;">승인</td>
+													</c:when>
+													<c:when test="${a.documentStatus eq 'D2'}">
+														<td style="color: red;">반려</td>
+													</c:when>
+													<c:otherwise>
+														<td>진행중</td>
+													</c:otherwise>
+												</c:choose>
+												<td>${a.createdAt}</td>
+											</tr>
+										</c:forEach>
+									</tbody>
+								</table>
+							</c:if>
+							<c:if test="${empty ar}">
+								<h3>조회된 결재 문서가 없습니다.</h3>
+							</c:if>
+
+							<!-- 페이징 -->
+							<nav class="text-center mt-3">
+								<ul class="pagination justify-content-center">
+									<c:if test="${pager.prev}">
+										<li class="page-item"><a class="page-link" href="?curPage=${pager.startPage - 1}&searchField=${pager.searchField}&searchWord=${pager.searchWord}&documentStatus=${documentStatus}">이전</a></li>
+									</c:if>
+						
+									<c:forEach var="i" begin="${pager.startPage}" end="${pager.endPage}">
+										<li class="page-item ${pager.curPage == i ? 'active' : ''}">
+											<a class="page-link" href="?curPage=${i}&searchField=${pager.searchField}&searchWord=${pager.searchWord}&documentStatus=${documentStatus}">${i}</a>
+										</li>
 									</c:forEach>
-								</tbody>
-							</table>
-						</c:if>
-						<c:if test="${empty ar}">
-							<h3>조회된 결재문서가 없습니다.</h3>
-    					</c:if>
+						
+									<c:if test="${pager.next}">
+										<li class="page-item"><a class="page-link" href="?curPage=${pager.endPage + 1}&searchField=${pager.searchField}&searchWord=${pager.searchWord}&documentStatus=${documentStatus}">다음</a></li>
+									</c:if>
+								</ul>
+							</nav>
+						</div>
 
-
-
-
-
-					<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+					
 					</div>
 				</main>
+				<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 			</div>
 		</div>
 					
@@ -89,8 +117,6 @@
 	
 	
 	
-		<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
-		</div>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	</body>
 </html>

@@ -97,9 +97,10 @@
 
 
 
-					<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+					
 					</div>
 				</main>
+				<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 			</div>
 		</div>
 					

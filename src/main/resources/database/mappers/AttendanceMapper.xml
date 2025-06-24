@@ -74,6 +74,48 @@
     SELECT * FROM ATTENDANCE
     ORDER BY ATTENDANCE_DATE DESC, CHECKIN_TIME
   </select>
+  
+  <!-- 전체 직원 월별 통계 -->
+  <select id="getAllMonthlyStats" resultType="AttendanceStatVO">
+  SELECT MONTH(ATTENDANCE_DATE) AS month,
+         COUNT(*) AS total,
+         SUM(CASE WHEN STATUS = '출근' THEN 1 ELSE 0 END) AS present,
+         SUM(CASE WHEN STATUS = '지각' THEN 1 ELSE 0 END) AS late,
+         SUM(CASE WHEN STATUS = '결근' THEN 1 ELSE 0 END) AS absent
+    FROM ATTENDANCE
+   WHERE YEAR(ATTENDANCE_DATE) = #{year}
+   GROUP BY MONTH(ATTENDANCE_DATE)
+   ORDER BY month
+</select>
+
+ <!-- 특정 부서 월별 통계 -->
+<select id="getDeptMonthlyStats" resultType="AttendanceStatVO">
+  SELECT MONTH(A.ATTENDANCE_DATE) AS month,
+         COUNT(*) AS total,
+         SUM(CASE WHEN A.STATUS = '출근' THEN 1 ELSE 0 END) AS present,
+         SUM(CASE WHEN A.STATUS = '지각' THEN 1 ELSE 0 END) AS late,
+         SUM(CASE WHEN A.STATUS = '결근' THEN 1 ELSE 0 END) AS absent
+    FROM ATTENDANCE A
+    JOIN USER U ON A.USERNAME = U.USERNAME
+   WHERE YEAR(A.ATTENDANCE_DATE) = #{year}
+     AND U.DEPARTMENT_ID = #{departmentId}
+   GROUP BY MONTH(A.ATTENDANCE_DATE)
+   ORDER BY month
+</select>
+
+<!-- 특정 사용자 월별 통계 -->
+<select id="getUserMonthlyStats" resultType="AttendanceStatVO">
+  SELECT MONTH(ATTENDANCE_DATE) AS month,
+         COUNT(*) AS total,
+         SUM(CASE WHEN STATUS = '출근' THEN 1 ELSE 0 END) AS present,
+         SUM(CASE WHEN STATUS = '지각' THEN 1 ELSE 0 END) AS late,
+         SUM(CASE WHEN STATUS = '결근' THEN 1 ELSE 0 END) AS absent
+    FROM ATTENDANCE
+   WHERE YEAR(ATTENDANCE_DATE) = #{year}
+     AND USERNAME = #{username}
+   GROUP BY MONTH(ATTENDANCE_DATE)
+   ORDER BY month
+</select>
   	
   	<!-- 관리자가 근태 수정 가능 -->
   	

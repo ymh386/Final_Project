@@ -30,6 +30,7 @@ import com.spring.app.approval.DocumentVO;
 import com.spring.app.approval.FormVO;
 import com.spring.app.approval.UserSignatureVO;
 import com.spring.app.files.FileManager;
+import com.spring.app.home.util.Pager;
 import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.payment.PaymentService;
 import com.spring.app.subscript.SubscriptService;
@@ -426,19 +427,15 @@ public class UserController {
 	
 	//로그인한 유저가 작성한 전자결재 목록
 	@GetMapping("getDocuments")
-	public String getDocuments(@AuthenticationPrincipal UserVO userVO, DocumentVO documentVO, Model model) throws Exception {
-		//양식별로 결재문서 불러오기
-		List<FormVO> forms = approvalService.getForms();
+	public String getDocuments(@AuthenticationPrincipal UserVO userVO, DocumentVO documentVO, Pager pager, Model model) throws Exception {
 		
 		//작성자에 로그인한 유저 ID넣기
 		documentVO.setWriterId(userVO.getUsername());
 		
-		List<DocumentVO> ar = userService.getDocuments(documentVO);
+		List<DocumentVO> ar = userService.getDocuments(documentVO, pager);
 		model.addAttribute("ar", ar);
-		model.addAttribute("forms", forms);
-		
-		//양식목록을 바꾸면 해당 목록으로 selected되있게 하기위함
-		model.addAttribute("selectedFormId", documentVO.getFormId());
+		model.addAttribute("pager", pager);
+		model.addAttribute("documentStatus", documentVO.getDocumentStatus());
 		
 		return "user/document/list";
 	}

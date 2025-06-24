@@ -29,6 +29,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.files.FileManager;
+import com.spring.app.home.util.Pager;
 import com.spring.app.user.DepartmentVO;
 import com.spring.app.user.UserService;
 import com.spring.app.user.UserVO;
@@ -63,7 +64,7 @@ public class ApprovalController {
 	private String path;
 	
 	//결재양식 리스트
-	@GetMapping("formList")
+	@GetMapping("admin/formList")
 	public String formList(Model model) throws Exception {
 		List<FormVO> ar = approvalService.getForms();
 		
@@ -74,7 +75,7 @@ public class ApprovalController {
 	}
 	
 	//결재양식 상세정보
-	@GetMapping("formDetail")
+	@GetMapping("/admin/formDetail")
 	public String formDetail(FormVO formVO, Model model) throws Exception {
 		formVO = approvalService.getForm(formVO);
 		
@@ -84,14 +85,14 @@ public class ApprovalController {
 	}
 	
 	//결재양식 등록 UI
-	@GetMapping("formRegister")
+	@GetMapping("admin/formRegister")
 	public String formRegister(Model model) throws Exception {
 		
 		return "form/formRegister";
 	}
 	
 	//결재양식 등록 프로세스
-	@PostMapping("formRegister")
+	@PostMapping("admin/formRegister")
 	public String formRegister(FormVO formVO, @AuthenticationPrincipal UserVO userVO, HttpServletRequest request) throws Exception {
 		
 		int result = approvalService.formRegister(formVO);
@@ -112,7 +113,7 @@ public class ApprovalController {
 	}
 	
 	//결재양식 수정 UI
-	@GetMapping("formUpdate")
+	@GetMapping("admin/formUpdate")
 	public String formUpdate(FormVO formVO, Model model) throws Exception {
 		formVO = approvalService.getForm(formVO);
 		
@@ -122,7 +123,7 @@ public class ApprovalController {
 	}
 	
 	//결재양식 수정 프로세스
-	@PostMapping("formUpdate")
+	@PostMapping("admin/formUpdate")
 	public String formUpdate(FormVO formVO, @AuthenticationPrincipal UserVO userVO, HttpServletRequest request) throws Exception {
 		
 		int result = approvalService.formUpdate(formVO);
@@ -144,7 +145,7 @@ public class ApprovalController {
 	}
 	
 	//결재양식 삭제
-	@GetMapping("formDelete")
+	@GetMapping("admin/formDelete")
 	public String formDelete(FormVO formVO, @AuthenticationPrincipal UserVO userVO, HttpServletRequest request) throws Exception {
 		
 		int result = approvalService.formDelete(formVO);
@@ -493,28 +494,16 @@ public class ApprovalController {
 	}
 	
 	@GetMapping("list")
-	public String list(@AuthenticationPrincipal UserVO userVO, FormVO formVO, String search, Model model) throws Exception {
-		ApprovalVO approvalVO = new ApprovalVO();
+	public String list(@AuthenticationPrincipal UserVO userVO, Pager pager, ApprovalVO approvalVO, Model model) throws Exception {
 		approvalVO.setApproverId(userVO.getUsername());
 		
-		//양식별 카테고리 정보 DB로 넘기기용
-		if(formVO.getFormId() != null) {
-			approvalVO.setDocumentVO(new DocumentVO());
-			approvalVO.getDocumentVO().setFormId(formVO.getFormId());
-		}
 		
-		List<ApprovalVO> ar = approvalService.getList(approvalVO, search);
+		List<ApprovalVO> ar = approvalService.getList(approvalVO, pager);
 		model.addAttribute("ar", ar);
-		
-		//양식별로 결재문서 불러오기
-		List<FormVO> forms = approvalService.getForms();
-		model.addAttribute("forms", forms);
-		
-		//양식목록을 바꾸면 해당 목록으로 selected되있게 하기위함
-		model.addAttribute("selectedFormId", formVO.getFormId());
-		
-		//양식목록을 바꾸면 해당 작성자로 검색되있게 하기위함
-		model.addAttribute("writedId", search);
+		//페이징
+		model.addAttribute("pager", pager);
+		//승인여부 넘기기
+		model.addAttribute("approvalStatus", approvalVO.getApprovalStatus());
 		
 		return "approval/list";
 	
