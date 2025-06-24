@@ -7,6 +7,7 @@ import org.springframework.security.authorization.AuthorityAuthorizationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -28,7 +29,7 @@ import com.spring.app.security.social.SocialService;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+public class SecurityConfig{
 	
 	@Autowired
 	private SocialLoginFailureHandler socialLoginFailureHandler;
@@ -56,6 +57,10 @@ public class SecurityConfig {
 		return new DefaultHttpFirewall();
 	}
 	
+	org.springframework.security.web.access.AccessDeniedHandler accessDeniedHandler() {
+		return new AccessDeniedHandler();
+	}
+	
 	@Bean
 	WebSecurityCustomizer custom() {
 		return (web)->{
@@ -79,6 +84,9 @@ public class SecurityConfig {
 				.requestMatchers("/approval/**").hasAnyRole("ADMIN", "TRAINER")		
 				.requestMatchers("/user/getDocuments", "/user/getDocument").hasAuthority("APPROVE")
 				.requestMatchers("/user/department/**").hasRole("ADMIN")
+				.requestMatchers("board/**").hasAnyAuthority("APPROVE", "CANCEL")
+				.requestMatchers("qna/**").hasAnyAuthority("APPROVE", "CANCEL")
+				.requestMatchers("notice/**").hasAnyAuthority("APPROVE", "CANCEL")
 				.requestMatchers("/schedule/**").hasAuthority("APPROVE")
 				.requestMatchers("/approval/**").hasAuthority("APPROVE")
 				.requestMatchers("/user/mypage**").hasAnyRole("MEMBER", "TRAINER", "ADMIN")
@@ -93,6 +101,8 @@ public class SecurityConfig {
 		.sessionManagement(session -> {
 			session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		})
+		.exceptionHandling(ex -> ex
+				.accessDeniedHandler(accessDeniedHandler()))
 		.httpBasic(httpBasic -> httpBasic.disable())
 		.addFilter(new JwtLoginFilter(jwtTokenManager, authenticationConfiguration.getAuthenticationManager(), auditLogService))
 		.addFilter(new JwtAuthenticationFilter(jwtTokenManager, authenticationConfiguration.getAuthenticationManager()))

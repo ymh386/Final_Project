@@ -475,7 +475,6 @@ public class ChatController {
 	}
 	
 	@PostMapping("invite")
-
 	public String invite(@AuthenticationPrincipal UserVO userVO, @RequestParam("roomId") Long roomId,
 			             @RequestParam("username") String username, Model model, HttpServletRequest request) throws Exception {
 		

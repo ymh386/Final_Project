@@ -23,6 +23,4 @@ public class CommentVO {
     private Long parentCommentNum;  // 부모 댓글 번호 (null이면 최상위 댓글)
     
     private int commentDepth;       // 댓글 깊이 (0=최상위, 1=대댓글, ...)
-   
-    
 }
