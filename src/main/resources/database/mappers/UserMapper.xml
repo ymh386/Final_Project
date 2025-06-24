@@ -325,4 +325,7 @@
  		UPDATE USER SET PARENT=#{username}
  		WHERE DEPARTMENT_ID=#{departmentId} AND POSITION='DP0'
  	</update>
+ 	
+
+ 	
   </mapper>

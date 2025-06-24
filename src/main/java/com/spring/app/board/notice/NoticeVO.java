@@ -31,5 +31,7 @@ public class NoticeVO {
      */
     public boolean isAdmin() {
         return "admin".equals(this.userName);
+  
     }
+    
 }

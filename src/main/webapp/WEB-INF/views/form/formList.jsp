@@ -4,68 +4,74 @@
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <!DOCTYPE html>
 <html class="fontawesome-i2svg-active fontawesome-i2svg-complete">
-	<head>
-	<meta charset="UTF-8">
-	<title>Insert title here</title>
-		<c:import url="/WEB-INF/views/templates/header.jsp"></c:import>
-		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jstree@3.3.15/dist/themes/default/style.min.css" />
-		<script src="https://cdn.jsdelivr.net/npm/jstree@3.3.15/dist/jstree.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-		<script src="https://cdn.ckeditor.com/4.22.1/full-all/ckeditor.js"></script>
-	</head>
-	<body class="sb-nav-fixed d-flex flex-column min-vh-100">
-		<c:import url="/WEB-INF/views/templates/topbar.jsp"></c:import>
-		<div id="layoutSidenav" class="d-flex flex-grow-1">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<c:import url="/WEB-INF/views/templates/header.jsp"></c:import>
+
+<style>
+  .sports-topbar { 
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 64px !important;
+    border-bottom: 4px solid #ffe600 !important;
+    margin-top: 0 !important;
+    box-shadow: none !important;
+    z-index: 1100 !important;
+  }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jstree@3.3.15/dist/themes/default/style.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/jstree@3.3.15/dist/jstree.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<script src="https://cdn.ckeditor.com/4.22.1/full-all/ckeditor.js"></script>
+</head>
+<body class="sb-nav-fixed d-flex flex-column min-vh-100">
+	<c:import url="/WEB-INF/views/templates/topbar.jsp"></c:import>
+	<div id="layoutSidenav" class="d-flex flex-grow-1">
 		<c:import url="/WEB-INF/views/templates/sidebar.jsp"></c:import>
-			<div id="layoutSidenav_content" class="d-flex flex-column flex-grow-1">
-                <main class="flex-grow-1">
-                    <div class="container">
-							<!-- contents -->
-						<h2>양식 목록</h2>
-    
-						<c:if test="${not empty ar}">
-							<table class="table table-hover">
-								<thead>
-									<tr>
-										<th scope="col">양식번호</th>
-										<th scope="col">양식이름</th>
-										<th scope="col">제작일시</th>
+		<div id="layoutSidenav_content" class="d-flex flex-column flex-grow-1">
+			<main class="flex-grow-1">
+				<div class="container">
+					<!-- contents -->
+					<h2>양식 목록</h2>
+
+					<c:if test="${not empty ar}">
+						<table class="table table-hover">
+							<thead>
+								<tr>
+									<th scope="col">양식번호</th>
+									<th scope="col">양식이름</th>
+									<th scope="col">제작일시</th>
+								</tr>
+							</thead>
+							<tbody>
+								<c:forEach var="a" items="${ar}">
+									<tr class="table-row" onclick="location.href='./formDetail?formId=${a.formId}'">
+										<th scope="row">${a.formId}</th>
+										<td>${a.formTitle}</td>
+										<td>${a.createdAt}</td>
 									</tr>
-								</thead>
-								<tbody>
-									<c:forEach var="a" items="${ar}">
-										<tr class="table-row" onclick="location.href='./formDetail?formId=${a.formId}'">
-											<th scope="row">${a.formId}</th>
-											<td>${a.formTitle}</td>
-											<td>${a.createdAt}</td>
-										</tr>
-									</c:forEach>
-								</tbody>
-							</table>
-						</c:if>
-						<c:if test="${empty ar}">
-							<h3>조회된 양식이 없습니다.</h3>
-						</c:if>
-						<div>
-							<a href="./formRegister" class="btn">양식 등록</a>
-						</div>
-
-
-
+								</c:forEach>
+							</tbody>
+						</table>
+					</c:if>
+					<c:if test="${empty ar}">
+						<h3>조회된 양식이 없습니다.</h3>
+					</c:if>
+					<div>
+						<a href="./formRegister" class="btn">양식 등록</a>
+					</div>
 
 					<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
-					</div>
-				</main>
-			</div>
+				</div>
+			</main>
 		</div>
-					
-	
-	
-	
-	
-		<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
-		</div>
+	</div>
+
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-	</body>
+</body>
 </html>

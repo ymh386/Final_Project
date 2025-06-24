@@ -26,5 +26,13 @@ public class QnaVO {
     /** 같은 ref 그룹 내 순서 */
     private Long boardStep;
     /** 비밀글 여부 (0=공개, 1=비밀) */
-    private Integer isSecret;
+    private Boolean isSecret;
+    /** 비밀글 비밀번호 */
+    private String secretPassword;
+
 }
+
+    
+		
+	
+

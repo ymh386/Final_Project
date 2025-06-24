@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.board.comment.CommentVO;
@@ -27,9 +28,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * 게시판 컨트롤러 (CRUD)
- */
 @Slf4j
 @Controller
 @RequestMapping("/board")
@@ -104,30 +102,43 @@ public class BoardController {
         }
     }
 
-    /** 상세 보기 (비밀글 처리) */
     @GetMapping("/detail")
     public String detail(
             @RequestParam("boardNum") Long boardNum,
             @RequestParam(value = "inputPassword", required = false) String inputPassword,
             @AuthenticationPrincipal UserVO user,
             Model m) throws Exception {
+
         BoardVO detail = boardService.getDetail(new BoardVO(boardNum));
         boolean canRead = false;
         boolean isOwnerOrAdmin = false;
-        boolean isAdmin = user != null && user.getRoleList() != null && user.getRoleList().contains("ADMIN");
+
+        boolean isAdmin = false;
+        String currentUserName = null;
+        if (user != null && user.getRoleList() != null) {
+            // ROLE_ADMIN 형태로 체크 (대소문자 맞춰야 함)
+            isAdmin = user.getRoleList().stream()
+                .anyMatch(role -> "ROLE_ADMIN".equals(role.getRoleName()));
+            currentUserName = user.getUsername();
+        }
 
         if (detail != null) {
-            // 비밀글 아니면 공개
             if (detail.getIsSecret() == null || !detail.getIsSecret()) {
                 canRead = true;
-            }
-            // 비밀글: 글쓴이, 관리자, 비번 일치자만
-            else if (user != null && (detail.getUserName().equals(user.getUsername()) || isAdmin)) {
+            } else if (isAdmin) {  // 관리자 접근 허용
+                canRead = true;
+                isOwnerOrAdmin = true;
+            } else if (currentUserName != null && detail.getUserName().equals(currentUserName)) {
                 canRead = true;
                 isOwnerOrAdmin = true;
             } else if (inputPassword != null && inputPassword.equals(detail.getSecretPassword())) {
                 canRead = true;
             }
+        }
+
+        // isOwnerOrAdmin 재설정 (안정성 위해)
+        if (user != null) {
+            isOwnerOrAdmin = isAdmin || (currentUserName != null && currentUserName.equals(detail.getUserName()));
         }
 
         long likeCount = 0;
@@ -138,57 +149,95 @@ public class BoardController {
             iq.setType("LIKE");
             likeCount = boardService.getInteractionCount(iq);
             if (user != null) {
-                iq.setUserName(user.getUsername());
+                iq.setUserName(currentUserName);
                 isLiked = boardService.isLiked(iq);
             }
         }
 
+        List<CommentVO> comments = boardService.getCommentList(new BoardVO(boardNum));
+
+        m.addAttribute("userName", currentUserName);
+        m.addAttribute("roleList", user != null ? user.getRoleList() : null);
+
         m.addAttribute("detail", detail);
         m.addAttribute("files", boardService.getFileList(new BoardVO(boardNum)));
-        m.addAttribute("comments", boardService.getCommentList(new BoardVO(boardNum)));
+        m.addAttribute("comments", comments);
         m.addAttribute("likeCount", likeCount);
         m.addAttribute("isLiked", isLiked);
         m.addAttribute("canRead", canRead);
         m.addAttribute("isOwnerOrAdmin", isOwnerOrAdmin);
         m.addAttribute("inputPassword", inputPassword);
+        m.addAttribute("isAdmin", isAdmin);
 
         return "board/detail";
     }
 
-    /** 수정 폼 */
+    /** 게시글 상세 (POST) - 비밀번호 입력 폼 제출 */
+    @PostMapping("/detail")
+    public String detailPost(
+            @RequestParam("boardNum") Long boardNum,
+            @RequestParam("inputPassword") String inputPassword,
+            RedirectAttributes rttr) {
+
+        rttr.addAttribute("boardNum", boardNum);
+        rttr.addAttribute("inputPassword", inputPassword);
+
+        return "redirect:/board/detail";
+    }
+
+    /** 게시글 수정 폼 */
     @GetMapping("/update")
     public String updateForm(
             @RequestParam("boardNum") Long boardNum,
             @AuthenticationPrincipal UserVO user,
             Model m) throws Exception {
+
         BoardVO vo = boardService.getDetail(new BoardVO(boardNum));
         if (vo == null) throw new RuntimeException("게시글을 찾을 수 없습니다.");
-        boolean isAdmin = user != null && user.getRoleList() != null && user.getRoleList().contains("ADMIN");
+
+        boolean isAdmin = false;
+        if (user != null && user.getRoleList() != null) {
+            isAdmin = user.getRoleList().stream()
+                        .anyMatch(role -> "ROLE_ADMIN".equals(role.getRoleName()));
+        }
+
         if (user == null || (!vo.getUserName().equals(user.getUsername()) && !isAdmin)) {
             throw new RuntimeException("수정 권한이 없습니다.");
         }
+
         m.addAttribute("board", vo);
         return "board/update";
     }
-
-    /** 수정 처리 */
     @PostMapping("/update")
     public String update(
             @ModelAttribute BoardVO boardVO,
             @RequestParam(value = "files", required = false) MultipartFile[] files,
             @RequestParam(value = "isSecret", required = false) Boolean isSecret,
             @RequestParam(value = "secretPassword", required = false) String secretPassword,
+            @RequestParam(value = "category", required = true) Long category,
             @AuthenticationPrincipal UserVO user,
+
             RedirectAttributes rttr, HttpServletRequest request) throws Exception {
+
         if (user == null) throw new RuntimeException("로그인이 필요합니다.");
+
         BoardVO original = boardService.getDetail(new BoardVO(boardVO.getBoardNum()));
-        boolean isAdmin = user.getRoleList() != null && user.getRoleList().contains("ADMIN");
+
+        boolean isAdmin = false;
+        if (user.getRoleList() != null) {
+            isAdmin = user.getRoleList().stream()
+                     .anyMatch(role -> "ROLE_ADMIN".equals(role.getRoleName()));
+        }
+
         if (!original.getUserName().equals(user.getUsername()) && !isAdmin) {
             throw new RuntimeException("수정 권한이 없습니다.");
         }
+
         boardVO.setUserName(original.getUserName());
         boardVO.setIsSecret(isSecret != null && isSecret);
-        boardVO.setSecretPassword(boardVO.getIsSecret() != null && boardVO.getIsSecret() ? secretPassword : null);
+        boardVO.setSecretPassword(isSecret != null && isSecret ? secretPassword : null);
+        boardVO.setCategory(category);
+
         int result = boardService.update(boardVO, files);
         if (result > 0) {
         	// 로그/감사 기록용
@@ -208,18 +257,28 @@ public class BoardController {
         }
     }
 
-    /** 삭제 처리 */
     @PostMapping("/delete")
     public String delete(
             @RequestParam("boardNum") Long boardNum,
             @AuthenticationPrincipal UserVO user,
+
             RedirectAttributes rttr, HttpServletRequest request) throws Exception {
+
         if (user == null) throw new RuntimeException("로그인이 필요합니다.");
+
         BoardVO vo = boardService.getDetail(new BoardVO(boardNum));
-        boolean isAdmin = user.getRoleList() != null && user.getRoleList().contains("ADMIN");
-        if (!vo.getUserName().equals(user.getUsername()) && !isAdmin) {
+
+        boolean isAdmin = false;
+        if (user.getRoleList() != null) {
+            isAdmin = user.getRoleList().stream()
+                     .anyMatch(role -> "ROLE_ADMIN".equals(role.getRoleName()));
+        }
+        boolean isOwner = vo != null && user.getUsername().equals(vo.getUserName());
+
+        if (!isOwner && !isAdmin) {
             throw new RuntimeException("삭제 권한이 없습니다.");
         }
+      
         int result = boardService.delete(vo);
         
         if(result > 0) {
@@ -233,11 +292,11 @@ public class BoardController {
 			        request
 			    );
         }
-        
+
         return "redirect:/board/list";
     }
 
-    // ====== 이하 기존 좋아요/댓글/파일 다운로드 등 부가기능은 그대로 ======
+
     @GetMapping("/checkSecret")
     @ResponseBody
     public boolean checkSecret(@RequestParam("boardNum") Long boardNum) throws Exception {
@@ -281,12 +340,15 @@ public class BoardController {
             HttpServletRequest request,
             @AuthenticationPrincipal UserVO user,
             RedirectAttributes rttr) throws Exception {
+
         if (user == null) throw new RuntimeException("로그인이 필요합니다.");
+
         Long boardNum = Long.valueOf(request.getParameter("boardNum"));
         InteractionVO vo = new InteractionVO();
         vo.setBoardNum(boardNum);
         vo.setUserName(user.getUsername());
         vo.setType("LIKE");
+
         int result = boardService.addInteraction(vo);
         
         if(result > 0) {   
@@ -312,7 +374,7 @@ public class BoardController {
 			        request
 			    );
         }
-        
+
         rttr.addAttribute("boardNum", boardNum);
         return "redirect:/board/detail";
     }
@@ -323,12 +385,15 @@ public class BoardController {
             HttpServletRequest request,
             @AuthenticationPrincipal UserVO user,
             RedirectAttributes rttr) throws Exception {
+
         if (user == null) throw new RuntimeException("로그인이 필요합니다.");
+
         Long boardNum = Long.valueOf(request.getParameter("boardNum"));
         InteractionVO vo = new InteractionVO();
         vo.setBoardNum(boardNum);
         vo.setUserName(user.getUsername());
         vo.setType("LIKE");
+
         int result = boardService.removeInteraction(vo);
         
         if(result > 0) {
@@ -348,18 +413,26 @@ public class BoardController {
         return "redirect:/board/detail";
     }
 
-    /** 댓글 등록 */
+    /** 댓글 등록 (빈 댓글 등록 방지) */
     @PostMapping("/addComment")
     public String addComment(
             @RequestParam("boardNum") Long boardNum,
             @RequestParam("commentContents") String commentContents,
             @AuthenticationPrincipal UserVO user,
+
             RedirectAttributes rttr, HttpServletRequest request) throws Exception {
+
         if (user == null) throw new RuntimeException("로그인이 필요합니다.");
+
+        if (commentContents == null || commentContents.trim().isEmpty()) {
+            throw new RuntimeException("댓글 내용을 입력해주세요.");
+        }
+
         CommentVO vo = new CommentVO();
         vo.setBoardNum(boardNum);
-        vo.setCommentContents(commentContents);
+        vo.setCommentContents(commentContents.trim());
         vo.setUserName(user.getUsername());
+
         int result = boardService.addComment(vo);
         
         if(result > 0) {        	
@@ -385,23 +458,53 @@ public class BoardController {
 			    );
         	
         }
-        
+
         rttr.addAttribute("boardNum", boardNum);
         return "redirect:/board/detail";
     }
 
-    /** 댓글 삭제 */
+    @PostMapping("/addReplyComment")
+    public String addReplyComment(@ModelAttribute CommentVO commentVO, @AuthenticationPrincipal UserDetails userDetails) throws Exception {
+        if (userDetails == null) {
+            return "redirect:/users/login";
+        }
+        commentVO.setUserName(userDetails.getUsername());
+
+        // 댓글 답글 로직 처리
+        boardService.addReplyComment(commentVO);
+
+        return "redirect:/board/detail?boardNum=" + commentVO.getBoardNum();
+    }
+
     @PostMapping("/deletecomment")
-    @ResponseBody
-    public List<CommentVO> deleteComment(
+    public String deleteComment(
             @RequestParam("commentNum") Long commentNum,
-            @RequestParam("boardNum") Long boardNum, HttpServletRequest request) throws Exception {
+            @RequestParam("boardNum") Long boardNum, HttpServletRequest request, @AuthenticationPrincipal UserVO user,
+            RedirectAttributes rttr) throws Exception {
         CommentVO vo = new CommentVO();
         vo.setCommentNum(commentNum);
         vo.setBoardNum(boardNum);
-        int result = boardService.deleteComment(vo);
-        
-        if(result > 0) {
+
+        if (user == null) throw new RuntimeException("로그인이 필요합니다.");
+
+        CommentVO comment = boardService.getCommentById(commentNum);
+
+        boolean isAdmin = false;
+        if (user.getRoleList() != null) {
+            isAdmin = user.getRoleList().stream()
+                          .anyMatch(role -> "ROLE_ADMIN".equals(role.getRoleName()));
+        }
+
+        boolean isOwner = comment.getUserName().equals(user.getUsername());
+
+        if (!isOwner && !isAdmin) {
+            throw new RuntimeException("댓글 삭제 권한이 없습니다.");
+        }
+
+       int result = boardService.deleteComment(comment);
+        boardService.decreaseCommentCount(boardNum);
+      
+          if(result > 0) {
         	// 로그/감사 기록용
         	auditLogService.log(
 					vo.getUserName(),
@@ -413,8 +516,10 @@ public class BoardController {
 			        request
 			    );
         }
-        
-        return boardService.getCommentList(new BoardVO(boardNum));
+
+        rttr.addAttribute("boardNum", boardNum);
+        return "redirect:/board/detail";
+
     }
 
     /** 파일 다운로드 */

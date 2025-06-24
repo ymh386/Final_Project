@@ -124,6 +124,15 @@ public class BoardServiceImpl implements BoardService {
         boardDAO.increaseCommentCount(vo.getBoardNum());
         return cnt;
     }
+    
+    @Override
+    public void addReplyComment(CommentVO commentVO) throws Exception {
+        // 답글 작성에 필요한 로직 구현
+        boardDAO.addComment(commentVO);
+
+        // 필요시 댓글 수 증가 등 후처리
+        boardDAO.increaseCommentCount(commentVO.getBoardNum());
+    }
 
     @Override
     public List<CommentVO> getCommentList(BoardVO boardVO) throws Exception {
@@ -151,4 +160,16 @@ public class BoardServiceImpl implements BoardService {
             && stored.getSecretPassword() != null
             && stored.getSecretPassword().equals(boardVO.getSecretPassword());
     }
-}
+
+    @Override
+    public CommentVO getCommentById(Long commentNum) throws Exception {
+        return boardDAO.getCommentById(commentNum);
+    }
+    @Override
+    public void decreaseCommentCount(Long boardNum) throws Exception {
+        boardDAO.decreaseCommentCount(boardNum);
+    }
+    
+}  
+
+

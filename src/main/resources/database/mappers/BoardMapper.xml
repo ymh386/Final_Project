@@ -109,7 +109,7 @@
   </update>
 
   <!-- 7) 게시글 삭제 -->
-  <delete id="delete" parameterType="long">
+  <delete id="delete" parameterType="com.spring.app.board.BoardVO">
     DELETE FROM BOARD WHERE BOARD_NUM = #{boardNum}
   </delete>
 
@@ -130,16 +130,21 @@
   </update>
 
   <!-- 댓글 목록 조회 -->
-  <select id="getCommentList" parameterType="com.spring.app.board.BoardVO" resultType="com.spring.app.board.comment.CommentVO">
-    SELECT 
-      COMMENT_NUM, 
-      BOARD_NUM, 
-      USERNAME, 
-      COMMENT_DATE, 
-      COMMENT_CONTENTS
+<select id="getCommentList" parameterType="long" resultType="com.spring.app.board.comment.CommentVO">
+  SELECT 
+    COMMENT_NUM, BOARD_NUM, USERNAME, COMMENT_CONTENTS, COMMENT_DATE, PARENT_COMMENT_NUM, COMMENT_DEPTH
+  FROM COMMENTS
+  WHERE BOARD_NUM = #{boardNum}
+  ORDER BY
+    CASE WHEN PARENT_COMMENT_NUM IS NULL THEN COMMENT_NUM ELSE PARENT_COMMENT_NUM END ASC,
+    COMMENT_DEPTH ASC,
+    COMMENT_DATE ASC
+</select>
+
+    <select id="getCommentById" parameterType="long" resultType="com.spring.app.board.comment.CommentVO">
+    SELECT COMMENT_NUM, BOARD_NUM, USERNAME, COMMENT_DATE, COMMENT_CONTENTS
     FROM COMMENTS
-    WHERE BOARD_NUM = #{boardNum}
-    ORDER BY COMMENT_DATE ASC
+    WHERE COMMENT_NUM = #{commentNum}
   </select>
 
   <!-- 11) 댓글 수 증가 -->
@@ -206,7 +211,7 @@
   </select>
 
   <!-- 24) 비밀글 여부 확인 -->
-<select id="checkSecret" parameterType="long" resultType="boolean">
+<select id="checkSecret" parameterType="long" resultType="com.spring.app.board.BoardVO">
   SELECT COUNT(*) > 0 FROM BOARD WHERE BOARD_NUM = #{boardNum} AND IS_SECRET = 1
 </select>
 
