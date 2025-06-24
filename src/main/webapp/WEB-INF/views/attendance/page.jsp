@@ -3,6 +3,9 @@
 <%@ taglib prefix="sec"     uri="http://www.springframework.org/security/tags" %>
 <!DOCTYPE html>
 <html>
+<script async defer
+  src="https://maps.googleapis.com/maps/api/js?key=${googleMapApiKey}&callback=initMap">
+</script>
 <head>
     <meta charset="UTF-8">
     <title>출퇴근 관리</title>
@@ -65,6 +68,7 @@
         <button id="checkInBtn" class="hidden">출근</button>
         <button id="checkOutBtn" class="hidden">퇴근</button>
     </div>
+    
 
     <table id="attendanceList">
         <thead>
@@ -79,6 +83,9 @@
             <!-- JS가 서버로부터 받은 근태 목록을 여기에 채웁니다 -->
         </tbody>
     </table>
+    
+    <div id="map" style="width: 50%; height: 300px; margin-top: 20px;"></div>
+    
 
     <script>
         (function() {
@@ -102,8 +109,25 @@
             // 출근 버튼 클릭 이벤트
             checkInBtn.addEventListener('click', () => {
                 if (checkInBtn.disabled) return;
+
+
+                navigator.geolocation.getCurrentPosition(function(pos) {
+
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+
                 const url = contextPath + '/attendance/checkIn?username=' + encodeURIComponent(username);
-                fetch(url, { method: 'POST' })
+                fetch(url, {
+                     method: 'POST',
+                     headers:{ 'Content-type': 'application/json' },
+                     body: JSON.stringify({
+                        username: username,
+                        lat: lat,
+                        lng: lng
+                     })
+
+
+                 })
                 .then(res => {
                     if (!res.ok) throw new Error('출근 처리 실패');
                     return res.json();
@@ -119,8 +143,9 @@
                     // 버튼 표시/숨김 및 활성화 상태 업데이트
                     updateButtonVisibility();
                 })
-                .catch(err => alert(err.message));
+                .catch(err => alert(err.message));	
             });
+        });
 
             // 퇴근 버튼 클릭 이벤트
             checkOutBtn.addEventListener('click', () => {
@@ -346,6 +371,45 @@
                 return timeStr.length > 5 ? timeStr.substring(0,5) : timeStr;
             }
         })();
+        
+        
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 37.476502, lng: 126.880193 }, // KM타워 근처
+                zoom: 16,
+            });
+
+            // 내 위치 마커
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                const myPos = {
+                    lat: pos.coords.latitude,
+                    lng: pos.coords.longitude
+                };
+
+                new google.maps.Marker({
+                    position: myPos,
+                    map: map,
+                    label: "나",
+                    icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                });
+
+                map.setCenter(myPos);
+            });
+
+            // 회사 위치 마커
+            const officePos = { lat: 37.476502, lng: 126.880193 };
+            new google.maps.Marker({
+                position: officePos,
+                map: map,
+                label: "회사",
+                icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+            });
+        }
+
+        // 전역 등록 (IE 대응)
+        window.initMap = initMap;
+        
+        
     </script>
 </body>
 </html>

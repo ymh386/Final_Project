@@ -24,6 +24,12 @@ public interface AttendanceDAO {
     public AttendanceVO selectById(@Param("attendanceId") Long attendanceId);
     
     public void updateAttendance(AttendanceVO Vo);
+    
+    // 체크아웃 하지 않은 출석 기록 조회
+    List<AttendanceVO> selectUncheckedOutAttendances(Map<String, Object> params);
+    // 자동 결석 처리
+    int updateToAutoAbsent(Map<String, Object> params);
+
 	
 	
 }

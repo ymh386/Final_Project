@@ -87,7 +87,6 @@
                 <tr>
                     <th>신고번호</th>
                     <th>비품명</th>
-                    <th>위치</th>
                     <th>신고자</th>
                     <th>신고일시</th>
                     <th>상태</th>
@@ -100,7 +99,6 @@
                     <tr>
                         <td>#${report.reportId}</td>
                         <td>${report.equipmentName}</td>
-                        <td>${report.equipmentLocation}</td>
                         <td>${report.username}</td>
                         <td>${report.reportDateStr}</td>
                         <td>${report.faultStatus}</td>
