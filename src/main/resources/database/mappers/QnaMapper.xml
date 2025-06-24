@@ -41,12 +41,13 @@
   </insert>
 
   <!-- 2) 답글 작성 전 같은 그룹 내 step 밀어내기 -->
-  <update id="updateStepForReply" parameterType="com.spring.app.board.qna.QnaVO">
-    UPDATE QNA
-      SET BOARD_STEP = BOARD_STEP + 1
-    WHERE BOARD_REF = #{boardRef}
-      AND BOARD_STEP > #{boardStep}
-  </update>
+<update id="updateStepForReply" parameterType="map">
+  UPDATE QNA
+  SET BOARD_STEP = BOARD_STEP + 1
+  WHERE BOARD_REF = #{boardRef}
+    AND BOARD_STEP > #{boardStep}
+</update>
+
 
   <!-- 3) 전체 게시물 수 조회 -->
   <select id="selectQnaCount" resultType="int">
@@ -101,5 +102,15 @@
     DELETE FROM QNA
     WHERE BOARD_NUM = #{boardNum}
   </delete>
+  
+  <select id="getList" resultType="com.spring.app.board.qna.QnaVO">
+  SELECT
+    board_num, user_name, board_title, board_contents,
+    board_ref, board_step, board_depth,
+    board_date, is_secret
+  FROM QNA
+  ORDER BY board_ref ASC, board_step ASC
+</select>
+  
 
 </mapper>

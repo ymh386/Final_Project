@@ -72,7 +72,7 @@ public interface BoardService {
 
 	void decreaseCommentCount(Long boardNum) throws Exception;
 
-	
+	 void addReplyComment(CommentVO commentVO) throws Exception;
 
 
 

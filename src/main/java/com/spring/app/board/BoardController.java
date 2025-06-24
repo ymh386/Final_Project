@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.spring.app.board.comment.CommentVO;
 import com.spring.app.board.interaction.InteractionVO;
@@ -196,6 +197,7 @@ public class BoardController {
             @RequestParam(value = "files", required = false) MultipartFile[] files,
             @RequestParam(value = "isSecret", required = false) Boolean isSecret,
             @RequestParam(value = "secretPassword", required = false) String secretPassword,
+            @RequestParam(value = "category", required = true) Long category,
             @AuthenticationPrincipal UserVO user,
             RedirectAttributes rttr) throws Exception {
 
@@ -216,6 +218,7 @@ public class BoardController {
         boardVO.setUserName(original.getUserName());
         boardVO.setIsSecret(isSecret != null && isSecret);
         boardVO.setSecretPassword(isSecret != null && isSecret ? secretPassword : null);
+        boardVO.setCategory(category);
 
         int result = boardService.update(boardVO, files);
         if (result > 0) {
@@ -354,6 +357,20 @@ public class BoardController {
         rttr.addAttribute("boardNum", boardNum);
         return "redirect:/board/detail";
     }
+
+    @PostMapping("/addReplyComment")
+    public String addReplyComment(@ModelAttribute CommentVO commentVO, @AuthenticationPrincipal UserDetails userDetails) throws Exception {
+        if (userDetails == null) {
+            return "redirect:/users/login";
+        }
+        commentVO.setUserName(userDetails.getUsername());
+
+        // 댓글 답글 로직 처리
+        boardService.addReplyComment(commentVO);
+
+        return "redirect:/board/detail?boardNum=" + commentVO.getBoardNum();
+    }
+
     @PostMapping("/deletecomment")
     public String deleteComment(
             @RequestParam("commentNum") Long commentNum,

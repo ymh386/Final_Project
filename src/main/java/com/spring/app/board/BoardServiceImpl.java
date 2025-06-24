@@ -124,6 +124,15 @@ public class BoardServiceImpl implements BoardService {
         boardDAO.increaseCommentCount(vo.getBoardNum());
         return cnt;
     }
+    
+    @Override
+    public void addReplyComment(CommentVO commentVO) throws Exception {
+        // 답글 작성에 필요한 로직 구현
+        boardDAO.addComment(commentVO);
+
+        // 필요시 댓글 수 증가 등 후처리
+        boardDAO.increaseCommentCount(commentVO.getBoardNum());
+    }
 
     @Override
     public List<CommentVO> getCommentList(BoardVO boardVO) throws Exception {

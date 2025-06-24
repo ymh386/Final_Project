@@ -9,6 +9,9 @@ public interface QnaService {
 
     /** 답글 작성 */
     void reply(QnaVO vo) throws Exception;
+    
+    /** 답글 작성 전 같은 그룹 내 step 밀어내기 */
+    void updateStepForReply(Long boardRef, Long boardStep) throws Exception;
 
     /** 페이징된 목록 조회 */
     Map<String, Object> getList(int page, int pageSize) throws Exception;

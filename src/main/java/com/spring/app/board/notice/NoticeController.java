@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-
 import com.spring.app.board.BoardService;
 import com.spring.app.board.interaction.InteractionVO;
 import com.spring.app.home.util.Pager;
@@ -40,7 +39,7 @@ public class NoticeController {
         NoticeVO noticeVO = new NoticeVO();
         noticeVO.setBoardNum(boardNum);
 
-        noticeService.hitUpdate(noticeVO);
+        noticeService.hitUpdate(noticeVO);  // 조회수 증가
         NoticeVO detail = noticeService.getDetail(noticeVO);
         model.addAttribute("detail", detail);
         return "notice/detail";
@@ -57,6 +56,7 @@ public class NoticeController {
         return "notice/add";
     }
 
+    // 4) 등록 처리
     @PostMapping("/add")
     public String add(NoticeVO noticeVO,
                       @AuthenticationPrincipal UserVO user,
@@ -71,7 +71,7 @@ public class NoticeController {
         return "redirect:/notice/list";
     }
 
-    // 6) 수정 폼 (GET)
+    // 5) 수정 폼 (GET) - 관리자만 접근
     @GetMapping("/update")
     public String updateForm(@RequestParam("boardNum") Long boardNum,
                              @AuthenticationPrincipal UserVO user,
@@ -88,7 +88,7 @@ public class NoticeController {
         return "notice/update";
     }
 
-    // 6) 수정 처리 (POST)
+    // 6) 수정 처리 (POST) - 관리자만 접근
     @PostMapping("/update")
     public String update(NoticeVO noticeVO,
                          @AuthenticationPrincipal UserVO user,
@@ -102,7 +102,6 @@ public class NoticeController {
         return "redirect:/notice/detail?boardNum=" + noticeVO.getBoardNum();
     }
 
-    // 7) 삭제 처리 (POST)
     @PostMapping("/delete")
     public String delete(@RequestParam("boardNum") Long boardNum,
                          @AuthenticationPrincipal UserVO user,
@@ -115,12 +114,20 @@ public class NoticeController {
 
         NoticeVO vo = new NoticeVO();
         vo.setBoardNum(boardNum);
-        vo.setUserName(user.getUsername()); // 관리자 이름 세팅 (MyBatis 조건용)
+        vo.setUserName(user.getUsername());
 
-        noticeService.delete(vo);
+        int deletedCount = noticeService.delete(vo);  // 반환값으로 삭제 성공 여부 받아오기
+
+        if (deletedCount == 0) {
+            model.addAttribute("msg", "삭제할 공지사항을 찾을 수 없거나 삭제 권한이 없습니다.");
+            model.addAttribute("path", "/notice/list");
+            return "commons/result";
+        }
+
         return "redirect:/notice/list";
     }
 
+    // 8) 좋아요 등 인터랙션 추가
     @PostMapping("/addInteraction")
     public String addInteraction(@RequestParam("noticeNum") Long noticeNum,
                                  @AuthenticationPrincipal UserVO user) throws Exception {
@@ -137,6 +144,7 @@ public class NoticeController {
         return "redirect:/notice/detail?boardNum=" + noticeNum;
     }
 
+    // 9) 인터랙션 제거
     @PostMapping("/removeInteraction")
     public String removeInteraction(@RequestParam("noticeNum") Long noticeNum,
                                     @AuthenticationPrincipal UserVO user) throws Exception {
@@ -153,7 +161,7 @@ public class NoticeController {
         return "redirect:/notice/detail?boardNum=" + noticeNum;
     }
 
-    /** 관리자 여부 체크 메서드 (중복 제거) */
+    // 관리자 여부 체크 메서드 (중복 제거)
     private boolean isAdmin(UserVO user) {
         return user != null && user.getRoleList() != null &&
                user.getRoleList().stream()
