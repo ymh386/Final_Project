@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.spring.app.auditLog.AuditLogDAO">
+  
+  	<select id="getList" resultType="AuditLogVO">
+  		SELECT *
+  		  FROM AUDIT_LOG
+  		 <where>
+  		 	<if test="searchWord != null and searchWord != ''">
+		        <choose>
+		            <when test="searchField == 'username'">
+		                USERNAME LIKE CONCAT('%', #{searchWord}, '%')
+		            </when>
+		            <when test="searchField == 'ACTION_TYPE'">
+		                ACTION_TYPE LIKE CONCAT('%', #{searchWord}, '%')
+		            </when>
+		            <when test="searchField == 'IP_ADDRESS'">
+		                IP_ADDRESS LIKE CONCAT('%', #{searchWord}, '%')
+		            </when>
+		        </choose>
+		    </if>
+  		 </where>
+  		 ORDER BY CREATED_AT DESC
+    	 LIMIT #{startRow}, #{pageSize}
+  	</select>
+  	
+  	<select id="getAuditLogCount" resultType="java.lang.Long">
+  		SELECT COUNT(*)
+  		  FROM AUDIT_LOG
+  		 <where>
+        	<if test="searchWord != null and searchWord != ''">
+		        <choose>
+		            <when test="searchField == 'username'">
+		                USERNAME LIKE CONCAT('%', #{searchWord}, '%')
+		            </when>
+		            <when test="searchField == 'ACTION_TYPE'">
+		                ACTION_TYPE LIKE CONCAT('%', #{searchWord}, '%')
+		            </when>
+		            <when test="searchField == 'IP_ADDRESS'">
+		                IP_ADDRESS LIKE CONCAT('%', #{searchWord}, '%')
+		            </when>
+		        </choose>
+		    </if>
+  		 </where>
+  	</select>
+  
+  	<insert id="addAuditLog" parameterType="AuditLogVO">
+  		INSERT INTO AUDIT_LOG (
+  			   USERNAME,
+  			   ACTION_TYPE,
+  			   TARGET_TABLE,
+  			   TARGET_ID,
+  			   DESCRIPTION,
+  			   IP_ADDRESS,
+  			   USER_AGENT,
+  			   CREATED_AT
+  		) VALUES (
+  			   #{username},
+  			   #{actionType},
+  			   #{targetTable},
+  			   #{targetId},
+  			   #{description},
+  			   #{ipAddress},
+  			   #{userAgent},
+  			   #{createdAt}
+  		)
+  	</insert>
+  
+  </mapper>

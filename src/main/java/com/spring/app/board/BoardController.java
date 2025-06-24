@@ -16,10 +16,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.board.comment.CommentVO;
 import com.spring.app.board.interaction.InteractionVO;
 import com.spring.app.home.util.Pager;
 import com.spring.app.user.UserVO;
+import com.spring.app.websocket.NotificationManager;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,6 +36,12 @@ public class BoardController {
     @Autowired
     private BoardService boardService;
 
+    @Autowired
+    private NotificationManager notificationManager;
+    
+    @Autowired
+    private AuditLogService auditLogService;
+    
     @Value("${board.file.path}")
     private String uploadDir;
 
@@ -69,7 +77,7 @@ public class BoardController {
             @RequestParam(value = "isSecret", required = false) Boolean isSecret,
             @RequestParam(value = "secretPassword", required = false) String secretPassword,
             @AuthenticationPrincipal UserVO user,
-            RedirectAttributes rttr) throws Exception {
+            RedirectAttributes rttr, HttpServletRequest request) throws Exception {
         if (user == null) throw new RuntimeException("로그인이 필요합니다.");
         boardVO.setUserName(user.getUsername());
         boardVO.setIsSecret(isSecret != null && isSecret);
@@ -78,6 +86,15 @@ public class BoardController {
 
         int result = boardService.add(boardVO, files);
         if (result > 0) {
+        	// 로그/감사 기록용
+			auditLogService.log(
+					boardVO.getUserName(),
+			        "CREATE_BOARD",
+			        "BOARD",
+			        boardVO.getBoardNum().toString(),
+			        boardVO.getUserName() + "이 게시글 작성",
+			        request
+			    );
             rttr.addAttribute("boardNum", boardVO.getBoardNum());
             return "redirect:/board/detail";
         } else {
@@ -199,7 +216,8 @@ public class BoardController {
             @RequestParam(value = "secretPassword", required = false) String secretPassword,
             @RequestParam(value = "category", required = true) Long category,
             @AuthenticationPrincipal UserVO user,
-            RedirectAttributes rttr) throws Exception {
+
+            RedirectAttributes rttr, HttpServletRequest request) throws Exception {
 
         if (user == null) throw new RuntimeException("로그인이 필요합니다.");
 
@@ -222,6 +240,16 @@ public class BoardController {
 
         int result = boardService.update(boardVO, files);
         if (result > 0) {
+        	// 로그/감사 기록용
+        	auditLogService.log(
+					boardVO.getUserName(),
+			        "UPDATE_BOARD",
+			        "BOARD",
+			        boardVO.getBoardNum().toString(),
+			        boardVO.getUserName() + "이 게시글 수정",
+			        request
+			    );
+            rttr.addAttribute("boardNum", boardVO.getBoardNum());
             rttr.addAttribute("boardNum", boardVO.getBoardNum());
             return "redirect:/board/detail";
         } else {
@@ -233,7 +261,8 @@ public class BoardController {
     public String delete(
             @RequestParam("boardNum") Long boardNum,
             @AuthenticationPrincipal UserVO user,
-            RedirectAttributes rttr) throws Exception {
+
+            RedirectAttributes rttr, HttpServletRequest request) throws Exception {
 
         if (user == null) throw new RuntimeException("로그인이 필요합니다.");
 
@@ -249,8 +278,20 @@ public class BoardController {
         if (!isOwner && !isAdmin) {
             throw new RuntimeException("삭제 권한이 없습니다.");
         }
-
-        boardService.delete(vo);
+      
+        int result = boardService.delete(vo);
+        
+        if(result > 0) {
+        	// 로그/감사 기록용
+        	auditLogService.log(
+					vo.getUserName(),
+			        "DELETE_BOARD",
+			        "BOARD",
+			        vo.getBoardNum().toString(),
+			        vo.getUserName() + "이 게시글 삭제",
+			        request
+			    );
+        }
 
         return "redirect:/board/list";
     }
@@ -307,7 +348,32 @@ public class BoardController {
         vo.setBoardNum(boardNum);
         vo.setUserName(user.getUsername());
         vo.setType("LIKE");
-        boardService.addInteraction(vo);
+
+        int result = boardService.addInteraction(vo);
+        
+        if(result > 0) {   
+        	
+        	//좋아요 알림
+        	BoardVO boardVO = new BoardVO();
+        	boardVO.setBoardNum(boardNum);
+        	boardVO = boardService.getDetail(boardVO);
+        	
+        	//자기자신 제외
+        	if(!user.getUsername().equals(boardVO.getUserName())) {
+        		notificationManager.likeNotification(vo, boardVO);	
+        	}
+        	
+        	// 로그/감사 기록용
+        	auditLogService.log(
+					vo.getUserName(),
+			        "LIKE",
+			        "BOARD_INTERACTION",
+			        vo.getBoardNum().toString() + ", " + vo.getUserName(),
+			        vo.getUserName() + "이 "
+			        + vo.getBoardNum() + "번 게시글에 좋아요함",
+			        request
+			    );
+        }
 
         rttr.addAttribute("boardNum", boardNum);
         return "redirect:/board/detail";
@@ -327,8 +393,22 @@ public class BoardController {
         vo.setBoardNum(boardNum);
         vo.setUserName(user.getUsername());
         vo.setType("LIKE");
-        boardService.removeInteraction(vo);
 
+        int result = boardService.removeInteraction(vo);
+        
+        if(result > 0) {
+        	// 로그/감사 기록용
+        	auditLogService.log(
+					vo.getUserName(),
+			        "LIKE_CANCEL",
+			        "BOARD_INTERACTION",
+			        vo.getBoardNum().toString() + ", " + vo.getUserName(),
+			        vo.getUserName() + "이 "
+			        + vo.getBoardNum() + "번 게시글의 좋아요취소",
+			        request
+			    );
+        }
+        
         rttr.addAttribute("boardNum", boardNum);
         return "redirect:/board/detail";
     }
@@ -339,7 +419,8 @@ public class BoardController {
             @RequestParam("boardNum") Long boardNum,
             @RequestParam("commentContents") String commentContents,
             @AuthenticationPrincipal UserVO user,
-            RedirectAttributes rttr) throws Exception {
+
+            RedirectAttributes rttr, HttpServletRequest request) throws Exception {
 
         if (user == null) throw new RuntimeException("로그인이 필요합니다.");
 
@@ -352,7 +433,31 @@ public class BoardController {
         vo.setCommentContents(commentContents.trim());
         vo.setUserName(user.getUsername());
 
-        boardService.addComment(vo);
+        int result = boardService.addComment(vo);
+        
+        if(result > 0) {        	
+        	//좋아요 알림
+        	BoardVO boardVO = new BoardVO();
+        	boardVO.setBoardNum(boardNum);
+        	boardVO = boardService.getDetail(boardVO);
+        	
+        	//자기자신 제외
+        	if(!user.getUsername().equals(boardVO.getUserName())) {
+        		notificationManager.commentNotification(vo, boardVO);	
+        	}
+        	
+        	// 로그/감사 기록용
+        	auditLogService.log(
+					vo.getUserName(),
+			        "CREATE_COMMENT",
+			        "COMMENTS",
+			        vo.getCommentNum().toString(),
+			        vo.getUserName() + "이 "
+			        + vo.getBoardNum() + "번 게시글에 댓글 작성",
+			        request
+			    );
+        	
+        }
 
         rttr.addAttribute("boardNum", boardNum);
         return "redirect:/board/detail";
@@ -374,9 +479,11 @@ public class BoardController {
     @PostMapping("/deletecomment")
     public String deleteComment(
             @RequestParam("commentNum") Long commentNum,
-            @RequestParam("boardNum") Long boardNum,
-            @AuthenticationPrincipal UserVO user,
+            @RequestParam("boardNum") Long boardNum, HttpServletRequest request, @AuthenticationPrincipal UserVO user,
             RedirectAttributes rttr) throws Exception {
+        CommentVO vo = new CommentVO();
+        vo.setCommentNum(commentNum);
+        vo.setBoardNum(boardNum);
 
         if (user == null) throw new RuntimeException("로그인이 필요합니다.");
 
@@ -394,11 +501,25 @@ public class BoardController {
             throw new RuntimeException("댓글 삭제 권한이 없습니다.");
         }
 
-        boardService.deleteComment(comment);
+       int result = boardService.deleteComment(comment);
         boardService.decreaseCommentCount(boardNum);
+      
+          if(result > 0) {
+        	// 로그/감사 기록용
+        	auditLogService.log(
+					vo.getUserName(),
+			        "DELETE_COMMENT",
+			        "COMMENTS",
+			        vo.getCommentNum().toString(),
+			        vo.getUserName() + "이 "
+			        + vo.getBoardNum() + "번 게시글의 댓글 삭제",
+			        request
+			    );
+        }
 
         rttr.addAttribute("boardNum", boardNum);
         return "redirect:/board/detail";
+
     }
 
     /** 파일 다운로드 */

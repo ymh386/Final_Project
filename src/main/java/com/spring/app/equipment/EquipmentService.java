@@ -4,9 +4,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
+import javax.management.Notification;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.spring.app.websocket.NotificationManager;
 
 @Service
 @Transactional
@@ -18,6 +22,7 @@ public class EquipmentService {
 	
 	@Autowired
 	private EquipmentFaultDAO faultDAO;
+	
 	
 	
 	
@@ -70,6 +75,8 @@ public class EquipmentService {
             // 2. 비품 상태를 '고장'으로 변경
             int statusResult = equipmentDAO.updateEquipmentStatus(faultReport.getEquipmentId(), "고장");
             
+           
+            
             return reportResult > 0 && statusResult > 0;
         } catch (Exception e) {
             throw new RuntimeException("고장 신고 처리 중 오류가 발생했습니다.", e);
@@ -120,6 +127,9 @@ public class EquipmentService {
         return faultDAO.getFaultReportsByPage(offset, size);
     }
     
+    public EquipmentFaultVO selectFaultReportById(Long reportId) {
+    	return faultDAO.selectFaultReportById(reportId);
+    }
     
 }
 

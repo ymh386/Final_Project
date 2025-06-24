@@ -34,6 +34,7 @@ function connectStomp() {
 
 // 종 버튼 클릭 -> 알림 불러오기
 notificationBtn.addEventListener('click', ()=>{
+    
     fetch("/notification/unread")
     .then(r => r.json())
     .then(r => {
@@ -45,17 +46,14 @@ notificationBtn.addEventListener('click', ()=>{
 function renderNotificationList(r) {
     notificationList.innerHTML='';
 
-    const btn = document.createElement("a");
-    btn.innerHTML = '<hr><a href="/notification/list" class="btn" >알림함 이동</a>'
-    notificationList.append(btn);
-
     if(r.length === 0) {
         notificationList.innerHTML = '<li class="dropdown-item text-muted">새로운 알림이 없습니다</li>';
-        notificationList.append(btn);
         return;
     }
 
     r.forEach(n => {
+        
+
         const li = document.createElement("li");
         li.className = "dropdown-item d-flex align-items-start gap-2 border-bottom py-2";
 
@@ -66,9 +64,8 @@ function renderNotificationList(r) {
             class="text-decoration-none text-dark fw-bold d-block">
             ${n.notificationTitle}
             </a>
-            <p>${n.message}</p>
-            <small class="text-muted">${getRelativeTime(n.createdAt)}</small>
-            <small class="text-muted">${n.senderVO.name}</small>
+            <p>${n.message.replace(/\n/g, "<br>")}</p>
+            <small class="text-muted">${getRelativeTime(n.createdAt)} · ${n.senderVO?.name || '알 수 없음'}</small>
         </div>
         `;
         li.addEventListener('click', (e)=>{
@@ -77,11 +74,12 @@ function renderNotificationList(r) {
         notificationList.append(li);
 
     })
-    notificationList.append(btn);
 }
 
  // 실시간 알림 추가
 function addNotification(notification) {
+    
+
     notificationList.innerHTML='';
     const list = document.getElementById("notificationList");
 
@@ -95,9 +93,8 @@ function addNotification(notification) {
            class="text-decoration-none text-dark fw-bold d-block">
           ${notification.notificationTitle}
         </a>
-        <p>${notification.message}</p>
-        <small class="text-muted">${getRelativeTime(notification.createdAt)}</small>
-        <small class="text-muted">${notification.senderVO.name}</small>
+        <p>${notification.message.replace(/\n/g, "<br>")}</p>
+        <small class="text-muted">${getRelativeTime(notification.createdAt)} · ${notification.senderVO?.name || '알 수 없음'}</small>
       </div>
     `;
     li.addEventListener('click', (e) => {
@@ -181,13 +178,15 @@ function showToast(notification) {
     toast.innerHTML = `
         <div class="d-flex flex-column">
             <div class="toast-header bg-dark text-white">
-                <strong class="me-auto">${notification.senderVO.name}</strong>
+                <strong class="me-auto">${notification.senderVO?.name || '알 수 없음'}</strong>
                 <small class="text-white-50 ms-2">${notification.notificationTitle}</small>
                 <button type="button" class="btn-close btn-close-white ms-2 mb-1" data-bs-dismiss="toast" aria-label="Close"></button>
             </div><hr>
             <div class="toast-body">
                 <a href="${notification.linkUrl}" class="text-white text-decoration-none">
-                ${notification.message}
+
+                    ${notification.message.replace(/\n/g, "<br>")}
+
                 </a><br>
             </div>
         </div>

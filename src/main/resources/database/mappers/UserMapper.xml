@@ -66,7 +66,7 @@
 		  AND TABLE_NAME = 'USER';
   	</select>
   	
-  	<select id="detail" resultMap="detailMap">
+  	<select id="detail" parameterType="UserVO" resultMap="detailMap">
 		SELECT * FROM USER U
 			 INNER JOIN MEMBER_ROLE MR
 			 USING (USERNAME)

@@ -66,7 +66,10 @@
         </c:forEach>
             </tbody>
         </table>
-        <button id="submit" type="submit">승인</button>
+        <button id="submit" type="submit">승인</button><br>
+        
+   <a href="./auditLog/list" class="btn btn-outline-dark">감사 기록 보러가기</a>   
+    
 <script src="/js/admin.js"></script>
 </body>
 </html>

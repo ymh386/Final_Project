@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.AuthenticationFilter;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
 
+import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.security.jwt.JwtAuthenticationFilter;
 import com.spring.app.security.jwt.JwtLoginFilter;
 import com.spring.app.security.jwt.JwtTokenManager;
@@ -47,6 +48,9 @@ public class SecurityConfig {
 	@Autowired
 	private SocialLoginSuccessHandler socialLoginSuccessHandler;
 	
+	@Autowired
+	private AuditLogService auditLogService;
+	
 	@Bean
 	HttpFirewall fireWall() {
 		return new DefaultHttpFirewall();
@@ -70,6 +74,7 @@ public class SecurityConfig {
 				.requestMatchers("/user/getDocuments", "/user/getDocument").hasAnyRole("ADMIN", "TRAINER")
 				.requestMatchers("/ws-chat/**").permitAll()
 				.requestMatchers("/user/admin/**").hasRole("ADMIN")
+				.requestMatchers("/admin/**").hasRole("ADMIN")
 				.requestMatchers("/approval/form**").hasRole("ADMIN")
 				.requestMatchers("/approval/**").hasAnyRole("ADMIN", "TRAINER")		
 				.requestMatchers("/user/getDocuments", "/user/getDocument").hasAuthority("APPROVE")
@@ -89,7 +94,7 @@ public class SecurityConfig {
 			session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		})
 		.httpBasic(httpBasic -> httpBasic.disable())
-		.addFilter(new JwtLoginFilter(jwtTokenManager, authenticationConfiguration.getAuthenticationManager()))
+		.addFilter(new JwtLoginFilter(jwtTokenManager, authenticationConfiguration.getAuthenticationManager(), auditLogService))
 		.addFilter(new JwtAuthenticationFilter(jwtTokenManager, authenticationConfiguration.getAuthenticationManager()))
 		
 		.oauth2Login(oauth->{

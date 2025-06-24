@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import com.spring.app.user.UserService;
 import com.spring.app.user.UserVO;
+import com.spring.app.websocket.NotificationManager;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.home.util.Pager;
 import com.spring.app.schedule.ScheduleService;
 import com.spring.app.schedule.ScheduleVO;
@@ -27,6 +31,9 @@ public class ReservationController {
     private ReservationService reservationService;
     @Autowired
     private ScheduleService   scheduleService;
+
+    
+    
 
 
     ReservationController(UserService userService) {
@@ -66,7 +73,7 @@ public class ReservationController {
     public String reserve(
             @ModelAttribute ReservationVO vo,
             RedirectAttributes rttr,
-            Model model) {
+            Model model, HttpServletRequest request) {
 
         // JWT 에서 username 추출
         String username = SecurityContextHolder
@@ -77,10 +84,14 @@ public class ReservationController {
 
         try {
             // 예약 시도 (중복 체크 로직 포함)
-            reservationService.reserve(vo);
+            reservationService.reserve(vo, request);
 
             // 성공 시 플래시 메시지
             rttr.addFlashAttribute("msg", "예약이 완료되었습니다.");
+            
+            
+            
+            
             return "redirect:/reservation/my";
 
         } catch (IllegalStateException ex) {
@@ -165,7 +176,7 @@ public class ReservationController {
     public String cancel(
             @RequestParam Long reservationId,
             @RequestParam String canceledReason,
-            RedirectAttributes rttr) {
+            RedirectAttributes rttr, HttpServletRequest request) {
     	
         ReservationVO before = reservationService.getReservation(reservationId);
 
@@ -175,7 +186,7 @@ public class ReservationController {
         vo.setCanceledReason(canceledReason);
         vo.setScheduleId(before.getScheduleId());
 
-        reservationService.cancel(vo);
+        reservationService.cancel(vo, request);
         rttr.addFlashAttribute("msg", "예약이 취소되었습니다.");
         return "redirect:/reservation/my";
 

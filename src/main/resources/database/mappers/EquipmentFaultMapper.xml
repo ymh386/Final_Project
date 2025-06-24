@@ -35,15 +35,19 @@
 
   <!-- 신고 ID로 조회 -->
   <select id="selectFaultReportById" parameterType="Long" resultMap="faultReportResultMap">
-    SELECT REPORT_ID,
-           EQUIPMENT_ID,
-           USERNAME,
-           REPORT_DATE,
-           DESCRIPTION,
-           FAULT_STATUS,
-           RESOLVED_AT
-      FROM EQUIPMENT_FAULT
-     WHERE REPORT_ID = #{reportId}
+    SELECT EF.REPORT_ID,
+		   EF.EQUIPMENT_ID,
+		   EF.USERNAME,
+		   EF.REPORT_DATE,
+		   EF.DESCRIPTION,
+		   EF.FAULT_STATUS,
+		   EF.RESOLVED_AT,
+		   E.NAME       AS equipmentName,
+		   E.LOCATION   AS equipmentLocation
+	  FROM EQUIPMENT_FAULT EF
+	  JOIN EQUIPMENT E
+	    ON EF.EQUIPMENT_ID = E.EQUIPMENT_ID
+	 WHERE REPORT_ID = #{reportId}
   </select>
 
   <!-- 비품 ID로 신고 내역 조회 -->

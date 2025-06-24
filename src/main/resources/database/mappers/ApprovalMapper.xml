@@ -113,7 +113,7 @@
   		 WHERE PARENT_ID=#{approvalId}
   	</select>
   	
-  	<insert id="addForm" parameterType="FormVO">
+  	<insert id="addForm" parameterType="FormVO" useGeneratedKeys="true" keyProperty="formId">
   		INSERT INTO FORM VALUES
   		(
   			null,
@@ -159,7 +159,7 @@
   		)
   	</insert>
   	
-  	<insert id="addSign" parameterType="UserSignatureVO">
+  	<insert id="addSign" parameterType="UserSignatureVO" useGeneratedKeys="true" keyProperty="signatureId">
   		INSERT INTO USER_SIGNATURE VALUES
   		(
   			NULL,

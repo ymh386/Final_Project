@@ -61,4 +61,8 @@ public class SubscriptService {
 		subscriptDAO.updateSubscript(subscriptVO);
 	}
 	
+	public SubscriptVO getSubscriptById(Long id, String username) throws Exception {
+		return subscriptDAO.getSubscriptById(id, username);
+	}
+	
 }

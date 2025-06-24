@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -30,13 +31,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.app.attendance.AttendanceController;
 import com.spring.app.attendance.AttendanceService;
+import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.files.FileManager;
 import com.spring.app.user.UserVO;
 import com.spring.app.user.friend.FriendService;
 import com.spring.app.user.friend.FriendVO;
 import com.spring.app.websocket.NotificationManager;
+import com.spring.app.websocket.StompSessionEventListener;
 
 import lombok.extern.slf4j.Slf4j;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/chat")
@@ -58,17 +62,24 @@ public class ChatController {
 	
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
-	
+
+	@Autowired
+	private StompSessionEventListener sessionEventListener;
+
 	@Value("${board.file.path}")
 	private String path;
 	
 	@Autowired
 	private FileManager fileManager;
 
+
     ChatController(AttendanceController attendanceController, AttendanceService attendanceService) {
         this.attendanceController = attendanceController;
         this.attendanceService = attendanceService;
     }
+	
+	@Autowired
+	private AuditLogService	auditLogService;
 	
 	@GetMapping("chat")
 	public void makeChat(@AuthenticationPrincipal UserVO userVO
@@ -97,12 +108,12 @@ public class ChatController {
 	@PostMapping("makeRoom")
 	@ResponseBody
 	public Map<String, Object> createGroupChat(@RequestBody Map<String, List<String>> body,
-											   @AuthenticationPrincipal UserVO userVO) throws Exception {
+											   @AuthenticationPrincipal UserVO userVO, HttpServletRequest request) throws Exception {
 		
 		List<String> selectedUsers = body.get("users");
 		selectedUsers.add(userVO.getUsername());
 		
-		Long roomId = chatService.insertMemberRoom(selectedUsers, true);
+		Long roomId = chatService.insertMemberRoom(selectedUsers, true, request);
 		
 		return Map.of("roomId", roomId);
 	}
@@ -110,10 +121,10 @@ public class ChatController {
 	@PostMapping("makeChat")
 	@ResponseBody
 	public Map<String, Object> createSingleChat(@RequestBody Map<String, String> body,
-			                                    @AuthenticationPrincipal UserVO userVO) throws Exception {
+			                                    @AuthenticationPrincipal UserVO userVO, HttpServletRequest request) throws Exception {
 		String me = userVO.getUsername();
 		String target = body.get("target");
-		Long roomId = chatService.insertMemberRoom(List.of(me, target), false);
+		Long roomId = chatService.insertMemberRoom(List.of(me, target), false, request);
 		
 		return Map.of("roomId", roomId);
 	}
@@ -340,6 +351,23 @@ public class ChatController {
 		if(result > 0) {
 			List<RoomMemberVO> ar = chatService.getUserByRoom(message.getRoomId());
 			notificationManager.messageNotification(message, ar);
+			
+			// 로그/감사 기록용
+			String ip = sessionEventListener.getUserIp(principal.getName());
+			String userAgent = sessionEventListener.getUserAgent(principal.getName());
+			if(ip != null && userAgent != null) {
+				auditLogService.log(
+						principal.getName(),
+						"SEND_MESSAGE",
+						"CHAT_MESSAGE",
+						message.getMessageId().toString(),
+						message.getSenderId() + "이 "
+								+ message.getRoomId() + "번방에서 "
+								+ "\"" + message.getContents() + "\"" + "메세지를 작성",
+								ip,
+								userAgent
+						);	
+			}
 		}
 		
 		messagingTemplate.convertAndSend(
@@ -363,7 +391,7 @@ public class ChatController {
 	
 	@PostMapping("kick")
 	public String kickUser(@AuthenticationPrincipal UserVO userVO, @RequestParam("roomId") Long roomId 
-						 , @RequestParam("username") String username, RoomMemberVO memberVO, Model model) throws Exception {
+						 , @RequestParam("username") String username, RoomMemberVO memberVO, Model model, HttpServletRequest request) throws Exception {
 		
 		ChatRoomVO roomVO=chatService.getRoomDetail(roomId);
 		String host = roomVO.getCreatedBy();
@@ -381,6 +409,18 @@ public class ChatController {
 				notificationManager.kickNotification(memberVO, roomVO, username);				
 			}
 			
+			// 로그/감사 기록용
+			auditLogService.log(
+					userVO.getUsername(),
+			        "KICK_CHAT",
+			        "CHAT_ROOM_MEMBER",
+			        roomId + ", " + memberVO.getUsername(),
+			        userVO.getUsername() + "이 "
+			        + roomId + "번방에서 "
+			        + memberVO.getUsername() + "을 강퇴",
+			        request
+			    );
+			
 			model.addAttribute("result", "강퇴에 성공했습니다.");
 			model.addAttribute("path", "/chat/detail/"+roomId);			
 		}
@@ -390,7 +430,7 @@ public class ChatController {
 	
 	@PostMapping("out")
 	public String out(@AuthenticationPrincipal UserVO userVO, @RequestParam("roomId") Long roomId
-			        , RoomMemberVO memberVO, Model model) throws Exception {
+			        , RoomMemberVO memberVO, Model model, HttpServletRequest request) throws Exception {
 		
 		memberVO.setUsername(userVO.getUsername());
 		memberVO.setRoomId(roomId);
@@ -405,6 +445,17 @@ public class ChatController {
 			return "commons/result";
 		} else {
 			chatService.outUser(memberVO);
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+					userVO.getUsername(),
+			        "LEAVE_CHAT",
+			        "CHAT_ROOM_MEMBER",
+			        roomId + ", " + userVO.getUsername(),
+			        userVO.getUsername() + "이 "
+			        + roomId + "번방에서 퇴장",
+			        request
+			    );
 			
 			return "";
 		}
@@ -424,10 +475,9 @@ public class ChatController {
 	}
 	
 	@PostMapping("invite")
-	public String invite(@AuthenticationPrincipal UserVO userVO,
-						 @RequestParam("roomId") Long roomId,
-						 @RequestBody Map<String, List<String>> body,
-			             @RequestParam("username") String username, Model model) throws Exception {
+
+	public String invite(@AuthenticationPrincipal UserVO userVO, @RequestParam("roomId") Long roomId,
+			             @RequestParam("username") String username, Model model, HttpServletRequest request) throws Exception {
 		
 		ChatRoomVO chatRoomVO = new ChatRoomVO();
 		
@@ -445,6 +495,21 @@ public class ChatController {
 		if (result>0) {
 			notificationManager.inviteNotification(memberVO, chatRoomVO, userVO.getUsername(), username);			
 		}
+		// 로그/감사 기록용
+		if(result > 0) {
+			auditLogService.log(
+					userVO.getUsername(),
+					"INVITE_CHAT",
+					"CHAT_ROOM_MEMBER",
+					memberVO.getRoomId().toString() + ", " + memberVO.getUsername(),
+					userVO.getUsername() + "이 "
+					+ memberVO.getRoomId() + "번방에 "
+					+ memberVO.getUsername() + "를 초대",
+					request
+					);	
+		}
+		
+		
 		
 		model.addAttribute("result", username+" 님을 초대했습니다.");
 		model.addAttribute("path", "/chat/detail/"+roomId);
@@ -468,6 +533,7 @@ public class ChatController {
 		
 		model.addAttribute("result", "방장 변경 완료");
 		model.addAttribute("path", "/chat/detail/"+roomId);
+		
 		
 		return "commons/result";
 	}
