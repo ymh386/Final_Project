@@ -265,21 +265,11 @@
 
             calendar.render();
             
+            btnCancel.onclick = () => modal.style.display = 'none';
 
-            // Modal 초기화 (관리자/트레이너만 접근 가능)
-            if (isAdmin || isTrainer) {
-                modal = document.getElementById('scheduleModal');
-                modalTitle = document.getElementById('modalTitle');
-                selectTrainer = document.getElementById('username');
-                inputFacility = document.getElementById('facilityId');
-                inputDate = document.getElementById('scheduleDate');
-                inputStart = document.getElementById('startTime');
-                inputEnd = document.getElementById('endTime');
-                btnCancel = document.getElementById('btnCancel');
-                btnSave = document.getElementById('btnSave');
-                btnDelete = document.getElementById('btnDelete');
-
-                btnCancel.onclick = () => modal.style.display = 'none';
+            if (isAdmin) {
+                btnSave.style.display = 'inline-block';
+                btnCancel.style.display = 'inline-block';
 
                 btnSave.onclick = () => {
                     const trainerUsername = selectTrainer.value;
@@ -289,36 +279,35 @@
                     const start = inputStart.value;
                     const end = inputEnd.value;
                     if (!facilityId || !date || !start || !end) { alert('모든 필드를 입력하세요.'); return; }
-                    
-                    const vo = { 
-                        username: trainerUsername, 
-                        facilityId, 
-                        scheduleDate: date, 
-                        startTime: start + ':00', 
-                        endTime: end + ':00' 
+
+                    const vo = {
+                        username: trainerUsername,
+                        facilityId,
+                        scheduleDate: date,
+                        startTime: start + ':00',
+                        endTime: end + ':00'
                     };
 
-                    const url = currentMode === 'create' 
+                    const url = currentMode === 'create'
                         ? '${pageContext.request.contextPath}/schedule/create'
-                        : '${pageContext.request.contextPath}/schedule/update/' + currentScheduleId;
-                    
+                        : '${pageContext.request.contextPath}/schedule/update';
+
                     const method = currentMode === 'create' ? 'POST' : 'PUT';
 
-                    fetch(url, { 
-                        method: method, 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify(vo) 
+                    fetch(url, {
+                        method: method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(vo)
                     })
-                    .then(res => { 
-                        if (!res.ok) throw new Error('저장 실패: ' + res.status); 
-                        return res.json(); 
+                    .then(res => {
+                        if (!res.ok) throw new Error('저장 실패: ' + res.status);
+                        return res.json();
                     })
                     .then(newEvent => {
                         if (currentMode === 'create') {
                             calendar.addEvent(newEvent);
                             alert('일정이 성공적으로 등록되었습니다.');
                         } else {
-                            // 수정 모드일 때는 기존 이벤트 제거 후 새로 추가
                             const existingEvent = calendar.getEventById(String(currentScheduleId));
                             if (existingEvent) existingEvent.remove();
                             calendar.addEvent(newEvent);
@@ -326,37 +315,22 @@
                         }
                         modal.style.display = 'none';
                     })
-                    .catch(err => { 
-                        alert('일정 저장 중 오류가 발생했습니다.'); 
-                        console.error(err); 
+                    .catch(err => {
+                        alert('일정 저장 중 오류가 발생했습니다.');
+                        console.error(err);
                     });
-                };
+            } else {
+                // 트레이너는 보기만 가능
+                btnSave.style.display = 'none';
+                btnCancel.style.display = 'none';
 
-                btnDelete.onclick = () => {
-                    if (!currentScheduleId) return;
-                    if (!confirm('정말 이 일정을 삭제하시겠습니까?')) return;
-                    
-                    fetch('${pageContext.request.contextPath}/schedule/delete/' + currentScheduleId, { 
-                        method: 'DELETE' 
-                    })
-                    .then(res => { 
-                        if (!res.ok) throw new Error('삭제 실패: ' + res.status); 
-                        const ev = calendar.getEventById(String(currentScheduleId)); 
-                        if (ev) ev.remove(); 
-                        modal.style.display = 'none';
-                        alert('일정이 성공적으로 삭제되었습니다.');
-                    })
-                    .catch(err => { 
-                        alert('일정 삭제 중 오류가 발생했습니다.'); 
-                        console.error(err); 
-                    });
-                };
-
-                window.onclick = event => { 
-                    if (event.target === modal) modal.style.display = 'none'; 
-                };
+                selectTrainer.disabled = true;
+                inputFacility.disabled = true;
+                inputDate.readOnly = true;
+                inputStart.readOnly = true;
+                inputEnd.readOnly = true;
             }
-        });
+
     </script>
 </body>
 </html>
