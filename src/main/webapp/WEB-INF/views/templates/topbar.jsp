@@ -293,6 +293,8 @@ body {
                     <sec:authorize access="hasRole('ADMIN')">
                         <li><a class="dropdown-item profileItem" href="/admin/main">관리자</a></li>
                         <li><a class="dropdown-item profileItem" href="${pageContext.request.contextPath}/equipment/admin">비품 관리</a></li>
+                        <li><a class="dropdown-item profileItem" href="${pageContext.request.contextPath}/attendance/admin">근태 관리(관리자	)</a></li>
+                        
                     </sec:authorize>
                 </sec:authorize>
                 <sec:authorize access="!isAuthenticated()">

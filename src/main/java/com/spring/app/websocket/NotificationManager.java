@@ -361,54 +361,55 @@ public class NotificationManager {
 		this.sendNotification(notificationVO);
 	}
 	
-	//비품 신고접수 알림
-	public void reportNotification(EquipmentFaultVO equipmentFaultVO) throws Exception {
-		NotificationVO notificationVO = null;
-		
-		notificationVO = new NotificationVO();
-		notificationVO.setNotificationTitle("비품 신고 접수");
-		notificationVO.setUsername(equipmentFaultVO.getUsername());
-		notificationVO.setMessage("비품 신고가 접수되었습니다.\n"
-				+ "(" + equipmentFaultVO.getEquipmentLocation() + " - " + equipmentFaultVO.getEquipmentName() + ")");
-		notificationVO.setLinkUrl("/equipment/main");
-		notificationVO.setNotificationType("N13");
-		notificationVO.setSenderId("admin");
-		
-		this.sendNotification(notificationVO);
-		
-		notificationVO = new NotificationVO();
-		notificationVO.setNotificationTitle("비품 신고 접수");
-		notificationVO.setUsername("admin");
-		notificationVO.setMessage("비품 신고요청이 왔습니다. 확인해주세요.\n"
-				+ "(" + equipmentFaultVO.getEquipmentLocation() + " - " + equipmentFaultVO.getEquipmentName() + ")");
-		notificationVO.setLinkUrl("/equipment/admin");
-		notificationVO.setNotificationType("N13");
-		notificationVO.setSenderId(equipmentFaultVO.getUsername());
-		
-		this.sendNotification(notificationVO);
-		
-	}
-	
-	//비품 신고 진행상황 알림
-	public void reportingNotification(EquipmentFaultVO equipmentFaultVO) throws Exception {
-		NotificationVO notificationVO = new NotificationVO();
-		
-		if("처리완료".equals(equipmentFaultVO.getFaultStatus())) {
-			notificationVO.setMessage("비품 신고가 처리 완료되었습니다.\n"
-					+ "(" + equipmentFaultVO.getEquipmentLocation() + " - " + equipmentFaultVO.getEquipmentName() + ")");
-		}else {
-			notificationVO.setMessage("비품 신고 처리 중 입니다.\n"
-					+ "(" + equipmentFaultVO.getEquipmentLocation() + " - " + equipmentFaultVO.getEquipmentName() + ")");
-		}
-		
-		notificationVO.setNotificationTitle("비품 신고 진행상황");
-		notificationVO.setUsername(equipmentFaultVO.getUsername());
-		notificationVO.setLinkUrl("/equipment/main");
-		notificationVO.setNotificationType("N14");
-		notificationVO.setSenderId("admin");
-		
-		this.sendNotification(notificationVO);
-	}
+//	//비품 신고접수 알림
+//	   public void reportNotification(EquipmentFaultVO equipmentFaultVO) throws Exception {
+//	      NotificationVO notificationVO = null;
+//	     
+//	      notificationVO = new NotificationVO();
+//	      notificationVO.setNotificationTitle("비품 신고 접수");
+//	      notificationVO.setUsername(equipmentFaultVO.getUsername());
+//	      notificationVO.setMessage("비품 신고가 접수되었습니다.\n"
+//	            + "(" + equipmentFaultVO.getEquipmentVO().getFacilityVO().getName() + " - " + equipmentFaultVO.getEquipmentName() + ")");
+//	      notificationVO.setLinkUrl("/equipment/main");
+//	      notificationVO.setNotificationType("N13");
+//	      notificationVO.setSenderId("admin");
+//	     
+//	      this.sendNotification(notificationVO);
+//	     
+//	      notificationVO = new NotificationVO();
+//	      notificationVO.setNotificationTitle("비품 신고 접수");
+//	      notificationVO.setUsername("admin");
+//	      notificationVO.setMessage("비품 신고요청이 왔습니다. 확인해주세요.\n"
+//	            + "(" + equipmentFaultVO.getEquipmentVO().getFacilityVO().getName() + " - " + equipmentFaultVO.getEquipmentName() + ")");
+//	      notificationVO.setLinkUrl("/equipment/admin");
+//	      notificationVO.setNotificationType("N13");
+//	      notificationVO.setSenderId(equipmentFaultVO.getUsername());
+//	     
+//	      this.sendNotification(notificationVO);
+//	     
+//	   }
+//	   
+//	   //비품 신고 진행상황 알림
+//	   public void reportingNotification(EquipmentFaultVO equipmentFaultVO) throws Exception {
+//	      NotificationVO notificationVO = new NotificationVO();
+//	     
+//	      if("처리완료".equals(equipmentFaultVO.getFaultStatus())) {
+//	         notificationVO.setMessage("비품 신고가 처리 완료되었습니다.\n"
+//	               + "(" + equipmentFaultVO.getEquipmentVO().getFacilityVO().getName() + " - " + equipmentFaultVO.getEquipmentName() + ")");
+//	      }else {
+//	         notificationVO.setMessage("비품 신고 처리 중 입니다.\n"
+//	               + "(" + equipmentFaultVO.getEquipmentVO().getFacilityVO().getName() + " - " + equipmentFaultVO.getEquipmentName() + ")");
+//	      }
+//	     
+//	      notificationVO.setNotificationTitle("비품 신고 진행상황");
+//	      notificationVO.setUsername(equipmentFaultVO.getUsername());
+//	      notificationVO.setLinkUrl("/equipment/main");
+//	      notificationVO.setNotificationType("N14");
+//	      notificationVO.setSenderId("admin");
+//	     
+//	      this.sendNotification(notificationVO);
+//	   }
+
 	
 	//게시글 좋아요 알림
 	public void likeNotification(InteractionVO interactionVO, BoardVO boardVO) throws Exception {

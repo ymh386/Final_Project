@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.schedule.ScheduleDAO;
+import com.spring.app.schedule.ScheduleVO;
 import com.spring.app.subscript.SubscriptDAO;
 import com.spring.app.websocket.NotificationManager;
 
@@ -181,5 +182,12 @@ public class ReservationService {
 	 public long getTotalReservationCount(String username) {
 	        return reservationDAO.countReservationsByUsername(username);
 	    }
+	 
+	 public List<ScheduleVO> getFutureSchedules() {
+		    LocalDate today = LocalDate.now();
+		    return scheduleDAO.selectAll().stream()
+		            .filter(s -> !s.getScheduleDate().isBefore(today))
+		            .collect(Collectors.toList());
+		}
 
 }
