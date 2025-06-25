@@ -41,25 +41,71 @@
   	</select>
   	
   	<select id="getList" resultMap="awaitMap" parameterType="ApprovalVO">
-  		SELECT * FROM APPROVAL A
+  		SELECT * 
+  		  FROM APPROVAL A
   				 INNER JOIN DOCUMENT D
   			ON A.DOCUMENT_ID=D.DOCUMENT_ID
   				 INNER JOIN FORM F
   			ON D.FORM_ID=F.FORM_ID
   		 <where>
-		    A.APPROVER_ID = #{approvalVO.approverId}
+		    A.APPROVER_ID = #{approverId}
 		    
-		    <if test="approvalVO.documentVO.formId != null">
-		        AND D.FORM_ID = #{approvalVO.documentVO.formId}
+		    <if test="pager.searchWord != null and pager.searchWord != ''">
+		    	<choose>
+		            <when test="pager.searchField == 'D.WRITER_ID'">
+		                AND D.WRITER_ID LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		            <when test="pager.searchField == 'D.DOCUMENT_TITLE'">
+		                AND D.DOCUMENT_TITLE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		            <when test="pager.searchField == 'F.FORM_TITLE'">
+		                AND F.FORM_TITLE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		        </choose>
 		    </if>
 		    
-		    <if test="search != null and search != ''">
-		        AND D.WRITER_ID LIKE CONCAT('%', #{search}, '%')
-		    </if>
-		    
-		    AND A.APPROVAL_STATUS IN ('AS1', 'AS2')
+		    <choose>
+	            <when test="approvalStatus == 'AS1'">AND A.APPROVAL_STATUS = 'AS1'</when>
+	            <when test="approvalStatus == 'AS2'">AND A.APPROVAL_STATUS = 'AS2'</when>
+	            <otherwise>AND A.APPROVAL_STATUS IN ('AS1', 'AS2')</otherwise>
+	        </choose>
+	        
 		</where>
   		 ORDER BY APPROVED_AT DESC
+  		 LIMIT #{pager.startRow}, #{pager.pageSize}
+  	</select>
+  	
+  	<select id="getApprovalCount" parameterType="ApprovalVO" resultType="java.lang.Long">
+  		SELECT COUNT(*)
+  		  FROM APPROVAL A
+  				 INNER JOIN DOCUMENT D
+  			ON A.DOCUMENT_ID=D.DOCUMENT_ID
+  				 INNER JOIN FORM F
+  			ON D.FORM_ID=F.FORM_ID
+  		 <where>
+		    A.APPROVER_ID = #{approverId}
+		    
+		    <if test="pager.searchWord != null and pager.searchWord != ''">
+		    	<choose>
+		            <when test="pager.searchField == 'D.WRITER_ID'">
+		                AND D.WRITER_ID LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		            <when test="pager.searchField == 'D.DOCUMENT_TITLE'">
+		                AND D.DOCUMENT_TITLE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		            <when test="pager.searchField == 'F.FORM_TITLE'">
+		                AND F.FORM_TITLE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		        </choose>
+		    </if>
+		   
+	        <choose>
+	            <when test="approvalStatus == 'AS1'">AND A.APPROVAL_STATUS = 'AS1'</when>
+	            <when test="approvalStatus == 'AS2'">AND A.APPROVAL_STATUS = 'AS2'</when>
+	            <otherwise>AND A.APPROVAL_STATUS IN ('AS1', 'AS2')</otherwise>
+	        </choose>
+	        
+		</where>
   	</select>
   	
   	<select id="getDetail" resultMap="awaitMap" parameterType="ApprovalVO">
@@ -113,7 +159,7 @@
   		 WHERE PARENT_ID=#{approvalId}
   	</select>
   	
-  	<insert id="addForm" parameterType="FormVO">
+  	<insert id="addForm" parameterType="FormVO" useGeneratedKeys="true" keyProperty="formId">
   		INSERT INTO FORM VALUES
   		(
   			null,
@@ -159,7 +205,7 @@
   		)
   	</insert>
   	
-  	<insert id="addSign" parameterType="UserSignatureVO">
+  	<insert id="addSign" parameterType="UserSignatureVO" useGeneratedKeys="true" keyProperty="signatureId">
   		INSERT INTO USER_SIGNATURE VALUES
   		(
   			NULL,

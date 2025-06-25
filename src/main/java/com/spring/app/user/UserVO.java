@@ -43,6 +43,7 @@ public class UserVO implements UserDetails, OAuth2User {
 	private Long trainerCode;
 	private Long stateNum;
 	private String state;
+	private Long roleNum;
 	@JsonIgnore //json으로 가져올 시 직렬화 문제 해결
 	private List<RoleVO> roleList;
 	@JsonIgnore

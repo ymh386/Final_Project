@@ -44,6 +44,11 @@ public class ScheduleService {
     public List<String> getAllTrainerNames() {
         return scheduleDAO.selectAllTrainerNames();
     }
+    
+  //트레이너ID 하나 조회
+    public ScheduleVO selectOneUsername(Long scheduleId) {
+    	return scheduleDAO.selectOneUsername(scheduleId);
+    }
 
 
     

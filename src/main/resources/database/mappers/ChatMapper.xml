@@ -120,6 +120,7 @@
   		    ON cm.ROOM_ID=rm.ROOM_ID
   		 WHERE cm.ROOM_ID=#{roomId}
   		   AND rm.USERNAME=#{username}
+  		   AND cm.SENDER_ID!=#{username}
   		   AND cm.MESSAGE_ID>COALESCE(rm.LAST_READ_MESSAGE, 0); 
   	</select>
   	
@@ -231,8 +232,8 @@
   	
   	<insert id="insertMessage" parameterType="ChatMessageVO" useGeneratedKeys="true" keyProperty="messageId">
   		INSERT
-  		  INTO CHAT_MESSAGE (ROOM_ID, SENDER_ID, CONTENTS, MESSAGE_TYPE, CREATED_AT)
-  		VALUES (#{roomId}, #{senderId}, #{contents}, #{messageType}, #{createdAt})
+  		  INTO CHAT_MESSAGE (ROOM_ID, SENDER_ID, CONTENTS, MESSAGE_TYPE, CREATED_AT, MEDIA_URL)
+  		VALUES (#{roomId}, #{senderId}, #{contents}, #{messageType}, #{createdAt}, #{mediaUrl})
   	</insert>
   	
   </mapper>

@@ -34,14 +34,20 @@ public class QnaServiceImpl implements QnaService {
         Long parentStep  = vo.getBoardStep();
         Long parentDepth = vo.getBoardDepth();
 
-        vo.setBoardRef(parentRef);
-        vo.setBoardStep(parentStep);
-        vo.setBoardDepth(parentDepth);
-        qnaDAO.updateStepForReply(vo);
+        // 답글 순서 밀기용 메서드 호출 시 boardRef, boardStep 만 전달
+        qnaDAO.updateStepForReply(parentRef, parentStep);
 
+        // 답글 정보 설정
+        vo.setBoardRef(parentRef);
         vo.setBoardStep(parentStep + 1);
         vo.setBoardDepth(parentDepth + 1);
+
         qnaDAO.insertQna(vo);
+    }
+    
+    @Override
+    public void updateStepForReply(Long boardRef, Long boardStep) throws Exception {
+        qnaDAO.updateStepForReply(boardRef, boardStep);
     }
 
     /** 페이징된 목록 조회 */

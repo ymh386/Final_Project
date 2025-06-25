@@ -82,7 +82,6 @@
 <delete id="delete" parameterType="com.spring.app.board.notice.NoticeVO">
   DELETE FROM NOTICE
   WHERE BOARD_NUM = #{boardNum}
-    AND #{userName} = 'admin'   <!-- 관리자 체크 조건 -->
 </delete>
 
 

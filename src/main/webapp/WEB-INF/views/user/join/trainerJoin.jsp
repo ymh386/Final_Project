@@ -29,10 +29,10 @@
                                                 <input class="form-control"name="password" type="password" placeholder="Password">
                                                 <label for="inputEmail">비밀번호</label>
                                             </div>
-											<div class="form-floating mb-3">
+											<!-- <div class="form-floating mb-3">
                                                 <input class="form-control"name="password" type="password" placeholder="Password">
                                                 <label for="inputEmail">비밀번호 재입력</label>
-                                            </div>											
+                                            </div>											 -->
 											<div class="form-floating mb-3">
 												<input class="form-control"  type="text" name="name">
 												<label for="inputEmail">이름</label>

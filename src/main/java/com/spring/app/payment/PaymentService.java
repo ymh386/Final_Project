@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.subscript.SubscriptDAO;
 import com.spring.app.subscript.SubscriptService;
 import com.spring.app.subscript.SubscriptVO;
@@ -23,6 +24,7 @@ import com.spring.app.subscript.SubscriptionVO;
 import com.spring.app.user.MemberStateVO;
 import com.spring.app.user.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -39,6 +41,7 @@ public class PaymentService {
 	
 	@Autowired
 	private UserService userService;
+	
 	
 	@Value("${toss.secret.key}")
 	private String secretKey;
@@ -162,6 +165,10 @@ public class PaymentService {
 		paymentResultVO.setApprovedAt(paymentVO.getApprovedAt());
 		
 		return paymentResultVO;
+	}
+	
+	public BillingVO getBilling(String username) throws Exception {
+		return paymentDAO.getBilling(username);
 	}
 	
 	

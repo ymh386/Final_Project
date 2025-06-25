@@ -14,6 +14,9 @@ import org.springframework.web.server.ResponseStatusException;
 import com.spring.app.board.BoardService;
 import com.spring.app.board.interaction.InteractionVO;
 import com.spring.app.user.UserVO;
+import com.spring.app.websocket.NotificationManager;
+
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/interaction")
@@ -25,6 +28,8 @@ public class InteractionController {
     public InteractionController(BoardService boardService) {
         this.boardService = boardService;
     }
+    
+    
 
     /**
      * 좋아요 추가
@@ -41,6 +46,9 @@ public class InteractionController {
         vo.setUserName(user.getUsername());
         vo.setType("LIKE");
         boardService.addInteraction(vo);
+        
+        
+        
         return boardService.getInteractionCount(vo);
     }
 
