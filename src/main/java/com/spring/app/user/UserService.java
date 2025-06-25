@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.spring.app.approval.DocumentVO;
 import com.spring.app.approval.UserSignatureVO;
+import com.spring.app.home.util.Pager;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -162,7 +163,16 @@ public class UserService implements UserDetailsService {
 	}
 	
 	//작성한 전자결재목록 불러오기
-	public List<DocumentVO> getDocuments(DocumentVO documentVO) throws Exception {
+	public List<DocumentVO> getDocuments(DocumentVO documentVO, Pager pager) throws Exception {
+		//LIMIT 절에 사용할 startRow, pageSize 계산
+		pager.makeRow();
+		//결재내역 총 개수(해당 카테고리의 검색어 기준)
+		documentVO.setPager(pager);
+		Long totalCount = userDAO.getDocumentCount(documentVO);
+		//총 개수를 토대로 페이지 생성
+		pager.makePage(totalCount);
+		documentVO.setPager(pager);
+		
 		return userDAO.getDocuments(documentVO);
 	}
 	

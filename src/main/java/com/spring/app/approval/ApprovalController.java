@@ -27,12 +27,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.files.FileManager;
+import com.spring.app.home.util.Pager;
 import com.spring.app.user.DepartmentVO;
 import com.spring.app.user.UserService;
 import com.spring.app.user.UserVO;
 import com.spring.app.websocket.NotificationManager;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Controller
@@ -54,11 +57,14 @@ public class ApprovalController {
 	@Autowired
 	private NotificationManager notificationManager;
 	
+	@Autowired
+	private AuditLogService auditLogService;
+	
 	@Value("${board.file.path}")
 	private String path;
 	
 	//결재양식 리스트
-	@GetMapping("formList")
+	@GetMapping("admin/formList")
 	public String formList(Model model) throws Exception {
 		List<FormVO> ar = approvalService.getForms();
 		
@@ -69,7 +75,7 @@ public class ApprovalController {
 	}
 	
 	//결재양식 상세정보
-	@GetMapping("formDetail")
+	@GetMapping("/admin/formDetail")
 	public String formDetail(FormVO formVO, Model model) throws Exception {
 		formVO = approvalService.getForm(formVO);
 		
@@ -79,23 +85,35 @@ public class ApprovalController {
 	}
 	
 	//결재양식 등록 UI
-	@GetMapping("formRegister")
+	@GetMapping("admin/formRegister")
 	public String formRegister(Model model) throws Exception {
 		
 		return "form/formRegister";
 	}
 	
 	//결재양식 등록 프로세스
-	@PostMapping("formRegister")
-	public String formRegister(FormVO formVO) throws Exception {
+	@PostMapping("admin/formRegister")
+	public String formRegister(FormVO formVO, @AuthenticationPrincipal UserVO userVO, HttpServletRequest request) throws Exception {
 		
 		int result = approvalService.formRegister(formVO);
+		
+		if(result > 0) {
+			// 로그/감사 기록용
+			auditLogService.log(
+			        userVO.getUsername(),
+			        "CREATE_FORM",
+			        "FORM",
+			        formVO.getFormId().toString(),
+			        userVO.getUsername() + "이 " + formVO.getFormId() + "번 양식을 생성",
+			        request
+			    );
+		}
 		
 		return "redirect:./formList";
 	}
 	
 	//결재양식 수정 UI
-	@GetMapping("formUpdate")
+	@GetMapping("admin/formUpdate")
 	public String formUpdate(FormVO formVO, Model model) throws Exception {
 		formVO = approvalService.getForm(formVO);
 		
@@ -105,20 +123,44 @@ public class ApprovalController {
 	}
 	
 	//결재양식 수정 프로세스
-	@PostMapping("formUpdate")
-	public String formUpdate(FormVO formVO) throws Exception {
+	@PostMapping("admin/formUpdate")
+	public String formUpdate(FormVO formVO, @AuthenticationPrincipal UserVO userVO, HttpServletRequest request) throws Exception {
 		
 		int result = approvalService.formUpdate(formVO);
+		
+		if(result > 0) {
+			// 로그/감사 기록용
+			auditLogService.log(
+			        userVO.getUsername(),
+			        "UPDATE_FORM",
+			        "FORM",
+			        formVO.getFormId().toString(),
+			        userVO.getUsername() + "이 " + formVO.getFormId() + "번 양식을 수정",
+			        request
+			    );
+		}
 		
 		return "redirect:./formDetail?formId=".concat(formVO.getFormId().toString());
 		
 	}
 	
 	//결재양식 삭제
-	@GetMapping("formDelete")
-	public String formDelete(FormVO formVO) throws Exception {
+	@GetMapping("admin/formDelete")
+	public String formDelete(FormVO formVO, @AuthenticationPrincipal UserVO userVO, HttpServletRequest request) throws Exception {
 		
 		int result = approvalService.formDelete(formVO);
+		
+		if(result > 0) {
+			// 로그/감사 기록용
+			auditLogService.log(
+			        userVO.getUsername(),
+			        "UPDATE_FORM",
+			        "FORM",
+			        formVO.getFormId().toString(),
+			        userVO.getUsername() + "이 " + formVO.getFormId() + "번 양식을 삭제",
+			        request
+			    );
+		}
 		
 		return "redirect:./formList";
 	}
@@ -135,7 +177,7 @@ public class ApprovalController {
 	
 	//전자결재 작성 프로세스(document와 approval DB에 추가)
 	@PostMapping("addDocument")
-	public String addDocument(@RequestParam("approvalLineJson") String approvalLineJson, DocumentVO documentVO, @AuthenticationPrincipal UserVO userVO) throws Exception {
+	public String addDocument(@RequestParam("approvalLineJson") String approvalLineJson, DocumentVO documentVO, @AuthenticationPrincipal UserVO userVO, HttpServletRequest request) throws Exception {
 		//JSON <-> Java객체 변환을 도와줌
 		ObjectMapper mapper = new ObjectMapper();
 		//JSON 문자열을 읽어서 원하는 타입으로 바꿔줌
@@ -147,17 +189,19 @@ public class ApprovalController {
 	    
 	    documentVO.setWriterId(userVO.getUsername());
 	    //approverList 이제 사용 가능
-	    approvalService.addDocument(documentVO, approverList);
+	    approvalService.addDocument(documentVO, approverList, request);
+	    
+		
 	    
 	    return "redirect:/";
 	}
 	
 	//전자결재 문서 삭제
 	@GetMapping("deleteDocument")
-	public String deleteDocument(@AuthenticationPrincipal UserVO userVO, DocumentVO documentVO, Model model) throws Exception {
+	public String deleteDocument(@AuthenticationPrincipal UserVO userVO, DocumentVO documentVO, Model model, HttpServletRequest request) throws Exception {
 		documentVO.setWriterId(userVO.getUsername());
 		
-		int result = approvalService.deleteDocument(documentVO);
+		int result = approvalService.deleteDocument(documentVO, request);
 		
 		if(result > 0) {
 			return "redirect:/user/getDocuments";
@@ -291,7 +335,7 @@ public class ApprovalController {
 	}
 	
 	@PostMapping("saveSign")
-	public String saveSign(@AuthenticationPrincipal UserVO userVO, @RequestParam("imageData") String imageData) throws Exception {
+	public String saveSign(@AuthenticationPrincipal UserVO userVO, @RequestParam("imageData") String imageData, HttpServletRequest request) throws Exception {
 		UserSignatureVO userSignatureVO = new UserSignatureVO();
 		
 		System.out.println(imageData);
@@ -323,11 +367,23 @@ public class ApprovalController {
 		//DB에 INSERT
 		int result = approvalService.addSign(userSignatureVO);
 		
+		if(result > 0) {
+			// 로그/감사 기록용
+			auditLogService.log(
+			        userVO.getUsername(),
+			        "ADD_SIGN",
+			        "USER_SIGNATURE",
+			        userSignatureVO.getSignatureId().toString(),
+			        userVO.getUsername() + "이 서명 등록",
+			        request
+			    );
+		}
+		
 		return "redirect:/user/mypage";
 	}
 	
 	@PostMapping("saveStamp")
-	public String saveStamp(@AuthenticationPrincipal UserVO userVO, MultipartFile stampFile, Model model) throws Exception {
+	public String saveStamp(@AuthenticationPrincipal UserVO userVO, MultipartFile stampFile, Model model, HttpServletRequest request) throws Exception {
 		
 		//파일 지정을 안했을 때 실행안함
 		if (stampFile.isEmpty()) {
@@ -365,13 +421,25 @@ public class ApprovalController {
 		//DB에 INSERT
 		int result = approvalService.addSign(userSignatureVO);
 		
+		if(result > 0) {
+			// 로그/감사 기록용
+			auditLogService.log(
+			        userVO.getUsername(),
+			        "ADD_SIGN",
+			        "USER_SIGNATURE",
+			        userSignatureVO.getSignatureId().toString(),
+			        userVO.getUsername() + "이 도장 등록",
+			        request
+			    );
+		}
+		
 		return "redirect:/user/mypage";
 		
 		
 	}
 	
 	@GetMapping("deleteSign")
-	public String deleteSign(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
+	public String deleteSign(@AuthenticationPrincipal UserVO userVO, Model model, HttpServletRequest request) throws Exception {
 		//로그인한 유저의 서명/도장 정보 가져오기
 		UserSignatureVO userSignatureVO = userService.getSign(userVO);
 		//서명/도장이 없을 시 실행X
@@ -386,6 +454,16 @@ public class ApprovalController {
 		//DB에서 지워졌으면 HDD에서도 해당 파일 삭제
 		if(result > 0) {
 			fileManager.deleteFile(path.concat("userSignature"), userSignatureVO.getFileName());
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+			        userVO.getUsername(),
+			        "DELETE_SIGN",
+			        "USER_SIGNATURE",
+			        userSignatureVO.getSignatureId().toString(),
+			        userVO.getUsername() + "이 서명/도장 삭제",
+			        request
+			    );
 		}
 		
 		return "redirect:/user/mypage";
@@ -393,13 +471,13 @@ public class ApprovalController {
 	
 	@PostMapping("appOrRej")
 	@ResponseBody
-	public int appOrRej(@AuthenticationPrincipal UserVO userVO, ApprovalVO approvalVO, DocumentVO documentVO, int type) throws Exception {		
+	public int appOrRej(@AuthenticationPrincipal UserVO userVO, ApprovalVO approvalVO, DocumentVO documentVO, int type, HttpServletRequest request) throws Exception {		
 		int result = 0;
 		
 		if(type == 1) {
-			result = approvalService.approve(approvalVO, documentVO, userVO);
+			result = approvalService.approve(approvalVO, documentVO, userVO, request);
 		}else {
-			result = approvalService.rejection(approvalVO, documentVO, userVO);
+			result = approvalService.rejection(approvalVO, documentVO, userVO, request);
 		}
 		
 		
@@ -416,28 +494,16 @@ public class ApprovalController {
 	}
 	
 	@GetMapping("list")
-	public String list(@AuthenticationPrincipal UserVO userVO, FormVO formVO, String search, Model model) throws Exception {
-		ApprovalVO approvalVO = new ApprovalVO();
+	public String list(@AuthenticationPrincipal UserVO userVO, Pager pager, ApprovalVO approvalVO, Model model) throws Exception {
 		approvalVO.setApproverId(userVO.getUsername());
 		
-		//양식별 카테고리 정보 DB로 넘기기용
-		if(formVO.getFormId() != null) {
-			approvalVO.setDocumentVO(new DocumentVO());
-			approvalVO.getDocumentVO().setFormId(formVO.getFormId());
-		}
 		
-		List<ApprovalVO> ar = approvalService.getList(approvalVO, search);
+		List<ApprovalVO> ar = approvalService.getList(approvalVO, pager);
 		model.addAttribute("ar", ar);
-		
-		//양식별로 결재문서 불러오기
-		List<FormVO> forms = approvalService.getForms();
-		model.addAttribute("forms", forms);
-		
-		//양식목록을 바꾸면 해당 목록으로 selected되있게 하기위함
-		model.addAttribute("selectedFormId", formVO.getFormId());
-		
-		//양식목록을 바꾸면 해당 작성자로 검색되있게 하기위함
-		model.addAttribute("writedId", search);
+		//페이징
+		model.addAttribute("pager", pager);
+		//승인여부 넘기기
+		model.addAttribute("approvalStatus", approvalVO.getApprovalStatus());
 		
 		return "approval/list";
 	

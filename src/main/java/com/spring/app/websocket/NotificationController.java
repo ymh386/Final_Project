@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.spring.app.home.util.Pager;
 import com.spring.app.user.UserVO;
 
 @Controller
@@ -55,12 +56,13 @@ public class NotificationController {
 	}
 	
 	@GetMapping("list")
-	public String getList(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
-		NotificationVO notificationVO = new NotificationVO();
+	public String getList(@AuthenticationPrincipal UserVO userVO, NotificationVO notificationVO, Pager pager, Model model) throws Exception {
 		notificationVO.setUsername(userVO.getUsername());
 		
-		List<NotificationVO> ar = notificationService.getList(notificationVO);
+		List<NotificationVO> ar = notificationService.getList(notificationVO, pager);
 		model.addAttribute("ar", ar);
+		model.addAttribute("pager", pager);
+		model.addAttribute("read", notificationVO.getRead());
 		
 		return "notification/list";
 	}

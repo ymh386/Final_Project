@@ -15,11 +15,17 @@ import org.springframework.stereotype.Component;
 
 import com.spring.app.approval.ApprovalVO;
 import com.spring.app.approval.DocumentVO;
+import com.spring.app.board.BoardVO;
+import com.spring.app.board.comment.CommentVO;
+import com.spring.app.board.interaction.InteractionVO;
 import com.spring.app.board.notice.NoticeDAO;
 import com.spring.app.chat.ChatMessageVO;
 import com.spring.app.chat.ChatRoomVO;
 import com.spring.app.chat.RoomMemberVO;
 import com.spring.app.user.MemberStateVO;
+import com.spring.app.equipment.EquipmentFaultVO;
+import com.spring.app.reservation.ReservationVO;
+import com.spring.app.schedule.ScheduleVO;
 import com.spring.app.user.UserVO;
 
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +54,7 @@ public class NotificationManager {
 			result = notificationDAO.add(notificationVO);
 			notificationVO = notificationDAO.getDetail(notificationVO);
 		}
+		
 		
 		if(result > 0) {
 			//해당 경로로 메세지를 보내면, 그 사용자에게 알림이 도착
@@ -199,6 +206,117 @@ public class NotificationManager {
 		this.sendNotification(notificationVO);
 	}
 	
+	//일정 부여 알림
+	public void scheduleNotification(ScheduleVO scheduleVO) throws Exception {
+		NotificationVO notificationVO = new NotificationVO();
+		notificationVO.setNotificationTitle("일정 추가");
+		notificationVO.setUsername(scheduleVO.getUsername());
+		notificationVO.setMessage("일정이 추가되었습니다. 확인해주세요.\n"
+				+ scheduleVO.getScheduleDate() + " " + scheduleVO.getStartTime() + " ~ " + scheduleVO.getEndTime());
+		notificationVO.setLinkUrl("/schedule/page");
+		notificationVO.setNotificationType("N11");
+		notificationVO.setSenderId("admin");
+		
+		this.sendNotification(notificationVO);
+	}
+	
+	//일정 취소 알림
+	public void cancelScheduleNotification(ScheduleVO scheduleVO) throws Exception {
+		NotificationVO notificationVO = new NotificationVO();
+		notificationVO.setNotificationTitle("일정 취소");
+		notificationVO.setUsername(scheduleVO.getUsername());
+		notificationVO.setMessage("일정이 취소되었습니다. 확인해주세요.\n"
+				+ scheduleVO.getScheduleDate() + " " + scheduleVO.getStartTime() + " ~ " + scheduleVO.getEndTime());
+		notificationVO.setLinkUrl("/schedule/page");
+		notificationVO.setNotificationType("N12");
+		notificationVO.setSenderId("admin");
+		
+		this.sendNotification(notificationVO);
+	}
+	
+	
+	
+	//수업 예약
+	public void reserveNotification(ReservationVO reservationVO) throws Exception {
+		NotificationVO notificationVO = null;
+		
+		//예약자에게 알림
+		notificationVO = new NotificationVO();
+		
+		notificationVO.setNotificationTitle("수업 예약 완료");
+		notificationVO.setUsername(reservationVO.getUsername());
+		notificationVO.setMessage("수업 예약이 완료되었습니다.\n"
+				+ "예약정보\n"
+				+ "- 예약자명 : " + reservationVO.getUserVO().getName() + "\n"
+				+ "- " + reservationVO.getScheduleVO().getScheduleDate() + " " + reservationVO.getScheduleVO().getStartTime() + " ~ " + reservationVO.getScheduleVO().getEndTime() +"\n"
+				+ "- 트레이너명 : " + reservationVO.getScheduleVO().getUserVO().getName() + "\n"
+				+ "- 시설명 : " + reservationVO.getFacilityVO().getName() + "(" + reservationVO.getFacilityVO().getLocation() + ")");
+		notificationVO.setLinkUrl("/reservation/my");
+		notificationVO.setNotificationType("N4");
+		notificationVO.setSenderId(reservationVO.getScheduleVO().getUsername());
+		
+		this.sendNotification(notificationVO);
+		
+		//트레이너에게 알림
+		notificationVO = new NotificationVO();
+		
+		notificationVO.setNotificationTitle("수업 예약 완료");
+		notificationVO.setUsername(reservationVO.getScheduleVO().getUsername());
+		notificationVO.setMessage("수업 예약이 완료되었습니다.\n"
+				+ "예약정보\n"
+				+ "- 예약자명 : " + reservationVO.getUserVO().getName() + "\n"
+				+ "- " + reservationVO.getScheduleVO().getScheduleDate() + " " + reservationVO.getScheduleVO().getStartTime() + " ~ " + reservationVO.getScheduleVO().getEndTime() +"\n"
+				+ "- 트레이너명 : " + reservationVO.getScheduleVO().getUserVO().getName() + "\n"
+				+ "- 시설명 : " + reservationVO.getFacilityVO().getName() + "(" + reservationVO.getFacilityVO().getLocation() + ")");
+		notificationVO.setLinkUrl("/schedule/page");
+		notificationVO.setNotificationType("N4");
+		notificationVO.setSenderId(reservationVO.getUsername());
+		
+		this.sendNotification(notificationVO);
+	}
+	
+	//수업 예약 취소
+	public void cancelReserveNotification(ReservationVO reservationVO) throws Exception {
+		
+		NotificationVO notificationVO = null;
+		
+		//예약자에게 알림
+		notificationVO = new NotificationVO();
+		
+		notificationVO.setNotificationTitle("수업 예약 취소");
+		notificationVO.setUsername(reservationVO.getUsername());
+		notificationVO.setMessage("수업 예약이 취소되었습니다.\n"
+				+ "예약정보\n"
+				+ "- 예약자명 : " + reservationVO.getUserVO().getName() + "\n"
+				+ "- " + reservationVO.getScheduleVO().getScheduleDate() + " " + reservationVO.getScheduleVO().getStartTime() + " ~ " + reservationVO.getScheduleVO().getEndTime() +"\n"
+				+ "- 트레이너명 : " + reservationVO.getScheduleVO().getUserVO().getName() + "\n"
+				+ "- 시설명 : " + reservationVO.getFacilityVO().getName() + "(" + reservationVO.getFacilityVO().getLocation() + ")\n\n"
+				+ "취소 사유 : " + reservationVO.getCanceledReason());
+		notificationVO.setLinkUrl("/reservation/my");
+		notificationVO.setNotificationType("N5");
+		notificationVO.setSenderId(reservationVO.getScheduleVO().getUsername());
+		
+		this.sendNotification(notificationVO);
+
+		
+		//트레이너에게 알림
+		notificationVO = new NotificationVO();
+		
+		notificationVO.setNotificationTitle("수업 예약 취소");
+		notificationVO.setUsername(reservationVO.getScheduleVO().getUsername());
+		notificationVO.setMessage("수업 예약이 취소되었습니다.\n"
+				+ "예약자명 : " + reservationVO.getUserVO().getName() + "\n"
+				+ "- " + reservationVO.getScheduleVO().getScheduleDate() + " " + reservationVO.getScheduleVO().getStartTime() + " ~ " + reservationVO.getScheduleVO().getEndTime() +"\n"
+				+ "- 트레이너명 : " + reservationVO.getScheduleVO().getUserVO().getName() + "\n"
+				+ "- 시설명 : " + reservationVO.getFacilityVO().getName() + "(" + reservationVO.getFacilityVO().getLocation() + ")\n\n"
+				+ "취소 사유 : " + reservationVO.getCanceledReason());
+		notificationVO.setLinkUrl("/schedule/page");
+		notificationVO.setNotificationType("N5");
+		notificationVO.setSenderId(reservationVO.getUsername());
+		
+		this.sendNotification(notificationVO);
+	}
+	
 	//구독권 하루 남았을때 알림
 	public void SubscribeWarningNotification(MemberStateVO memberStateVO, String username) throws Exception {
 		String senderName = notificationDAO.getSenderName(memberStateVO.getUsername());
@@ -242,5 +360,84 @@ public class NotificationManager {
 		
 		this.sendNotification(notificationVO);
 	}
-
+	
+	//비품 신고접수 알림
+	public void reportNotification(EquipmentFaultVO equipmentFaultVO) throws Exception {
+		NotificationVO notificationVO = null;
+		
+		notificationVO = new NotificationVO();
+		notificationVO.setNotificationTitle("비품 신고 접수");
+		notificationVO.setUsername(equipmentFaultVO.getUsername());
+		notificationVO.setMessage("비품 신고가 접수되었습니다.\n"
+				+ "(" + equipmentFaultVO.getEquipmentLocation() + " - " + equipmentFaultVO.getEquipmentName() + ")");
+		notificationVO.setLinkUrl("/equipment/main");
+		notificationVO.setNotificationType("N13");
+		notificationVO.setSenderId("admin");
+		
+		this.sendNotification(notificationVO);
+		
+		notificationVO = new NotificationVO();
+		notificationVO.setNotificationTitle("비품 신고 접수");
+		notificationVO.setUsername("admin");
+		notificationVO.setMessage("비품 신고요청이 왔습니다. 확인해주세요.\n"
+				+ "(" + equipmentFaultVO.getEquipmentLocation() + " - " + equipmentFaultVO.getEquipmentName() + ")");
+		notificationVO.setLinkUrl("/equipment/admin");
+		notificationVO.setNotificationType("N13");
+		notificationVO.setSenderId(equipmentFaultVO.getUsername());
+		
+		this.sendNotification(notificationVO);
+		
+	}
+	
+	//비품 신고 진행상황 알림
+	public void reportingNotification(EquipmentFaultVO equipmentFaultVO) throws Exception {
+		NotificationVO notificationVO = new NotificationVO();
+		
+		if("처리완료".equals(equipmentFaultVO.getFaultStatus())) {
+			notificationVO.setMessage("비품 신고가 처리 완료되었습니다.\n"
+					+ "(" + equipmentFaultVO.getEquipmentLocation() + " - " + equipmentFaultVO.getEquipmentName() + ")");
+		}else {
+			notificationVO.setMessage("비품 신고 처리 중 입니다.\n"
+					+ "(" + equipmentFaultVO.getEquipmentLocation() + " - " + equipmentFaultVO.getEquipmentName() + ")");
+		}
+		
+		notificationVO.setNotificationTitle("비품 신고 진행상황");
+		notificationVO.setUsername(equipmentFaultVO.getUsername());
+		notificationVO.setLinkUrl("/equipment/main");
+		notificationVO.setNotificationType("N14");
+		notificationVO.setSenderId("admin");
+		
+		this.sendNotification(notificationVO);
+	}
+	
+	//게시글 좋아요 알림
+	public void likeNotification(InteractionVO interactionVO, BoardVO boardVO) throws Exception {
+		NotificationVO notificationVO = new NotificationVO();
+		notificationVO.setNotificationTitle("좋아요");
+		notificationVO.setUsername(boardVO.getUserName());
+		notificationVO.setMessage(interactionVO.getUserName() + "님께서 회원님의 게시글을 좋아합니다 : "
+				+ boardVO.getBoardTitle());
+		notificationVO.setLinkUrl("/board/detail?boardNum=".concat(boardVO.getBoardNum().toString()));
+		notificationVO.setNotificationType("N15");
+		notificationVO.setSenderId(interactionVO.getUserName());
+		
+		this.sendNotification(notificationVO);
+		
+	}
+	
+	//게시글 댓글 알림
+	public void commentNotification(CommentVO commentVO, BoardVO boardVO) throws Exception {
+		NotificationVO notificationVO = new NotificationVO();
+		notificationVO.setNotificationTitle("댓글");
+		notificationVO.setUsername(boardVO.getUserName());
+		notificationVO.setMessage(commentVO.getUserName() + "님께서 회원님의 게시글에 댓글을 작성했습니다 : "
+				+ boardVO.getBoardTitle() + "\n - "
+				+ commentVO.getCommentContents());
+		notificationVO.setLinkUrl("/board/detail?boardNum=".concat(boardVO.getBoardNum().toString()));
+		notificationVO.setNotificationType("N16");
+		notificationVO.setSenderId(commentVO.getUserName());
+		
+		this.sendNotification(notificationVO);
+		
+	}
 }

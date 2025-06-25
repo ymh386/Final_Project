@@ -3,6 +3,7 @@ package com.spring.app.websocket;
 import java.sql.Date;
 import java.sql.Timestamp;
 
+import com.spring.app.home.util.Pager;
 import com.spring.app.user.UserVO;
 
 import lombok.Getter;
@@ -20,10 +21,13 @@ public class NotificationVO {
 	private String message;
 	private String linkUrl;
 	private String notificationType;
-	private boolean read;
+	private Boolean read;
 	private Timestamp createdAt;
 	private String senderId;
 	
 	private UserVO userVO;
 	private UserVO senderVO;
+	
+	//페이징 처리용
+	private Pager pager;
 }

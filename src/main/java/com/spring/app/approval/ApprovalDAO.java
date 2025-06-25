@@ -71,7 +71,10 @@ public interface ApprovalDAO {
 	public int updateContent(DocumentVO documentVO) throws Exception;
 	
 	//로그인한 유저의 승인내역 리스트
-	public List<ApprovalVO> getList(Map<String, Object> map) throws Exception;
+	public List<ApprovalVO> getList(ApprovalVO approvalVO) throws Exception;
+	
+	//로그인한 유저의 승인내역 총 개수
+	public Long getApprovalCount(ApprovalVO approvalVO) throws Exception;
 	
 	//로그인한 유저의 승인내역 디테일
 	public ApprovalVO getDetail(ApprovalVO approvalVO) throws Exception;

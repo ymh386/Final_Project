@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import com.spring.app.user.UserVO;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,6 +23,8 @@ public class ScheduleVO {
     private LocalTime endTime;     // 종료 시간
     private LocalDateTime createdAt; // 생성 일시
     private Long remainingSeats; // 남은 좌석 수 
+    
+    private UserVO userVO; //트레이너 정보
 	
 	
 }

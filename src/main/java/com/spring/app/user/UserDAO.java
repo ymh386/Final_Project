@@ -59,6 +59,9 @@ public interface UserDAO {
 	//트레이너등급 이상 부서가없는 회원들의 정보 조회
 	List<UserVO> getUsersNoDepartment() throws Exception;
 	
+	//트레이너등급 이상 부서별 회원들의 정보 조회
+	List<UserVO> getUsersOfDepartment(DepartmentVO departmentVO) throws Exception;
+	
 	//부서등 정보 가져오기
 	List<DepartmentVO> getDepartments() throws Exception;
 	
@@ -67,6 +70,9 @@ public interface UserDAO {
 	
 	//전재결재 작성목록 불러오기
 	public List<DocumentVO> getDocuments(DocumentVO documentVO) throws Exception;
+	
+	//로그인한 유저의 전자결재 작성목록 총 개수
+	public Long getDocumentCount(DocumentVO documentVO) throws Exception;
 	
 	//전자결재 작성 디테일 불러오기
 	public DocumentVO getDocument(DocumentVO documentVO) throws Exception;

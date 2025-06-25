@@ -106,12 +106,6 @@
         결재신청
       </a>
     </sec:authorize>
-    <sec:authorize access="hasRole('ADMIN')">
-      <a class="nav-link" href="/approval/formList">
-        <div class="sb-nav-link-icon"><i class="bi bi-person-bounding-box"></i></div>
-        결재양식(관리자)
-      </a>
-    </sec:authorize>
   </div>
   <div class="sb-sidenav-footer">
     <div class="small">Logged in as:</div>

@@ -22,11 +22,13 @@
                 <main class="flex-grow-1">
                     <div class="container">
 							<!-- contents -->
+						<div class="container mt-4">
 						<h2>승인 대기함</h2>
-    
+
 						<c:if test="${not empty ar}">
-							<table class="table table-hover">
-								<thead>
+
+							<table class="table table-hover table-bordered">
+								<thead class="table-dark">
 									<tr>
 										<th scope="col">문서번호</th>
 										<th scope="col">종류</th>
@@ -73,11 +75,11 @@
 
 
 
-
-
-					<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+						</div>
+					
 					</div>
 				</main>
+				<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 			</div>
 		</div>
 					
@@ -85,8 +87,6 @@
 	
 	
 	
-		<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
-		</div>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	</body>
 </html>

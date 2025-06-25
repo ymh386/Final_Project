@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import com.spring.app.home.util.Pager;
 import com.spring.app.user.UserVO;
 
 @Mapper
@@ -29,4 +30,6 @@ public interface NotificationDAO {
 	
 	//송신자 이름 조회
 	public String getSenderName(String username) throws Exception;
+	
+	public Long getNotificationCount(NotificationVO notificationVO) throws Exception;
 }

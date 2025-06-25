@@ -86,6 +86,13 @@
       font-weight: bold;
       color: #2025b6;
     }
+    /* 삭제 버튼 별도 색상 */
+    .btn-delete {
+      padding: 6px 14px;
+      font-size: 14px;
+      background: linear-gradient(90deg, #ef4444 20%, #f59e42 100%);
+      box-shadow: none;
+    }
   </style>
 </head>
 <body>
@@ -138,7 +145,7 @@
               <form action="${pageContext.request.contextPath}/notice/delete" method="post" style="display:inline;" onsubmit="return confirm('정말 삭제할까요?');">
                 <input type="hidden" name="boardNum" value="${notice.boardNum}" />
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                <button type="submit" class="modern-btn" style="padding: 6px 14px; font-size: 14px; background:linear-gradient(90deg, #ef4444 20%, #f59e42 100%);">
+                <button type="submit" class="modern-btn btn-delete">
                   <i class="fas fa-trash-alt"></i>삭제
                 </button>
               </form>

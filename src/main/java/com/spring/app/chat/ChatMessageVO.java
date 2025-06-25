@@ -20,6 +20,6 @@ public class ChatMessageVO {
 	private String createdAt;
 	private String senderId;
 	private Long readStatus;
-	
+	private String mediaUrl;
 
 }
