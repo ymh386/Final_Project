@@ -120,6 +120,11 @@ public class EquipmentService {
         return faultDAO.getFaultReportsByPage(offset, size);
     }
     
+    public List<EquipmentVO> selectByFacilityId(Long facilityId){
+    	return equipmentDAO.selectByFacilityId(facilityId);
+    	
+    }
+    
     
 }
 
