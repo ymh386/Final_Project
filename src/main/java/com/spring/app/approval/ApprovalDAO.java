@@ -81,4 +81,7 @@ public interface ApprovalDAO {
 	
 	//다음결재자 정보 조회
 	public ApprovalVO getChild(ApprovalVO approvalVO) throws Exception;
+	
+	//해당 유저 휴가사용
+	public int updateLeave(LeaveVO leaveVO) throws Exception;
 }

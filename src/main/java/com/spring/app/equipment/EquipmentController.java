@@ -135,8 +135,8 @@ public class EquipmentController {
 				        "EQUIPMENT_FAULT",
 				        faultReport.getReportId().toString(),
 				        faultReport.getUsername()
-				        + "이 " + faultReport.getEquipmentLocation()
-				        + "의 " + faultReport.getEquipmentName() + " 고장 신고",
+				        + "이 " + faultReport.getEquipmentVO().getFacilityVO().getName()
+				        + "의 " + faultReport.getEquipmentVO().getName() + " 고장 신고",
 				        request
 				    );
             	
@@ -187,8 +187,8 @@ public class EquipmentController {
 				        "EQUIPMENT_FAULT",
 				        equipmentFaultVO.getReportId().toString(),
 				        "admin이 " + equipmentFaultVO.getUsername() + "이 신고한 "
-				        + equipmentFaultVO.getEquipmentLocation()+ "의 "
-				        + equipmentFaultVO.getEquipmentName()
+				        + equipmentFaultVO.getEquipmentVO().getFacilityVO().getName() + "의 "
+				        + equipmentFaultVO.getEquipmentVO().getName()
 				        + " 고장 신고 처리중",
 				        request
 				    );
@@ -227,8 +227,8 @@ public class EquipmentController {
 				        "EQUIPMENT_FAULT",
 				        equipmentFaultVO.getReportId().toString(),
 				        "admin이 " + equipmentFaultVO.getUsername() + "이 신고한 "
-				        + equipmentFaultVO.getEquipmentLocation()+ "의 "
-				        + equipmentFaultVO.getEquipmentName()
+				        + equipmentFaultVO.getEquipmentVO().getFacilityVO().getName() + "의 "
+				        + equipmentFaultVO.getEquipmentVO().getName()
 				        + " 고장 신고 처리완료",
 				        request
 				    );

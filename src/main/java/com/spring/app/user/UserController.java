@@ -1,5 +1,7 @@
 package com.spring.app.user;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -32,6 +34,8 @@ import com.spring.app.approval.UserSignatureVO;
 import com.spring.app.files.FileManager;
 import com.spring.app.home.util.Pager;
 import com.spring.app.auditLog.AuditLogService;
+import com.spring.app.chart.AttendanceStatVO;
+import com.spring.app.chart.ChartService;
 import com.spring.app.payment.PaymentService;
 import com.spring.app.subscript.SubscriptService;
 import com.spring.app.subscript.SubscriptVO;
@@ -74,6 +78,9 @@ public class UserController {
 	
 	@Autowired
 	private AuditLogService auditLogService;
+	
+	@Autowired
+	private ChartService chartService;
 
 	
 	@Value("${board.file.path}")
@@ -91,7 +98,30 @@ public class UserController {
 	void memberJoin() {}
 	
 	@GetMapping("mypage")
-	void myPage(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
+	void myPage(@AuthenticationPrincipal UserVO userVO, @RequestParam(required = false) Integer year, Model model) throws Exception {
+		
+		////로그인한 유저의 근태율 차트
+		// 현재 연도 기준으로 yearList 생성
+	    Integer currentYear = LocalDate.now(ZoneId.of("Asia/Seoul")).getYear();
+	    List<Integer> yearList = new ArrayList<>();
+	    for (int y = 2020; y <= currentYear; y++) {
+	        yearList.add(y);
+	    }
+	    
+	    if (year == null) {
+	        // 기본 연도 설정(현재년도)
+	        year = currentYear;
+		}
+    	
+	    //현재년도로 설정용
+		model.addAttribute("year", year);
+		//연도별 필터링 시 필요한 정보들
+		model.addAttribute("yearList", yearList);
+	    
+	    List<AttendanceStatVO> stats = chartService.getMonthlyStats(year, userVO.getUsername());
+	    //통계를 차트화 할때 필요한 정보들
+	    model.addAttribute("stats", stats);
+		
 		
 		//로그인한 유저의 서명정보 담기
 		UserSignatureVO userSignatureVO = userService.getSign(userVO);

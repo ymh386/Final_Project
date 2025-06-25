@@ -15,6 +15,12 @@
     <result property="faultStatus"  column="FAULT_STATUS"/>
     <result property="resolvedAt"   column="RESOLVED_AT"/>
     <result property="equipmentName" column="EQUIPMENT_NAME"/>
+    <association javaType="EquipmentVO" property="equipmentVO">
+    	<result property="name" column="EQUIPMENT_NAME"/>
+    	<association javaType="FacilityVO" property="facilityVO">
+    		<result property="name" column="FACILITY_NAME"/>
+    	</association>
+    </association>
   </resultMap>
 
   <!-- 모든 고장 신고 조회 -->
@@ -42,8 +48,8 @@
 		   EF.DESCRIPTION,
 		   EF.FAULT_STATUS,
 		   EF.RESOLVED_AT,
-		   E.NAME       AS equipmentName,
-		   E.LOCATION   AS equipmentLocation
+		   E.NAME       AS EQUIPMENT_NAME,
+		   F.NAME   	AS FACILITY_NAME
 	  FROM EQUIPMENT_FAULT EF
 	  LEFT OUTER JOIN EQUIPMENT E
 	    ON EF.EQUIPMENT_ID = E.EQUIPMENT_ID

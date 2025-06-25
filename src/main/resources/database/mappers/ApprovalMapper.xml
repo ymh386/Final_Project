@@ -244,6 +244,14 @@
   		UPDATE DOCUMENT SET CONTENT_HTML=#{contentHtml} WHERE DOCUMENT_ID=#{documentId}
   	</update>
   	
+  	<update id="updateLeave" parameterType="LeaveVO">
+  		UPDATE LEAVE_BALANCE
+  		   SET USED_DAYS = USED_DAYS + #{usedDays}
+  		 WHERE USERNAME=#{username}
+  		   AND TYPE_ID=#{typeId}
+  		   AND YEAR=#{year}
+  	</update>
+  	
   	<delete id="deleteCategory" parameterType="CategoryVO">
   		DELETE FROM FORM_CATEGORY
   		WHERE CATEGORY_ID=#{categoryId}

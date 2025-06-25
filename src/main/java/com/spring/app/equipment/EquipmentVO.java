@@ -3,6 +3,8 @@ package com.spring.app.equipment;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.spring.app.facility.FacilityVO;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,6 +19,8 @@ public class EquipmentVO {
 	    private LocalDateTime lastMaintenanceAt;
 	    private String status;
 	    private LocalDateTime createdAt;
+	    
+	    private FacilityVO facilityVO;
 	    
 	
 	

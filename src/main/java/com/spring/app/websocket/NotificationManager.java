@@ -93,7 +93,6 @@ public class NotificationManager {
 	//결재문서 최종 승인
 	public void appOrRejNotification(DocumentVO documentVO, UserVO userVO) throws Exception {
 		NotificationVO notificationVO = new NotificationVO();
-		log.info("documentVO {}", documentVO);
 		if("D1".equals(documentVO.getDocumentStatus())) {
 			notificationVO.setNotificationTitle("결재문서 최종 승인");
 			notificationVO.setMessage("요청하신 결재가 최종 승인되었습니다.");
@@ -369,7 +368,7 @@ public class NotificationManager {
 		notificationVO.setNotificationTitle("비품 신고 접수");
 		notificationVO.setUsername(equipmentFaultVO.getUsername());
 		notificationVO.setMessage("비품 신고가 접수되었습니다.\n"
-				+ "(" + equipmentFaultVO.getEquipmentLocation() + " - " + equipmentFaultVO.getEquipmentName() + ")");
+				+ "(" + equipmentFaultVO.getEquipmentVO().getFacilityVO().getName() + " - " + equipmentFaultVO.getEquipmentName() + ")");
 		notificationVO.setLinkUrl("/equipment/main");
 		notificationVO.setNotificationType("N13");
 		notificationVO.setSenderId("admin");
@@ -380,7 +379,7 @@ public class NotificationManager {
 		notificationVO.setNotificationTitle("비품 신고 접수");
 		notificationVO.setUsername("admin");
 		notificationVO.setMessage("비품 신고요청이 왔습니다. 확인해주세요.\n"
-				+ "(" + equipmentFaultVO.getEquipmentLocation() + " - " + equipmentFaultVO.getEquipmentName() + ")");
+				+ "(" + equipmentFaultVO.getEquipmentVO().getFacilityVO().getName() + " - " + equipmentFaultVO.getEquipmentName() + ")");
 		notificationVO.setLinkUrl("/equipment/admin");
 		notificationVO.setNotificationType("N13");
 		notificationVO.setSenderId(equipmentFaultVO.getUsername());
@@ -395,10 +394,10 @@ public class NotificationManager {
 		
 		if("처리완료".equals(equipmentFaultVO.getFaultStatus())) {
 			notificationVO.setMessage("비품 신고가 처리 완료되었습니다.\n"
-					+ "(" + equipmentFaultVO.getEquipmentLocation() + " - " + equipmentFaultVO.getEquipmentName() + ")");
+					+ "(" + equipmentFaultVO.getEquipmentVO().getFacilityVO().getName() + " - " + equipmentFaultVO.getEquipmentName() + ")");
 		}else {
 			notificationVO.setMessage("비품 신고 처리 중 입니다.\n"
-					+ "(" + equipmentFaultVO.getEquipmentLocation() + " - " + equipmentFaultVO.getEquipmentName() + ")");
+					+ "(" + equipmentFaultVO.getEquipmentVO().getFacilityVO().getName() + " - " + equipmentFaultVO.getEquipmentName() + ")");
 		}
 		
 		notificationVO.setNotificationTitle("비품 신고 진행상황");

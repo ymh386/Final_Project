@@ -59,7 +59,7 @@
 									<label class="form-label">연도</label>
 									<select name="year" class="form-select">
 										<c:forEach var="y" items="${yearList}">
-										<option value="${y}" <c:if test="${y == year}">selected</c:if>>${y}년</option>
+											<option value="${y}" <c:if test="${y == year}">selected</c:if>>${y}년</option>
 										</c:forEach>
 									</select>
 									</div>
@@ -79,10 +79,10 @@
 									<div class="col-md-3" id="deptSelectContainer" style="display:none">
 										<label class="form-label">부서</label>
 										<select id="deptSelect" name="departmentId" class="form-select" onchange="onDeptChange()">
-										<option value="">전체</option>
-										<c:forEach var="dept" items="${deptList}">
-											<option value="${dept.departmentId}"  <c:if test="${dept.departmentId == deptId}">selected</c:if>>${dept.departmentName}</option>
-										</c:forEach>
+											<option value="">전체</option>
+											<c:forEach var="dept" items="${deptList}">
+												<option value="${dept.departmentId}"  <c:if test="${dept.departmentId == deptId}">selected</c:if>>${dept.departmentName}</option>
+											</c:forEach>
 										</select>
 									</div>
 								

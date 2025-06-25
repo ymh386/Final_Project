@@ -19,6 +19,8 @@ public class EquipmentFaultVO {
     private String faultStatus;
     private LocalDateTime resolvedAt;
     private String equipmentName;
+    
+    private EquipmentVO equipmentVO;
    
 	
 	
