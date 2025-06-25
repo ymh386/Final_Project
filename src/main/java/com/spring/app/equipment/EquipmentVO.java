@@ -13,10 +13,11 @@ public class EquipmentVO {
 	    private Long equipmentId;
 	    private String name;
 	    private String description;
-	    private String location;
+	    private Long facilityId;
 	    private LocalDateTime lastMaintenanceAt;
 	    private String status;
 	    private LocalDateTime createdAt;
+	    
 	
 	
 	    public String getLastMaintenanceAtStr() {

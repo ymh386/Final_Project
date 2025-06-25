@@ -19,7 +19,7 @@ public class EquipmentFaultVO {
     private String faultStatus;
     private LocalDateTime resolvedAt;
     private String equipmentName;
-    private String equipmentLocation;
+   
 	
 	
     // reportDate를 yyyy-MM-dd HH:mm:ss 형식의 문자열로 반환

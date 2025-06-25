@@ -7,34 +7,34 @@
 
   <!-- 결과 매핑 -->
   <resultMap id="faultReportResultMap" type="com.spring.app.equipment.EquipmentFaultVO">
-    <id     property="reportId"    column="REPORT_ID"/>
-    <result property="equipmentId" column="EQUIPMENT_ID"/>
-    <result property="username"    column="USERNAME"/>
-    <result property="reportDate"  column="REPORT_DATE"/>
-    <result property="description" column="DESCRIPTION"/>
-    <result property="faultStatus" column="FAULT_STATUS"/>
-    <result property="resolvedAt"  column="RESOLVED_AT"/>
+    <id     property="reportId"     column="REPORT_ID"/>
+    <result property="equipmentId"  column="EQUIPMENT_ID"/>
+    <result property="username"     column="USERNAME"/>
+    <result property="reportDate"   column="REPORT_DATE"/>
+    <result property="description"  column="DESCRIPTION"/>
+    <result property="faultStatus"  column="FAULT_STATUS"/>
+    <result property="resolvedAt"   column="RESOLVED_AT"/>
+    <result property="equipmentName" column="EQUIPMENT_NAME"/>
   </resultMap>
 
   <!-- 모든 고장 신고 조회 -->
   <select id="selectAllFaultReports" resultMap="faultReportResultMap">
-  SELECT
-    EF.REPORT_ID,
-    EF.EQUIPMENT_ID,
-    EF.USERNAME,
-    EF.REPORT_DATE,
-    EF.DESCRIPTION,
-    EF.FAULT_STATUS,
-    EF.RESOLVED_AT,
-    E.NAME       AS equipmentName,
-    E.LOCATION   AS equipmentLocation
-  FROM EQUIPMENT_FAULT EF
-  JOIN EQUIPMENT E
-    ON EF.EQUIPMENT_ID = E.EQUIPMENT_ID
+    SELECT
+      EF.REPORT_ID,
+      EF.EQUIPMENT_ID,
+      EF.USERNAME,
+      EF.REPORT_DATE,
+      EF.DESCRIPTION,
+      EF.FAULT_STATUS,
+      EF.RESOLVED_AT,
+      E.NAME AS EQUIPMENT_NAME
+    FROM EQUIPMENT_FAULT EF
+    JOIN EQUIPMENT E ON EF.EQUIPMENT_ID = E.EQUIPMENT_ID
   </select>
 
   <!-- 신고 ID로 조회 -->
   <select id="selectFaultReportById" parameterType="Long" resultMap="faultReportResultMap">
+
     SELECT EF.REPORT_ID,
 		   EF.EQUIPMENT_ID,
 		   EF.USERNAME,
@@ -50,39 +50,41 @@
 	  LEFT OUTER JOIN FACILITY F
 	  	ON E.FACILITY_ID = F.FACILITY_ID 
 	 WHERE REPORT_ID = #{reportId}
+
   </select>
 
   <!-- 비품 ID로 신고 내역 조회 -->
   <select id="selectFaultReportsByEquipmentId" parameterType="Long" resultMap="faultReportResultMap">
-    SELECT REPORT_ID,
-           EQUIPMENT_ID,
-           USERNAME,
-           REPORT_DATE,
-           DESCRIPTION,
-           FAULT_STATUS,
-           RESOLVED_AT
-      FROM EQUIPMENT_FAULT
-     WHERE EQUIPMENT_ID = #{equipmentId}
-     ORDER BY REPORT_DATE DESC
+    SELECT
+      EF.REPORT_ID,
+      EF.EQUIPMENT_ID,
+      EF.USERNAME,
+      EF.REPORT_DATE,
+      EF.DESCRIPTION,
+      EF.FAULT_STATUS,
+      EF.RESOLVED_AT,
+      E.NAME AS EQUIPMENT_NAME
+    FROM EQUIPMENT_FAULT EF
+    JOIN EQUIPMENT E ON EF.EQUIPMENT_ID = E.EQUIPMENT_ID
+    WHERE EF.EQUIPMENT_ID = #{equipmentId}
+    ORDER BY EF.REPORT_DATE DESC
   </select>
 
   <!-- 신고 상태로 조회 -->
   <select id="selectFaultReportsByStatus" parameterType="String" resultMap="faultReportResultMap">
-      SELECT
-    EF.REPORT_ID,
-    EF.EQUIPMENT_ID,
-    EF.USERNAME,
-    EF.REPORT_DATE,
-    EF.DESCRIPTION,
-    EF.FAULT_STATUS,
-    EF.RESOLVED_AT,
-    E.NAME     AS equipmentName,
-    E.LOCATION AS equipmentLocation
-  FROM EQUIPMENT_FAULT EF
-  JOIN EQUIPMENT E
-    ON EF.EQUIPMENT_ID = E.EQUIPMENT_ID
-  WHERE EF.FAULT_STATUS = #{faultStatus}
-  ORDER BY EF.REPORT_DATE DESC
+    SELECT
+      EF.REPORT_ID,
+      EF.EQUIPMENT_ID,
+      EF.USERNAME,
+      EF.REPORT_DATE,
+      EF.DESCRIPTION,
+      EF.FAULT_STATUS,
+      EF.RESOLVED_AT,
+      E.NAME AS EQUIPMENT_NAME
+    FROM EQUIPMENT_FAULT EF
+    JOIN EQUIPMENT E ON EF.EQUIPMENT_ID = E.EQUIPMENT_ID
+    WHERE EF.FAULT_STATUS = #{faultStatus}
+    ORDER BY EF.REPORT_DATE DESC
   </select>
 
   <!-- 고장 신고 등록 -->
@@ -98,7 +100,7 @@
   <update id="updateFaultStatus" parameterType="EquipmentFaultVO">
     UPDATE EQUIPMENT_FAULT
        SET FAULT_STATUS = #{faultStatus}
-     WHERE REPORT_ID   = #{reportId}
+     WHERE REPORT_ID = #{reportId}
   </update>
 
   <!-- 신고 처리 완료 -->
@@ -106,7 +108,7 @@
     UPDATE EQUIPMENT_FAULT
        SET FAULT_STATUS = '처리완료',
            RESOLVED_AT  = #{resolvedAt}
-     WHERE REPORT_ID   = #{reportId}
+     WHERE REPORT_ID = #{reportId}
   </update>
 
   <!-- 신고 삭제 -->
@@ -114,33 +116,29 @@
     DELETE FROM EQUIPMENT_FAULT
      WHERE REPORT_ID = #{reportId}
   </delete>
-  
-  <!-- 페이징을 위한 새로운 쿼리들 -->
-<select id="getTotalFaultReportsCount" resultType="int">
-    SELECT COUNT(*)
-    FROM EQUIPMENT_FAULT
-</select>
 
-<select id="getFaultReportsByPage" resultType="EquipmentFaultVO" parameterType="map">
-    SELECT FR.REPORT_ID AS REPORTID,
-           FR.EQUIPMENT_ID AS EQUIPMENTID,
-           E.NAME AS EQUIPMENTNAME,
-           FR.USERNAME,
-           FR.DESCRIPTION,
-           FR.FAULT_STATUS AS FAULTSTATUS,
-           FR.REPORT_DATE AS REPORTDATE,
-           DATE_FORMAT(FR.REPORT_DATE, '%Y-%m-%d %H:%i') AS REPORTDATESTR,
-           FR.RESOLVED_AT AS RESOLVEDAT,
-           DATE_FORMAT(FR.RESOLVED_AT, '%Y-%m-%d %H:%i') AS RESOLVEDATSTR
+  <!-- 전체 건수 조회 (페이징용) -->
+  <select id="getTotalFaultReportsCount" resultType="int">
+    SELECT COUNT(*) FROM EQUIPMENT_FAULT
+  </select>
+
+  <!-- 페이징 목록 조회 -->
+  <select id="getFaultReportsByPage" resultType="EquipmentFaultVO" parameterType="map">
+    SELECT
+      FR.REPORT_ID AS REPORTID,
+      FR.EQUIPMENT_ID AS EQUIPMENTID,
+      E.NAME AS EQUIPMENTNAME,
+      FR.USERNAME,
+      FR.DESCRIPTION,
+      FR.FAULT_STATUS AS FAULTSTATUS,
+      FR.REPORT_DATE AS REPORTDATE,
+      DATE_FORMAT(FR.REPORT_DATE, '%Y-%m-%d %H:%i') AS REPORTDATESTR,
+      FR.RESOLVED_AT AS RESOLVEDAT,
+      DATE_FORMAT(FR.RESOLVED_AT, '%Y-%m-%d %H:%i') AS RESOLVEDATSTR
     FROM EQUIPMENT_FAULT FR
     JOIN EQUIPMENT E ON FR.EQUIPMENT_ID = E.EQUIPMENT_ID
     ORDER BY FR.REPORT_DATE DESC
     LIMIT #{offset}, #{size}
-</select>
-  
-  
-  
-  
-  
+  </select>
 
 </mapper>

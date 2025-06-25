@@ -127,9 +127,17 @@ public class EquipmentService {
         return faultDAO.getFaultReportsByPage(offset, size);
     }
     
+
+    public List<EquipmentVO> selectByFacilityId(Long facilityId){
+    	return equipmentDAO.selectByFacilityId(facilityId);
+    	
+    }
+    
+
     public EquipmentFaultVO selectFaultReportById(Long reportId) {
     	return faultDAO.selectFaultReportById(reportId);
     }
+
     
 }
 

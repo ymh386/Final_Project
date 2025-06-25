@@ -60,7 +60,6 @@
             <tr>
               <th>ID</th>
               <th>이름</th>
-              <th>위치</th>
               <th>상태</th>
               <th>설명</th>
               <th>최종점검</th>
@@ -73,7 +72,6 @@
               <tr>
                 <td>${equipment.equipmentId}</td>
                 <td>${equipment.name}</td>
-                <td>${equipment.location}</td>
                 <td>${equipment.status}</td>
                 <td>${equipment.description}</td>
                 <td>${equipment.lastMaintenanceAtStr}</td>
