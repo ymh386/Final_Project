@@ -24,6 +24,7 @@ public class AttendanceScheduler {
 			
 			//전날 날짜 계산 
 			LocalDate yesterday = LocalDate.now().minusDays(1);
+			System.out.println();
 			String startDate = yesterday + " 00:00:00";
 			String endDate = yesterday + " 23:59:59";
 			String autoCheckOutTime = yesterday + " 23:59:59";
@@ -36,7 +37,7 @@ public class AttendanceScheduler {
 			List<AttendanceVO> uncheckedOutList=
 					attendanceDAO.selectUncheckedOutAttendances(params);
 			List<Long> attendanceIds = new ArrayList();
-
+			
 			
 			
 			

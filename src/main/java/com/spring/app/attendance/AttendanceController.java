@@ -50,274 +50,27 @@ public class AttendanceController {
 	@Autowired
 	private Environment env;
 	
-	/**
-	 * Excel 파일로 출석 데이터 내보내기
-	 * GET /attendance/export/excel?date=2024-01-15
-	 */
-	@GetMapping("/export/excel")
-	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<Resource> exportToExcel(@RequestParam String date) {
-		
-		try {
-			// 1. 해당 날짜의 출석 데이터 조회 
-			LocalDate searchDate = LocalDate.parse(date);
-			List<Map<String, Object>> attendanceList = attendanceService.listByDate(searchDate);
-			
-			// 2. Excel 파일 생성
-			ByteArrayInputStream excelFile = createExcelFile(attendanceList, date);
-			
-			// 3. 파일명 생성 (한글 인코딩 처리)
-			String fileName = "출석현황_" + date + ".xlsx";
-			String encodedFileName = URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20");
-			
-			// 4. Resource로 변환
-			InputStreamResource resource = new InputStreamResource(excelFile);
-			
-			return ResponseEntity.ok()
-					.header(HttpHeaders.CONTENT_DISPOSITION, 
-							"attachment; filename*=UTF-8''" + encodedFileName)
-					.contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-					.body(resource);
-					
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.internalServerError().build();
-		}
-	}
+
+    @GetMapping("/export/excel")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Resource> exportToExcel(@RequestParam String date) {
+        try {
+            ByteArrayInputStream excelFile = attendanceService.exportAttendanceToExcel(date);
+            String fileName = "출석현황_" + date + ".xlsx";
+            String encodedFileName = URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20");
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFileName)
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .body(new InputStreamResource(excelFile));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
 	
-	/**
-	 * Excel 파일을 생성하는 메서드
-	 * @param attendanceList 출석 데이터 리스트
-	 * @param date 조회 날짜
-	 * @return ByteArrayInputStream Excel 파일 스트림
-	 * @throws IOException
-	 */
-	private ByteArrayInputStream createExcelFile(List<Map<String, Object>> attendanceList, String date) throws IOException {
-		// Apache POI를 사용하여 Excel 파일 생성
-		Workbook workbook = new XSSFWorkbook();
-		Sheet sheet = workbook.createSheet("출석현황");
-		
-		// 헤더 스타일 설정
-		CellStyle headerStyle = workbook.createCellStyle();
-		headerStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
-		headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-		headerStyle.setBorderTop(BorderStyle.THIN);
-		headerStyle.setBorderBottom(BorderStyle.THIN);
-		headerStyle.setBorderLeft(BorderStyle.THIN);
-		headerStyle.setBorderRight(BorderStyle.THIN);
-		headerStyle.setAlignment(HorizontalAlignment.CENTER);
-		
-		Font headerFont = workbook.createFont();
-		headerFont.setBold(true);
-		headerFont.setColor(IndexedColors.WHITE.getIndex());
-		headerStyle.setFont(headerFont);
-		
-		// 데이터 셀 스타일 설정
-		CellStyle dataStyle = workbook.createCellStyle();
-		dataStyle.setBorderTop(BorderStyle.THIN);
-		dataStyle.setBorderBottom(BorderStyle.THIN);
-		dataStyle.setBorderLeft(BorderStyle.THIN);
-		dataStyle.setBorderRight(BorderStyle.THIN);
-		dataStyle.setAlignment(HorizontalAlignment.CENTER);
-		
-		// 제목 행 생성
-		Row titleRow = sheet.createRow(0);
-		Cell titleCell = titleRow.createCell(0);
-		titleCell.setCellValue("출석 현황 - " + date);
-		
-		CellStyle titleStyle = workbook.createCellStyle();
-		Font titleFont = workbook.createFont();
-		titleFont.setBold(true);
-		titleFont.setFontHeightInPoints((short) 16);
-		titleStyle.setFont(titleFont);
-		titleStyle.setAlignment(HorizontalAlignment.CENTER);
-		titleCell.setCellStyle(titleStyle);
-		
-		// 제목 셀 병합
-		sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 5));
-		
-		// 헤더 생성 (2번째 행)
-		Row headerRow = sheet.createRow(2);
-		String[] headers = {"트레이너명", "출근시간", "퇴근시간", "근무시간", "상태", "날짜"};
-		
-		for (int i = 0; i < headers.length; i++) {
-			Cell cell = headerRow.createCell(i);
-			cell.setCellValue(headers[i]);
-			cell.setCellStyle(headerStyle);
-		}
-		
-		// 데이터 행 생성 (3번째 행부터)
-		for (int i = 0; i < attendanceList.size(); i++) {
-			Row row = sheet.createRow(i + 3);
-			Map<String, Object> attendance = attendanceList.get(i);
-			
-			// Map에서 데이터 추출 (실제 DB 컬럼명에 맞게 조정)
-			String name = getStringValue(attendance, "name");  // 또는 "trainer_name", "username" 등
-			Object checkinTime = attendance.get("checkinTime");  // 또는 "checkin_time"
-			Object checkoutTime = attendance.get("checkoutTime"); // 또는 "checkout_time"
-			
-			// 각 셀에 데이터 입력 및 스타일 적용
-			Cell nameCell = row.createCell(0);
-			nameCell.setCellValue(name != null ? name : "미등록");
-			nameCell.setCellStyle(dataStyle);
-			
-			Cell checkinCell = row.createCell(1);
-			checkinCell.setCellValue(formatTimeFromObject(checkinTime));
-			checkinCell.setCellStyle(dataStyle);
-			
-			Cell checkoutCell = row.createCell(2);
-			checkoutCell.setCellValue(formatTimeFromObject(checkoutTime));
-			checkoutCell.setCellStyle(dataStyle);
-			
-			Cell workHoursCell = row.createCell(3);
-			workHoursCell.setCellValue(calculateWorkHoursFromObjects(checkinTime, checkoutTime));
-			workHoursCell.setCellStyle(dataStyle);
-			
-			// 상태에 따른 색상 적용
-			Cell statusCell = row.createCell(4);
-			String status = getAttendanceStatusFromObject(checkinTime);
-			statusCell.setCellValue(status);
-			
-			CellStyle statusStyle = workbook.createCellStyle();
-			statusStyle.cloneStyleFrom(dataStyle);
-			
-			if ("지각".equals(status)) {
-				statusStyle.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
-				statusStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-			} else if ("결근".equals(status)) {
-				statusStyle.setFillForegroundColor(IndexedColors.RED.getIndex());
-				statusStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-			} else if ("출근".equals(status)) {
-				statusStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
-				statusStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-			}
-			statusCell.setCellStyle(statusStyle);
-			
-			Cell dateCell = row.createCell(5);
-			dateCell.setCellValue(date);
-			dateCell.setCellStyle(dataStyle);
-		}
-		
-		// 컬럼 너비 자동 조정
-		for (int i = 0; i < headers.length; i++) {
-			sheet.autoSizeColumn(i);
-			// 최소 너비 설정
-			if (sheet.getColumnWidth(i) < 3000) {
-				sheet.setColumnWidth(i, 3000);
-			}
-		}
-		
-		// ByteArrayOutputStream으로 변환
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		workbook.write(outputStream);
-		workbook.close();
-		
-		return new ByteArrayInputStream(outputStream.toByteArray());
-	}
-	
-	// Map에서 String 값을 안전하게 가져오는 메서드
-	private String getStringValue(Map<String, Object> map, String key) {
-		Object value = map.get(key);
-		return value != null ? value.toString() : null;
-	}
-	
-	/**
-	 * Object를 시간 문자열로 포맷팅
-	 */
-	private String formatTimeFromObject(Object timeObj) {
-		if (timeObj == null) return "-";
-		
-		// LocalTime 객체인 경우
-		if (timeObj instanceof LocalTime) {
-			return timeObj.toString();
-		}
-		
-		// String인 경우
-		if (timeObj instanceof String) {
-			return timeObj.toString();
-		}
-		
-		// java.sql.Time인 경우
-		if (timeObj instanceof java.sql.Time) {
-			return timeObj.toString();
-		}
-		
-		return timeObj.toString();
-	}
-	
-	/**
-	 * 근무시간을 계산하여 문자열로 반환
-	 */
-	private String calculateWorkHoursFromObjects(Object checkinObj, Object checkoutObj) {
-		if (checkinObj == null || checkoutObj == null) return "-";
-		
-		try {
-			LocalTime checkinTime = convertToLocalTime(checkinObj);
-			LocalTime checkoutTime = convertToLocalTime(checkoutObj);
-			
-			if (checkinTime == null || checkoutTime == null) return "-";
-			
-			Duration duration = Duration.between(checkinTime, checkoutTime);
-			long hours = duration.toHours();
-			long minutes = duration.toMinutes() % 60;
-			
-			return hours + "시간 " + minutes + "분";
-		} catch (Exception e) {
-			return "-";
-		}
-	}
-	
-	/**
-	 * 출석 상태를 판단하여 반환
-	 */
-	private String getAttendanceStatusFromObject(Object checkinObj) {
-		if (checkinObj == null) return "결근";
-		
-		try {
-			LocalTime checkinTime = convertToLocalTime(checkinObj);
-			if (checkinTime == null) return "결근";
-			
-			// 9시 이후 출근 시 지각 처리
-			if (checkinTime.isAfter(LocalTime.of(9, 0))) {
-				return "지각";
-			}
-			return "출근";
-		} catch (Exception e) {
-			return "결근";
-		}
-	}
-	
-	/**
-	 * 다양한 타입의 시간 객체를 LocalTime으로 변환
-	 */
-	private LocalTime convertToLocalTime(Object timeObj) {
-		if (timeObj == null) return null;
-		
-		if (timeObj instanceof LocalTime) {
-			return (LocalTime) timeObj;
-		}
-		
-		if (timeObj instanceof String) {
-			try {
-				return LocalTime.parse(timeObj.toString());
-			} catch (Exception e) {
-				return null;
-			}
-		}
-		
-		if (timeObj instanceof java.sql.Time) {
-			return ((java.sql.Time) timeObj).toLocalTime();
-		}
-		
-		// java.util.Date나 java.sql.Timestamp 등 다른 타입도 처리 가능
-		if (timeObj instanceof java.util.Date) {
-			return ((java.util.Date) timeObj).toInstant()
-					.atZone(java.time.ZoneId.systemDefault())
-					.toLocalTime();
-		}
-		
-		return null;
-	}
 	
 	@GetMapping("/page")
 	public String attendancePage(Model model) {
@@ -328,20 +81,7 @@ public class AttendanceController {
 		return "attendance/page";
 	}
 	
-    // ✅ 거리 계산 (Haversine 공식): 두 지점의 위/경도로 거리 계산
-    private double haversine(double lat1, double lon1, double lat2, double lon2) {
-        double R = 6371.0; // 지구 반지름 (km 단위)
-        double dLat = Math.toRadians(lat2 - lat1); // 위도 차이 라디안으로 변환
-        double dLon = Math.toRadians(lon2 - lon1); // 경도 차이 라디안으로 변환
 
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                   Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                   Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        return R * c * 1000; // 결과: 미터(m) 단위 거리 반환
-    }
 	
 	@PostMapping("/checkIn")
 	@PreAuthorize("hasRole('TRAINER')")
@@ -376,6 +116,20 @@ public class AttendanceController {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 	                             .body("출근 처리 중 오류 발생: " + ex.getMessage());
 	    }
+	}
+	// ✅ 거리 계산 (Haversine 공식): 두 지점의 위/경도로 거리 계산
+	private double haversine(double lat1, double lon1, double lat2, double lon2) {
+		double R = 6371.0; // 지구 반지름 (km 단위)
+		double dLat = Math.toRadians(lat2 - lat1); // 위도 차이 라디안으로 변환
+		double dLon = Math.toRadians(lon2 - lon1); // 경도 차이 라디안으로 변환
+		
+		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+				Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+				Math.sin(dLon / 2) * Math.sin(dLon / 2);
+		
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		
+		return R * c * 1000; // 결과: 미터(m) 단위 거리 반환
 	}
 
 	/**

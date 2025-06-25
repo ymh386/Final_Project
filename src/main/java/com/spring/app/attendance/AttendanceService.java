@@ -1,5 +1,6 @@
 package com.spring.app.attendance;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -21,6 +22,9 @@ public class AttendanceService {
 	
 	@Autowired
 	public UserDAO userDAO;
+	
+	@Autowired
+	private AttendanceExcelUtil attendanceExcelUtil;
 	
 	
 	/**
@@ -141,8 +145,13 @@ public class AttendanceService {
 	    }
 
 	  
-	  
-	  
+	 
+
+	    public ByteArrayInputStream exportAttendanceToExcel(String date) {
+	        LocalDate searchDate = LocalDate.parse(date);
+	        List<Map<String, Object>> data = listByDate(searchDate);
+	        return attendanceExcelUtil.generateAttendanceExcel(data, date);
+	    }
 	  
 	  
 	  
