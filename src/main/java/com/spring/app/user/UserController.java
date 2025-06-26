@@ -36,6 +36,7 @@ import com.spring.app.home.util.Pager;
 import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.chart.AttendanceStatVO;
 import com.spring.app.chart.ChartService;
+import com.spring.app.chart.LeaveStatVO;
 import com.spring.app.payment.PaymentService;
 import com.spring.app.subscript.SubscriptService;
 import com.spring.app.subscript.SubscriptVO;
@@ -118,9 +119,12 @@ public class UserController {
 		//연도별 필터링 시 필요한 정보들
 		model.addAttribute("yearList", yearList);
 	    
-	    List<AttendanceStatVO> stats = chartService.getMonthlyStats(year, userVO.getUsername());
-	    //통계를 차트화 할때 필요한 정보들
-	    model.addAttribute("stats", stats);
+	    List<AttendanceStatVO> attendanceStats = chartService.getMonthlyStats(year, userVO.getUsername());
+	    //근태율 통계를 차트화 할때 필요한 정보들
+	    model.addAttribute("attendanceStats", attendanceStats);
+	    //휴가율 통계 차트화
+	    List<LeaveStatVO> leaveStats = chartService.getUsedLeaveByType(year, userVO.getUsername());
+	    model.addAttribute("leaveStats", leaveStats);
 		
 		
 		//로그인한 유저의 서명정보 담기

@@ -3,6 +3,7 @@ package com.spring.app.approval;
 import java.sql.Date;
 
 import com.spring.app.home.util.Pager;
+import com.spring.app.user.UserVO;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +23,7 @@ public class DocumentVO {
 	private Date createdAt;
 	
 	private FormVO formVO;
+	private UserVO userVO;
 	
 	private Pager pager;
 

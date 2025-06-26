@@ -90,21 +90,43 @@
       <div class="sb-nav-link-icon"><i class="bi bi-people-fill"></i></div>
       친구
     </a>
-    <div class="sb-sidenav-menu-heading">ADDONS</div>
-    <a class="nav-link" href="charts.html">
-      <div class="sb-nav-link-icon"><i class="bi bi-bar-chart-line-fill"></i></div>
-      Charts
-    </a>
-    <a class="nav-link" href="tables.html">
-      <div class="sb-nav-link-icon"><i class="bi bi-table"></i></div>
-      Tables
-    </a>
     <sec:authorize access="hasRole('TRAINER')">
-      <div class="sb-sidenav-menu-heading">결재</div>
-      <a class="nav-link" href="/approval/addDocument">
-        <div class="sb-nav-link-icon"><i class="bi bi-folder-fill"></i></div>
-        결재신청
+      <div class="sb-sidenav-menu-heading">ADDONS</div>
+      <a class="nav-link" href="/user/mypage#chart">
+        <div class="sb-nav-link-icon"><i class="bi bi-bar-chart-line-fill"></i></div>
+        통계/차트
       </a>
+      
+        <div class="sb-sidenav-menu-heading">결재</div>
+        <a class="nav-link" href="/approval/addDocument">
+          <div class="sb-nav-link-icon"><i class="bi bi-folder-fill"></i></div>
+          결재신청
+        </a>
+    </sec:authorize>
+    <sec:authorize access="hasRole('ADMIN')">
+      <div class="sb-sidenav-menu-heading">관리자</div>
+        <a class="nav-link" href="/admin/main">
+          <div class="sb-nav-link-icon"><i class="bi bi-gear-fill"></i></div>
+          관리자 메인
+        </a>
+        <a class="nav-link" href="/admin/auditLog/list">
+          <div class="sb-nav-link-icon"><i class="bi bi-eye"></i></div>
+          감사 기록
+        </a>
+        <a class="nav-link" href="/user/department/list">
+          <div class="sb-nav-link-icon"><i class="bi bi-building"></i></div>
+          부서 관리
+        </a>
+        <a class="nav-link" href="/approval/admin/formList">
+          <div class="sb-nav-link-icon"><i class="bi bi-folder-fill"></i></div>
+          결재양식 관리
+        </a>
+        <a class="nav-link" href="/chart/admin/stats">
+          <div class="sb-nav-link-icon"><i class="bi bi-bar-chart-line-fill"></i></div>
+          통계/차트
+        </a>
+      
+        
     </sec:authorize>
   </div>
   <div class="sb-sidenav-footer">

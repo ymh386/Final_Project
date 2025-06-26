@@ -65,7 +65,7 @@
 											<tr onclick="location.href='./detail?approvalId=${a.approvalId}'">
 												<th scope="row">${a.documentId}</th>
 												<td>${a.documentVO.formVO.formTitle}</td>
-												<td>${a.documentVO.writerId}</td>
+												<td>${a.documentVO.userVO.name}(${a.documentVO.writerId})</td>
 												<td>${a.documentVO.documentTitle}</td>
 												<c:choose>
 													<c:when test="${a.documentVO.documentStatus eq 'D1'}">

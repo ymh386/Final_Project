@@ -52,7 +52,6 @@
 										<tr>
 											<th scope="col">#</th>
 											<th scope="col">문서 양식</th>
-											<th scope="col">작성자</th>
 											<th scope="col">제목</th>
 											<th scope="col">진행상태</th>
 											<th scope="col">작성 일시</th>
@@ -63,7 +62,6 @@
 											<tr class="table-row" onclick="location.href='./getDocument?documentId=${a.documentId}'">
 												<th scope="row">${a.documentId}</th>
 												<td>${a.formVO.formTitle}</a></td>
-												<td>${a.writerId}</td>
 												<td>${a.documentTitle}</td>
 												<c:choose>
 													<c:when test="${a.documentStatus eq 'D1'}">

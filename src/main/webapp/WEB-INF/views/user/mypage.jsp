@@ -137,7 +137,7 @@
         </div>
 
         <div class="container py-5" id="chart">
-          <h1 class="mb-4">근태율</h1>
+          <h1 class="mb-4">근태/휴가 통계</h1>
 
           <form id="filterForm" method="get" action="./mypage#chart" class="row g-3 mb-4">
             <div class="col-md-2">
@@ -149,10 +149,6 @@
             </select>
             </div>
 
-									
-
-									
-
             <div class="col-md-2 d-flex align-items-end">
               <button type="submit" class="btn btn-dark">조회</button>
             </div>
@@ -161,7 +157,16 @@
           <div class="card p-4 shadow">
             <canvas id="attendanceChart" height="400"></canvas>
           </div>
+
+		  <div class="card p-4 shadow">
+				<canvas id="leaveChart" height="400"></canvas>
+			</div>
         </div>
+
+				
+			
+
+		
 
 		<sec:authorize access="hasAnyRole('ADMIN', 'TRAINER')">
 			<h1 class="mb-4">전자 결재</h1>
@@ -248,24 +253,26 @@
   <!-- Bootstrap JS (필요하다면) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+
+		//근태율 차트
 		const labels = [
-			<c:forEach var="stat" items="${stats}">"${stat.month}월",</c:forEach>
+			<c:forEach var="stat" items="${attendanceStats}">"${stat.month}월",</c:forEach>
 		];
 
 		const presentData = [
-			<c:forEach var="stat" items="${stats}">
+			<c:forEach var="stat" items="${attendanceStats}">
 			${stat.total > 0 ? (stat.present * 100 / stat.total) : 0},
 			</c:forEach>
 		];
 
 		const lateData = [
-			<c:forEach var="stat" items="${stats}">
+			<c:forEach var="stat" items="${attendanceStats}">
 			${stat.total > 0 ? (stat.late * 100 / stat.total) : 0},
 			</c:forEach>
 		];
 
 		const absentData = [
-			<c:forEach var="stat" items="${stats}">
+			<c:forEach var="stat" items="${attendanceStats}">
 			${stat.total > 0 ? (stat.absent * 100 / stat.total) : 0},
 			</c:forEach>
 		];
@@ -328,6 +335,67 @@
 				grid: { color: "#e0e0e0" }
 				}
 			}
+			}
+		});
+
+		//휴가율 차트
+		const labels2 = [
+			<c:forEach var="stat" items="${leaveStats}">
+				"${stat.leaveVO.leaveName}",
+			</c:forEach>
+		];
+
+		const usedData = [
+			<c:forEach var="stat" items="${leaveStats}">
+				${stat.usedDays},
+			</c:forEach>
+		];
+
+		
+
+		new Chart(document.getElementById('leaveChart'), {
+			type: 'bar',
+			data: {
+				labels: labels2,
+				datasets: [{
+				label: '사용일 수',
+				data: usedData,
+				backgroundColor: ['#4caf50', '#2196f3', '#ff9800', '#9c27b0']
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+				title: {
+					display: true,
+					text: "${year}년 휴가유형별 사용일 수",
+					color: "#000000",
+					font: { size: 18 }
+				},
+				legend: {
+					labels: { color: "#000000" }
+				}
+				},
+				scales: {
+				x: {
+					ticks: { color: "#000000" },
+					grid: { color: "#e0e0e0" }
+				},
+				y: {
+					beginAtZero: true,
+					ticks: {
+					color: "#000000",
+					stepSize: 1
+					},
+					title: {
+					display: true,
+					text: '사용일 수',
+					color: "#000000"
+					},
+					grid: { color: "#e0e0e0" }
+				}
+				}
 			}
 		});
 

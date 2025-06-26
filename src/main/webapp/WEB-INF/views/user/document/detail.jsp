@@ -30,8 +30,6 @@
                         <sec:authentication property="principal" var="user"/>
                         <h2>결재 정보</h2><br>
                         <div class="mb-3">
-                            <label class="form-label">작성자</label>
-                            <input type="text" class="form-control" value="${vo.writerId}" readonly>
                             <label class="form-label">종류</label>
                             <input type="text" class="form-control" value="${vo.formVO.formTitle}" readonly>
                             <label class="form-label">제목</label>
