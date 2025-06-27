@@ -36,10 +36,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.spring.app.user.UserService;
-import com.spring.app.auditLog.AuditLogService;
-import com.spring.app.chart.AttendanceStatVO;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/attendance")
@@ -52,9 +48,6 @@ public class AttendanceController {
 	private UserService userService;
 	
 	@Autowired
-  private AuditLogService auditLogService;
-  
-  @Autowired
 	private Environment env;
 	
 
@@ -77,9 +70,6 @@ public class AttendanceController {
         }
     }
 
-
-	
-
 	
 	
 	@GetMapping("/page")
@@ -93,7 +83,6 @@ public class AttendanceController {
 	
 
 	
-
 	@PostMapping("/checkIn")
 	@PreAuthorize("hasRole('TRAINER')")
 	@ResponseBody
@@ -114,29 +103,10 @@ public class AttendanceController {
 	        if (distance > 1000) {
 	            return ResponseEntity.status(HttpStatus.FORBIDDEN)
 	                                 .body("KM타워 반경 1000m 이내에서만 출근 가능합니다.");
-
 	        }
 
 	        // 정상 출근 처리
 	        AttendanceVO vo = attendanceService.checkIn(username);
-  
-           // 로그/감사 기록용
-          try {
-            auditLogService.log(
-                vo.getUsername(),
-                    "CHECKIN",
-                    "ATTENDANCE",
-                    vo.getAttendanceId().toString(),
-                    vo.getUsername() + "이 "
-                    + vo.getAttendanceDate() + " 날짜의 "
-                    + vo.getCheckinTime() + "에 출근",
-                    request
-                );
-          } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-  
 	        return ResponseEntity.ok(vo);
 
 	    } catch (AttendanceException ex) {
@@ -162,41 +132,20 @@ public class AttendanceController {
 		return R * c * 1000; // 결과: 미터(m) 단위 거리 반환
 	}
 
-
-	    /**
-	     * 퇴근 처리 (ROLE_TRAINER 권한)
-	     * POST /attendance/checkOut?attendanceId=xxx
-	     */
-	    @PostMapping("/checkOut")
-	    @PreAuthorize("hasRole('TRAINER')")
-	    @ResponseBody
-	    public ResponseEntity<?> checkOut(@RequestParam("attendanceId") Long attendanceId, HttpServletRequest request) {
-	        try {
-	            AttendanceVO vo = attendanceService.checkOut(attendanceId);
-	            
-	         // 로그/감사 기록용
-				try {
-					auditLogService.log(
-							vo.getUsername(),
-					        "CHECKOUT",
-					        "ATTENDANCE",
-					        vo.getAttendanceId().toString(),
-					        vo.getUsername() + "이 "
-					        + vo.getAttendanceDate() + " 날짜의 "
-					        + vo.getCheckinTime() + "에 퇴근",
-					        request
-					    );
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-	            
-	            return ResponseEntity.ok(vo);
-	        } catch (AttendanceException ex) {
-	            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-	                                 .body(ex.getMessage());
-	        }
-
+	/**
+	 * 퇴근 처리 (ROLE_TRAINER 권한)
+	 * POST /attendance/checkOut?attendanceId=xxx
+	 */
+	@PostMapping("/checkOut")
+	@PreAuthorize("hasRole('TRAINER')")
+	@ResponseBody
+	public ResponseEntity<?> checkOut(@RequestParam("attendanceId") Long attendanceId) {
+	    try {
+	        AttendanceVO vo = attendanceService.checkOut(attendanceId);
+	        return ResponseEntity.ok(vo);
+	    } catch (AttendanceException ex) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	                             .body(ex.getMessage());
 	    }
 	
 
@@ -265,20 +214,4 @@ public class AttendanceController {
     	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("수정 실패: " + e.getMessage());
     	}
     }
-
 }
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-	
-	
-

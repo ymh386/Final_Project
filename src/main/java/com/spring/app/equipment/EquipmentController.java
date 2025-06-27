@@ -126,7 +126,7 @@ public class EquipmentController {
             if (success) {
             	// 신고 접수 알림
             	faultReport = equipmentService.selectFaultReportById(faultReport.getReportId());
-            	notificationManager.reportNotification(faultReport);
+//            	notificationManager.reportNotification(faultReport);
             	
 				// 로그/감사 기록용
 				auditLogService.log(
@@ -135,6 +135,7 @@ public class EquipmentController {
 				        "EQUIPMENT_FAULT",
 				        faultReport.getReportId().toString(),
 				        faultReport.getUsername()
+          
 				        + "이 " + faultReport.getEquipmentVO().getFacilityVO().getName()
 				        + "의 " + faultReport.getEquipmentVO().getName() + " 고장 신고",
 				        request
@@ -178,7 +179,7 @@ public class EquipmentController {
             if (success) {
             	//비품 신고처리중 알림
             	EquipmentFaultVO equipmentFaultVO = equipmentService.selectFaultReportById(reportId);
-            	notificationManager.reportingNotification(equipmentFaultVO);
+//            	notificationManager.reportingNotification(equipmentFaultVO);
             	
 				// 로그/감사 기록용
 				auditLogService.log(
@@ -187,6 +188,7 @@ public class EquipmentController {
 				        "EQUIPMENT_FAULT",
 				        equipmentFaultVO.getReportId().toString(),
 				        "admin이 " + equipmentFaultVO.getUsername() + "이 신고한 "
+
 				        + equipmentFaultVO.getEquipmentVO().getFacilityVO().getName() + "의 "
 				        + equipmentFaultVO.getEquipmentVO().getName()
 				        + " 고장 신고 처리중",
@@ -218,7 +220,7 @@ public class EquipmentController {
             if (success) {
             	//비품 신고 처리완료 알림
             	EquipmentFaultVO equipmentFaultVO = equipmentService.selectFaultReportById(reportId);
-            	notificationManager.reportingNotification(equipmentFaultVO);
+//            	notificationManager.reportingNotification(equipmentFaultVO);
             	
 				// 로그/감사 기록용
 				auditLogService.log(
@@ -227,6 +229,7 @@ public class EquipmentController {
 				        "EQUIPMENT_FAULT",
 				        equipmentFaultVO.getReportId().toString(),
 				        "admin이 " + equipmentFaultVO.getUsername() + "이 신고한 "
+
 				        + equipmentFaultVO.getEquipmentVO().getFacilityVO().getName() + "의 "
 				        + equipmentFaultVO.getEquipmentVO().getName()
 				        + " 고장 신고 처리완료",
@@ -272,6 +275,5 @@ public class EquipmentController {
 	
 	
 	
-	
-	
+
 

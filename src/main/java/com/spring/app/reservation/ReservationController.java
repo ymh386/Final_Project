@@ -1,6 +1,7 @@
 package com.spring.app.reservation;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import com.spring.app.user.UserService;
@@ -54,28 +55,28 @@ public class ReservationController {
     
     
     
-    /** 1) 예약 폼 보여주기 (트레이너 목록) */
+    /** 1) 예약 폼 보여주기 (트레이너 목록 + 미래 일정만) */
     @GetMapping("/book")
     public String showBookingForm(Model model) {
+        // 트레이너 목록 (아이디가 T로 시작하는 유저)
         List<UserVO> trainers = userService.getUsersByUsernamePrefix("T%");
         model.addAttribute("trainerList", trainers);
-        
-        List<ScheduleVO> schedules = scheduleService.getAllSchedules();
-        model.addAttribute("schedules", schedules);
-        
-        
+
+        // 과거 일정 제외한 미래 일정만
+        List<ScheduleVO> futureSchedules = reservationService.getFutureSchedules();
+        model.addAttribute("schedules", futureSchedules);
+        System.out.println("트레이너 수: " + trainers.size());
         return "reservation/book";
     }
 
-
-    /** 3) 예약 처리 */
+    /** 2) 예약 처리 */
     @PostMapping("/book")
     public String reserve(
             @ModelAttribute ReservationVO vo,
             RedirectAttributes rttr,
             Model model, HttpServletRequest request) {
 
-        // JWT 에서 username 추출
+        // JWT로부터 사용자 아이디 추출
         String username = SecurityContextHolder
             .getContext()
             .getAuthentication()
@@ -83,28 +84,22 @@ public class ReservationController {
         vo.setUsername(username);
 
         try {
-            // 예약 시도 (중복 체크 로직 포함)
+            // 예약 시도 (중복 체크 포함)
             reservationService.reserve(vo, request);
 
-            // 성공 시 플래시 메시지
+            // 성공 시 메시지 전달 후 이동
             rttr.addFlashAttribute("msg", "예약이 완료되었습니다.");
-            
-            
-            
-            
             return "redirect:/reservation/my";
 
         } catch (IllegalStateException ex) {
-            // 예외 메시지를 모델에 담아서 폼으로 포워드
+            // 실패 시 에러 메시지와 함께 다시 폼 렌더링
             model.addAttribute("err", ex.getMessage());
-
-            model.addAttribute("trainerList",  userService.getUsersByUsernamePrefix("T%"));
-            model.addAttribute("schedules", scheduleService.getAllSchedules());
-            
-            
+            model.addAttribute("trainerList", userService.getUsersByUsernamePrefix("T%"));
+            model.addAttribute("schedules", reservationService.getFutureSchedules());
             return "reservation/book";
         }
     }
+
 
 
     /** 4) 예약 상세 조회 */

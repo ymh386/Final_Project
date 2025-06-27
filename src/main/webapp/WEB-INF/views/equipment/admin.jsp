@@ -4,6 +4,8 @@
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
 <!DOCTYPE html>
 <html lang="ko">
+<html class="fontawesome-i2svg-active fontawesome-i2svg-complete">
+
 <head>
     <meta charset="UTF-8">
     <title>관리자 페이지 – 비품 고장 신고 관리</title>
@@ -18,8 +20,17 @@
         .btn-process { background: #4CAF50; color: white; border: none; }
         .btn-complete { background: #2196F3; color: white; border: none; }
     </style>
+        <c:import url="/WEB-INF/views/templates/header.jsp"></c:import>
+    
 </head>
-<body>
+<body class="sb-nav-fixed">
+   <c:import url="/WEB-INF/views/templates/topbar.jsp"></c:import>
+    <div id="layoutSidenav">
+        <c:import url="/WEB-INF/views/templates/sidebar.jsp"></c:import>
+        
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container-fluid px-4" style="margin-top:30px;">
 
 <h1>관리자 페이지 – 비품 고장 신고 관리</h1>
 
@@ -133,6 +144,16 @@
     <input type="hidden" name="reportId" id="resolveReportId"/>
     <input type="hidden" name="equipmentId" id="resolveEquipmentId"/>
 </form>
+
+
+  </div>
+            </main>
+            
+            <c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 function updateStatus(reportId, status) {
