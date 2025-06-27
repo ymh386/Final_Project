@@ -1,7 +1,8 @@
-// src/main/java/com/spring/app/board/BoardServiceImpl.java
 package com.spring.app.board;
 
+
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -69,51 +70,56 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public int update(BoardVO boardVO, MultipartFile[] files) throws Exception {
-        // 파일 처리 로직이 필요하면 구현!
+        // 파일 처리 로직 필요시 구현
         return boardDAO.update(boardVO);
     }
 
-    
-    
-    
     @Override
     public int delete(BoardVO boardVO) throws Exception {
         return boardDAO.delete(boardVO);
     }
 
+    @Override
     public void hitUpdate(BoardVO boardVO) throws Exception {
         System.out.println("조회수 증가 boardNum = " + boardVO.getBoardNum());
         boardDAO.updateBoardHits(boardVO.getBoardNum());
     }
 
+    @Override
     public List<BoardFileVO> getFileList(BoardVO boardVO) throws Exception {
         return boardDAO.getFileList(boardVO);
     }
 
+    @Override
     public BoardFileVO getFileDetail(BoardFileVO fileVO) throws Exception {
         return boardDAO.getFileDetail(fileVO);
     }
 
+    @Override
     public int deleteFile(BoardFileVO fileVO) throws Exception {
         return boardDAO.deleteFile(fileVO);
     }
 
+    @Override
     public int addInteraction(InteractionVO vo) throws Exception {
         int cnt = boardDAO.addInteraction(vo);
         boardDAO.increaseLikeCount(vo.getBoardNum());
         return cnt;
     }
 
+    @Override
     public int removeInteraction(InteractionVO vo) throws Exception {
         int cnt = boardDAO.removeInteraction(vo);
         boardDAO.decreaseLikeCount(vo.getBoardNum());
         return cnt;
     }
 
+    @Override
     public long getInteractionCount(InteractionVO vo) throws Exception {
         return boardDAO.getInteractionCount(vo);
     }
 
+    @Override
     public boolean isLiked(InteractionVO vo) throws Exception {
         return boardDAO.isLiked(vo);
     }
@@ -127,10 +133,8 @@ public class BoardServiceImpl implements BoardService {
     
     @Override
     public void addReplyComment(CommentVO commentVO) throws Exception {
-        // 답글 작성에 필요한 로직 구현
+        // 대댓글 추가: parentCommentNum, commentDepth는 컨트롤러에서 세팅되었다고 가정
         boardDAO.addComment(commentVO);
-
-        // 필요시 댓글 수 증가 등 후처리
         boardDAO.increaseCommentCount(commentVO.getBoardNum());
     }
 
@@ -146,14 +150,17 @@ public class BoardServiceImpl implements BoardService {
         return cnt;
     }
 
+    @Override
     public int updateSecret(BoardVO boardVO) throws Exception {
         return boardDAO.updateSecret(boardVO);
     }
 
+    @Override
     public boolean checkSecret(BoardVO boardVO) throws Exception {
         return boardDAO.checkSecret(boardVO);
     }
 
+    @Override
     public boolean validateSecret(BoardVO boardVO) throws Exception {
         BoardVO stored = boardDAO.getDetail(boardVO);
         return stored != null
@@ -165,11 +172,9 @@ public class BoardServiceImpl implements BoardService {
     public CommentVO getCommentById(Long commentNum) throws Exception {
         return boardDAO.getCommentById(commentNum);
     }
+
     @Override
     public void decreaseCommentCount(Long boardNum) throws Exception {
         boardDAO.decreaseCommentCount(boardNum);
     }
-    
-}  
-
-
+}

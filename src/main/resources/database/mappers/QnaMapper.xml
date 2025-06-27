@@ -103,14 +103,15 @@
     WHERE BOARD_NUM = #{boardNum}
   </delete>
   
-  <select id="getList" resultType="com.spring.app.board.qna.QnaVO">
+<select id="getList" resultType="com.spring.app.board.qna.QnaVO">
   SELECT
     board_num, user_name, board_title, board_contents,
     board_ref, board_step, board_depth,
     board_date, is_secret
   FROM QNA
-  ORDER BY board_ref ASC, board_step ASC
+  ORDER BY board_ref DESC, board_step ASC
 </select>
+
   
 
 </mapper>

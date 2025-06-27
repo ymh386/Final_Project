@@ -17,11 +17,12 @@ public class QnaController {
 
     private final QnaService qnaService;
 
-    // 1. 전체 목록 (누구나 접근)
+    // 1. 전체 목록 (최신글 위, 답글은 부모글 아래 순서)
     @GetMapping("/list")
     public String list(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal UserDetails userDetails,
             Model model
     ) throws Exception {
         Map<String, Object> data = qnaService.getList(page, size);
@@ -29,6 +30,14 @@ public class QnaController {
         model.addAttribute("list", data.get("list"));
         model.addAttribute("currentPage", page);
         model.addAttribute("pageSize", size);
+
+        boolean isAdmin = false;
+        if (userDetails != null) {
+            isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        }
+        model.addAttribute("isAdmin", isAdmin);
+
         return "qna/list";
     }
 
@@ -41,6 +50,11 @@ public class QnaController {
             @RequestParam(value = "secretPassword", required = false) String secretPassword
     ) throws Exception {
         QnaVO vo = qnaService.getById(boardNum);
+
+        if (vo == null) {
+            model.addAttribute("errorMsg", "존재하지 않는 글입니다.");
+            return "qna/error";
+        }
 
         if (vo.getIsSecret() != null && Boolean.TRUE.equals(vo.getIsSecret())) {
             if (userDetails == null) {
@@ -60,6 +74,17 @@ public class QnaController {
         }
 
         model.addAttribute("qna", vo);
+
+        boolean isAdmin = false;
+        String username = null;
+        if (userDetails != null) {
+            isAdmin = userDetails.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            username = userDetails.getUsername();
+        }
+        model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("username", username);
+
         return "qna/detail";
     }
 
@@ -93,10 +118,13 @@ public class QnaController {
             }
         }
 
+        // 새 글인 경우 boardRef = boardNum (신규 등록 후 세팅)
         qnaService.write(vo);
+
         return "redirect:/qna/list";
     }
- // 5. 답글 폼 (로그인한 회원만)
+
+    // 5. 답글 폼 (로그인한 회원만)
     @GetMapping("/reply")
     public String replyForm(
             @RequestParam Long ref,
@@ -108,30 +136,42 @@ public class QnaController {
         if (userDetails == null) {
             return "redirect:/users/login";
         }
+        // 부모글 정보 세팅
         QnaVO parent = new QnaVO();
         parent.setBoardRef(ref);
         parent.setBoardStep(step);
         parent.setBoardDepth(depth);
         model.addAttribute("parent", parent);
+        model.addAttribute("username", userDetails.getUsername());
         return "qna/reply";
     }
 
+    // 6. 답글 등록 (관리자만 가능)
     @PostMapping("/reply")
     public String reply(@ModelAttribute QnaVO vo, @AuthenticationPrincipal UserDetails userDetails) throws Exception {
         if (userDetails == null) {
             return "redirect:/users/login";
         }
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin) {
+            throw new RuntimeException("답글 작성 권한이 없습니다.");
+        }
+
         vo.setUserName(userDetails.getUsername());
 
-        // 부모 글 조회
-        QnaVO parent = qnaService.getById(vo.getBoardRef());
+        // 부모 글 조회 및 유효성 검사
+        if (vo.getBoardRef() == null || vo.getBoardRef() <= 0) {
+            throw new RuntimeException("부모 글 번호(boardRef)가 올바르지 않습니다.");
+        }
 
+        QnaVO parent = qnaService.getById(vo.getBoardRef());
         if (parent == null) {
             throw new RuntimeException("부모 게시글을 찾을 수 없습니다.");
         }
 
-        // 부모 글이 비밀글이면 답글도 무조건 비밀글로 처리
-        if (parent.getIsSecret() != null && Boolean.TRUE.equals(parent.getIsSecret())) {
+        // 부모 글 비밀글 여부에 따라 답글 비밀글 설정
+        if (Boolean.TRUE.equals(parent.getIsSecret())) {
             vo.setIsSecret(true);
         } else {
             if (vo.getIsSecret() == null) {
@@ -139,7 +179,7 @@ public class QnaController {
             }
         }
 
-        // 비밀글일 경우 비밀번호 필수 체크
+        // 비밀글 비밀번호 체크
         if (Boolean.TRUE.equals(vo.getIsSecret())) {
             if (vo.getSecretPassword() == null || vo.getSecretPassword().isBlank()) {
                 throw new RuntimeException("비밀글일 경우 비밀번호를 입력하세요.");
@@ -148,15 +188,15 @@ public class QnaController {
             vo.setSecretPassword(null);
         }
 
-        // 제목이 없으면 부모 글 제목 앞에 [답글] 붙임
+        // 답글 제목 처리
         if (vo.getBoardTitle() == null || vo.getBoardTitle().isBlank()) {
             vo.setBoardTitle("[답글] " + parent.getBoardTitle());
         }
 
-        // 부모 글 기준으로 boardStep 밀어내기(답글 순서 조정)
+        // 답글 순서 밀기
         qnaService.updateStepForReply(parent.getBoardRef(), parent.getBoardStep());
 
-        // 답글의 boardRef, boardStep, boardDepth 설정
+        // 답글 정보 설정
         vo.setBoardRef(parent.getBoardRef());
         vo.setBoardStep(parent.getBoardStep() + 1);
         vo.setBoardDepth(parent.getBoardDepth() + 1);
@@ -164,6 +204,7 @@ public class QnaController {
         // 답글 등록
         qnaService.reply(vo);
 
+        // 리스트로 리다이렉트
         return "redirect:/qna/list";
     }
 
@@ -223,7 +264,8 @@ public class QnaController {
         vo.setBoardStep(existing.getBoardStep());
         vo.setBoardDepth(existing.getBoardDepth());
 
-        qnaService.modify(vo);
+        qnaService.update(vo);
+        
         return "redirect:/qna/detail/" + vo.getBoardNum();
     }
 
@@ -245,7 +287,7 @@ public class QnaController {
             throw new RuntimeException("삭제 권한이 없습니다.");
         }
 
-        qnaService.remove(boardNum);
+        qnaService.delete(boardNum);
         return "redirect:/qna/list";
     }
 }

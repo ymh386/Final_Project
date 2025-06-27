@@ -68,12 +68,13 @@ public interface BoardService {
     /** 20) 비밀글 비밀번호 검증 */
     boolean validateSecret(BoardVO boardVO) throws Exception;
 
+    /** 21) 댓글 상세 조회 (ID로) */
     CommentVO getCommentById(Long commentNum) throws Exception;
 
-	void decreaseCommentCount(Long boardNum) throws Exception;
+    /** 22) 댓글 수 감소 */
+    void decreaseCommentCount(Long boardNum) throws Exception;
 
-	 void addReplyComment(CommentVO commentVO) throws Exception;
-
-
+    /** 23) 대댓글 추가 */
+    void addReplyComment(CommentVO commentVO) throws Exception;
 
 }
