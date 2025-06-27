@@ -2,6 +2,8 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="ko">
+<html class="fontawesome-i2svg-active fontawesome-i2svg-complete">
+
 <head>
   <meta charset="UTF-8">
   <title>수업 예약하기</title>
@@ -32,9 +34,18 @@
       margin-top: 0.5rem;
     }
   </style>
+     <c:import url="/WEB-INF/views/templates/header.jsp"></c:import>
 </head>
-<body>
-  <div class="container">
+<body class="sb-nav-fixed">
+    <c:import url="/WEB-INF/views/templates/topbar.jsp"></c:import>
+
+    <div id="layoutSidenav">
+        <c:import url="/WEB-INF/views/templates/sidebar.jsp"></c:import>
+         <div id="layoutSidenav_content">
+            <main>
+                <div class="container-fluid px-4">
+        
+  <div class="container" style="margin-top:150px;">
     <div class="card mx-auto" style="max-width: 600px;">
       <div class="card-header text-center">
         수업 예약 폼
@@ -98,7 +109,7 @@
 
           <!-- 예약 버튼 -->
           <div class="d-grid mt-4">
-            <button type="submit" id="submitBtn" class="btn btn-primary btn-lg" disabled>예약하기</button>
+            <button type="submit" id="submitBtn" class="btn btn-lg" disabled>예약하기</button>
           </div>
         </form>
 
@@ -108,6 +119,12 @@
       </div>
     </div>
   </div>
+   </div>
+            </main>
+            
+            <c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+        </div>
+    </div>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

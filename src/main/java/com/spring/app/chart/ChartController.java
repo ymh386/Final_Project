@@ -42,18 +42,22 @@ public class ChartController {
 	    }
     	
 		if (year == null) {
-	        // 기본 연도 설정
+	        // 기본 연도 설정(현재년도)
 	        year = currentYear;
 		}
 		
     	List<AttendanceStatVO> stats = chartService.getMonthlyStats(year, scope, departmentId, username);
-    	
+    	//현재년도로 설정용
 		model.addAttribute("year", year);
+		//연도별 필터링 시 필요한 정보들
 		model.addAttribute("yearList", yearList);
+		//적용 범위 필터링 시
 	    model.addAttribute("scope", scope);
+	    
+	    //통계를 차트화 할때 필요한 정보들
 	    model.addAttribute("stats", stats);
 	    
-	    
+	    //직원별, 부서별 필터링 시 필요한 직원, 부서 정보들을 프론트로 넘김
 	    model.addAttribute("userList", userService.getUsersWithDepartment());
 	    model.addAttribute("deptList", userService.getDepartments());
 	    
@@ -62,7 +66,7 @@ public class ChartController {
 
 	}
 	
-	
+	//프론트에서 부서별 직원 불러오는 용도
 	@GetMapping("admin/usersOfDepartment")
 	@ResponseBody
 	public List<UserVO> getUsersOfDepartment(DepartmentVO departmentVO) throws Exception {

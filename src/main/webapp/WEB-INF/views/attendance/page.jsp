@@ -1,85 +1,339 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
-<%@ taglib prefix="c"       uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="sec"     uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <!DOCTYPE html>
-<html>
+<html class="fontawesome-i2svg-active fontawesome-i2svg-complete">
 <head>
     <meta charset="UTF-8">
     <title>출퇴근 관리</title>
+    <c:import url="/WEB-INF/views/templates/header.jsp"></c:import>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=${googleMapApiKey}&callback=initMap"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+        /* 출퇴근 관리 전용 스타일 */
+        .attendance-container {
+            padding: 20px;
         }
-        h2 {
-            margin-bottom: 20px;
+        
+        .attendance-header {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
         }
-        #buttons {
-            margin-bottom: 20px;
+        
+        .attendance-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 300;
         }
-        #buttons button {
-            padding: 10px 20px;
+        
+        .attendance-controls {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .attendance-controls button {
+            padding: 12px 30px;
             font-size: 16px;
+            font-weight: 500;
+            border: none;
+            border-radius: 25px;
             cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        /* 비활성화 상태 스타일 */
-        #buttons button.disabled {
-            background-color: #ddd;
-            color: #666;
+        
+        #checkInBtn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+        
+        #checkOutBtn {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+            color: white;
+        }
+        
+        .attendance-controls button:hover:not(.disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .attendance-controls button.disabled {
+            background: #ddd !important;
+            color: #666 !important;
             cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
         }
-        /* 숨김 처리 */
+        
         .hidden {
             display: none;
         }
-        #attendanceList {
-            width: 100%;
-            border-collapse: collapse;
+        
+        /* 월별 필터 스타일 개선 */
+        .month-filter {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        #attendanceList th, #attendanceList td {
-            border: 1px solid #ccc;
-            padding: 8px;
+        
+        .month-filter h4 {
+            margin-bottom: 15px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .filter-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-controls label {
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .filter-controls select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+            font-size: 14px;
+        }
+        
+        .filter-controls button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        #filterBtn {
+            background: #007bff;
+            color: white;
+        }
+        
+        #resetBtn {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .filter-controls button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        /* 현재 조회 월 표시 */
+        .current-month {
+            font-weight: 600;
+            color: #007bff;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
             text-align: center;
         }
-        #attendanceList th {
-            background-color: #f4f4f4;
+        
+        /* 테이블 스타일 개선 */
+        .attendance-table-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+        
+        .attendance-table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .attendance-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .attendance-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .attendance-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* 지도 스타일 */
+        .map-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+        
+        .map-header {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        #map {
+            width: 100%;
+            height: 400px;
+        }
+        
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-controls > div {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .attendance-controls button {
+                display: block;
+                width: 100%;
+                margin: 10px 0;
+            }
         }
     </style>
 </head>
-<body>
-    <h2>
+<body class="sb-nav-fixed">
+    <c:import url="/WEB-INF/views/templates/topbar.jsp"></c:import>
+    <div id="layoutSidenav">
+        <c:import url="/WEB-INF/views/templates/sidebar.jsp"></c:import>
         
-        <c:choose>
-            <c:when test="${not empty pageContext.request.userPrincipal}">
-                ${pageContext.request.userPrincipal.name}
-            </c:when>
-            <c:otherwise>
-                손님
-            </c:otherwise>
-        </c:choose>
-       님 출/퇴근
-    </h2>
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container-fluid px-4">
+                    <div class="attendance-container">
+                        <!-- 헤더 -->
+                        <div class="attendance-header">
+                            <h2>
+                                <i class="fas fa-clock me-2"></i>
+                                <c:choose>
+                                    <c:when test="${not empty pageContext.request.userPrincipal}">
+                                        ${pageContext.request.userPrincipal.name}
+                                    </c:when>
+                                    <c:otherwise>
+                                        손님
+                                    </c:otherwise>
+                                </c:choose>
+                                님의 출퇴근 관리
+                            </h2>
+                        </div>
 
-    <div id="buttons">
-        <!-- 출근/퇴근 버튼 (둘 다 준비해 두되, JS에서 보이거나 숨김 처리) -->
-        <button id="checkInBtn" class="hidden">출근</button>
-        <button id="checkOutBtn" class="hidden">퇴근</button>
+                        <!-- 출퇴근 버튼 -->
+                        <div class="attendance-controls">
+                            <button id="checkInBtn" class="hidden">
+                                <i class="fas fa-sign-in-alt me-2"></i>출근
+                            </button>
+                            <button id="checkOutBtn" class="hidden">
+                                <i class="fas fa-sign-out-alt me-2"></i>퇴근
+                            </button>
+                        </div>
+                        
+                        <!-- 월별 필터 -->
+                        <div class="month-filter">
+                            <h4><i class="fas fa-filter me-2"></i>기간별 조회</h4>
+                            <div class="filter-controls">
+                                <div>
+                                    <label for="yearSelect">년도:</label>
+                                    <select id="yearSelect">
+                                        <!-- JS에서 동적으로 채움 -->
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="monthSelect">월:</label>
+                                    <select id="monthSelect">
+                                        <option value="1">1월</option>
+                                        <option value="2">2월</option>
+                                        <option value="3">3월</option>
+                                        <option value="4">4월</option>
+                                        <option value="5">5월</option>
+                                        <option value="6">6월</option>
+                                        <option value="7">7월</option>
+                                        <option value="8">8월</option>
+                                        <option value="9">9월</option>
+                                        <option value="10">10월</option>
+                                        <option value="11">11월</option>
+                                        <option value="12">12월</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <button id="filterBtn">
+                                        <i class="fas fa-search me-1"></i>조회
+                                    </button>
+                                    <button id="resetBtn">
+                                        <i class="fas fa-undo me-1"></i>전체 보기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 현재 조회 월 표시 -->
+                        <div id="currentMonth" class="current-month"></div>
+
+                        <!-- 출퇴근 기록 테이블 -->
+                        <div class="attendance-table-container">
+                            <table id="attendanceList" class="attendance-table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-calendar-day me-2"></i>출근 날짜</th>
+                                        <th><i class="fas fa-clock me-2"></i>출근 시간</th>
+                                        <th><i class="fas fa-clock me-2"></i>퇴근 시간</th>
+                                        <th><i class="fas fa-info-circle me-2"></i>상태</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- JS가 서버로부터 받은 근태 목록을 여기에 채웁니다 -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- 지도 -->
+                        <div class="map-container">
+                            <div class="map-header">
+                                <i class="fas fa-map-marker-alt me-2"></i>현재 위치 및 회사 위치
+                            </div>
+                            <div id="map"></div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            
+            <c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+        </div>
     </div>
 
-    <table id="attendanceList">
-        <thead>
-            <tr>
-                <th>출근 날짜</th>
-                <th>출근 시간</th>
-                <th>퇴근 시간</th>
-                <th>상태</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- JS가 서버로부터 받은 근태 목록을 여기에 채웁니다 -->
-        </tbody>
-    </table>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         (function() {
             const username     = '<sec:authentication property="name"/>';
@@ -87,49 +341,138 @@
             const checkInBtn   = document.getElementById('checkInBtn');
             const checkOutBtn  = document.getElementById('checkOutBtn');
             const tbody        = document.querySelector('#attendanceList tbody');
+            
+            // 월별 필터 요소들
+            const yearSelect = document.getElementById('yearSelect');
+            const monthSelect = document.getElementById('monthSelect');
+            const filterBtn = document.getElementById('filterBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const currentMonth = document.getElementById('currentMonth');
 
             // 오늘자 가장 최신 ID/상태를 저장할 변수
             let latestAttendanceId = null;
             let latestStatus       = null;
-            // “퇴근” 버튼을 눌러 체크아웃을 한 뒤에는 true로 바꿔서 다시 누르지 못하도록 제어
             let isCheckedOut      = false;
+            
+            // 전체 근태 데이터를 저장할 변수
+            let allAttendanceData = [];
 
-            // 페이지 로드 시 근태 목록 가져오기
+            // 페이지 로드 시 초기화
             document.addEventListener('DOMContentLoaded', () => {
+                initYearSelect();
+                setCurrentMonth();
                 fetchAttendanceList();
+                
+                // 이벤트 리스너 등록
+                filterBtn.addEventListener('click', filterByMonth);
+                resetBtn.addEventListener('click', showAllData);
             });
+            
+            // 년도 셀렉트박스 초기화 (현재 년도 기준으로 ±2년)
+            function initYearSelect() {
+                const currentYear = new Date().getFullYear();
+                yearSelect.innerHTML = '';
+                
+                for (let year = currentYear - 2; year <= currentYear + 1; year++) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year + '년';
+                    if (year === currentYear) {
+                        option.selected = true;
+                    }
+                    yearSelect.appendChild(option);
+                }
+            }
+            
+            // 현재 월로 셀렉트박스 설정
+            function setCurrentMonth() {
+                const currentMonth = new Date().getMonth() + 1;
+                monthSelect.value = currentMonth;
+            }
+            
+            // 월별 필터링
+            function filterByMonth() {
+                const selectedYear = parseInt(yearSelect.value);
+                const selectedMonth = parseInt(monthSelect.value);
+                
+                const filteredData = allAttendanceData.filter(vo => {
+                    const voDate = new Date(vo.attendanceDate);
+                    return voDate.getFullYear() === selectedYear && 
+                           voDate.getMonth() + 1 === selectedMonth;
+                });
+                
+                displayAttendanceData(filteredData);
+                currentMonth.textContent = `${selectedYear}년 ${selectedMonth}월 근태 내역`;
+            }
+            
+            // 전체 데이터 보기
+            function showAllData() {
+                displayAttendanceData(allAttendanceData);
+                currentMonth.textContent = '전체 근태 내역';
+            }
+            
+            // 테이블에 데이터 표시
+            function displayAttendanceData(data) {
+                tbody.innerHTML = '';
+                data.forEach(vo => appendAttendanceRow(vo));
+            }
 
             // 출근 버튼 클릭 이벤트
             checkInBtn.addEventListener('click', () => {
                 if (checkInBtn.disabled) return;
-                const url = contextPath + '/attendance/checkIn?username=' + encodeURIComponent(username);
-                fetch(url, { method: 'POST' })
-                .then(res => {
-                    if (!res.ok) throw new Error('출근 처리 실패');
-                    return res.json();
-                })
-                .then(vo => {
-                    // 서버로부터 응답받은 VO의 attendanceId, status를 갱신
-                    latestAttendanceId = vo.attendanceId;
-                    latestStatus       = vo.status; // 정상출근/지각/결근
-                    isCheckedOut       = false;    // 아직 체크아웃 전이므로 false
 
-                    // 테이블 맨 위에 새로운 출근 기록 추가
-                    prependAttendanceRow(vo);
-                    // 버튼 표시/숨김 및 활성화 상태 업데이트
-                    updateButtonVisibility();
-                })
-                .catch(err => alert(err.message));
+                navigator.geolocation.getCurrentPosition(function(pos) {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+
+                    const url = contextPath + '/attendance/checkIn?username=' + encodeURIComponent(username);
+                    fetch(url, {
+                         method: 'POST',
+                         headers:{ 'Content-type': 'application/json' },
+                         body: JSON.stringify({
+                            username: username,
+                            lat: lat,
+                            lng: lng
+                         })
+                     })
+                    .then(res => {
+                        if (!res.ok) throw new Error('출근 처리 실패');
+                        return res.json();
+                    })
+                    .then(vo => {
+                        latestAttendanceId = vo.attendanceId;
+                        latestStatus       = vo.status;
+                        isCheckedOut       = false;
+
+                        // 전체 데이터에 새 데이터 추가
+                        allAttendanceData.unshift(vo);
+                        
+                        // 현재 필터 상태에 따라 표시 업데이트
+                        if (currentMonth.textContent.includes('전체')) {
+                            prependAttendanceRow(vo);
+                        } else {
+                            // 현재 필터링된 월과 새 데이터의 월이 같으면 표시
+                            const selectedYear = parseInt(yearSelect.value);
+                            const selectedMonth = parseInt(monthSelect.value);
+                            const voDate = new Date(vo.attendanceDate);
+                            
+                            if (voDate.getFullYear() === selectedYear && 
+                                voDate.getMonth() + 1 === selectedMonth) {
+                                prependAttendanceRow(vo);
+                            }
+                        }
+                        
+                        updateButtonVisibility();
+                    })
+                    .catch(err => alert(err.message));	
+                });
             });
 
             // 퇴근 버튼 클릭 이벤트
             checkOutBtn.addEventListener('click', () => {
-                // 이미 체크아웃한 상태이거나 버튼이 비활성화 상태라면 리턴
                 if (checkOutBtn.disabled || isCheckedOut) return;
                 if (!latestAttendanceId) return;
 
-                // 방어 코드: 지각/결근인 경우에도 요청은 보내지만, 
-                // 클라이언트에서는 상태를 바꾸지 않음 → 서버에서 checkoutTime만 업데이트
                 const url = contextPath + '/attendance/checkOut?attendanceId=' + latestAttendanceId;
                 fetch(url, { method: 'POST' })
                 .then(res => {
@@ -137,18 +480,19 @@
                     return res.json();
                 })
                 .then(vo => {
-                    // 1) isCheckedOut을 true로 바꿔서 더는 퇴근 버튼을 누르지 못하도록
                     isCheckedOut = true;
 
-                    // 2) “정상출근” 상태에서만 latestStatus를 “퇴근”으로 변경
                     if (latestStatus === '정상출근') {
                         latestStatus = '퇴근';
                     }
-                    // “지각” 또는 “결근”인 경우에는 latestStatus를 그대로 둡니다.
+                    
+                    // 전체 데이터에서 해당 항목 업데이트
+                    const index = allAttendanceData.findIndex(item => item.attendanceId === latestAttendanceId);
+                    if (index !== -1) {
+                        allAttendanceData[index] = vo;
+                    }
 
-                    // 3) 테이블 최신 행(맨 위)만 퇴근 시간만 업데이트
                     updateLatestRow(vo);
-                    // 4) 버튼 상태 업데이트
                     updateButtonVisibility();
                 })
                 .catch(err => alert(err.message));
@@ -163,25 +507,23 @@
                     return res.json();
                 })
                 .then(list => {
-                    // 1) 테이블 초기화
-                    tbody.innerHTML = '';
-                    // 2) 전체 내역을 순서대로 하단에 append
-                    list.forEach(vo => appendAttendanceRow(vo));
-                    // 3) todayRecords를 찾아서 latestAttendanceId, latestStatus 설정
+                    // 전체 데이터 저장
+                    allAttendanceData = list;
+                    
+                    // 초기에는 전체 데이터 표시
+                    displayAttendanceData(list);
+                    currentMonth.textContent = '전체 근태 내역';
+                    
                     determineLatestStatus(list);
-                    // 4) 만약 todayRecords 중 마지막 요소(vo)에 checkoutTime이 있다면
-                    //    이미 체크아웃된 상태임을 표시
                     if (latestStatus === '퇴근' || hadCheckoutTime(list)) {
                         isCheckedOut = true;
                     } else {
                         isCheckedOut = false;
                     }
-                    // 5) 버튼 표시/숨김 및 활성/비활성 업데이트
                     updateButtonVisibility();
                 })
                 .catch(err => {
                     console.error(err);
-                    // 오류 시 두 버튼 모두 숨김
                     checkInBtn.classList.add('hidden');
                     checkOutBtn.classList.add('hidden');
                 });
@@ -192,11 +534,7 @@
                 const firstRow = tbody.querySelector('tr');
                 if (!firstRow) return;
                 const cells = firstRow.children;
-                // 3번째 셀(퇴근 시간)만 vo.checkoutTime으로 교체
                 cells[2].textContent = formatTime(vo.checkoutTime);
-                // 4번째 셀(상태)는
-                //   - 최신 상태가 “정상출근”이었으면 “퇴근”으로 바꿔주고
-                //   - “지각”/“결근”인 경우에는 아무 변화 없이 그대로 두기
                 if (latestStatus === '퇴근') {
                     cells[3].textContent = '퇴근';
                 }
@@ -235,16 +573,12 @@
                 return tr;
             }
 
-            // 서버에서 내려온 list(AttendanceVO 배열) 중에서 “오늘자” 레코드만 골라
-            // attendanceId가 가장 큰(=가장 최근) VO를 찾아 latestAttendanceId, latestStatus를 설정
             function determineLatestStatus(list) {
-                // 오늘 연/월/일을 구함
                 const now    = new Date();
                 const todayY = now.getFullYear();
-                const todayM = now.getMonth();   // 0~11
+                const todayM = now.getMonth();
                 const todayD = now.getDate();
 
-                // 오늘자 기록만 필터
                 const todayRecords = list.filter(vo => {
                     const voDate = new Date(vo.attendanceDate);
                     return (
@@ -254,14 +588,12 @@
                     );
                 });
 
-                // 디버그용(콘솔에 오늘자 필터 결과를 찍어봅니다)
                 console.log("▶ todayRecords after Date filter:", todayRecords);
 
                 if (todayRecords.length === 0) {
                     latestAttendanceId = null;
                     latestStatus       = null;
                 } else {
-                    // attendanceId가 가장 큰(=가장 최근) VO를 reduce로 선택
                     const mostRecent = todayRecords.reduce((prev, curr) => {
                         return (prev.attendanceId > curr.attendanceId) ? prev : curr;
                     });
@@ -270,8 +602,6 @@
                 }
             }
 
-            // “정상출근”, “지각”, “결근” 상태에서도 체크아웃 시간이 이미 들어왔는지 확인
-            // 오늘자 레코드 중 checkoutTime 프로퍼티가 non-null인 VO가 있으면 true 리턴
             function hadCheckoutTime(list) {
                 const now = new Date();
                 const todayY = now.getFullYear();
@@ -285,34 +615,26 @@
                         voDate.getMonth()    === todayM &&
                         voDate.getDate()     === todayD
                     ) {
-                        // 체크아웃 시간이 non-null/빈 문자열이 아니면 이미 체크아웃한 것
                         return vo.checkoutTime && vo.checkoutTime.trim() !== '';
                     }
                     return false;
                 });
             }
 
-            // 버튼 표시/숨김 및 활성/비활성 상태 결정
             function updateButtonVisibility() {
-                // 1) 오늘자 기록이 없으면 → “출근” 버튼만 보이게, “퇴근” 숨김
                 if (!latestAttendanceId || latestStatus === null) {
                     checkInBtn.classList.remove('hidden');
                     checkInBtn.classList.remove('disabled');
                     checkInBtn.disabled = false;
-
                     checkOutBtn.classList.add('hidden');
                 }
-                // 2) 출근했지만 퇴근 전상태(정상출근/지각/결근)이라면 → “퇴근” 버튼만 보이게
-                //    단, 체크아웃 시간을 이미 찍었으면 “퇴근” 버튼을 비활성화
                 else if (
                     latestStatus === '정상출근' ||
                     latestStatus === '지각'    ||
                     latestStatus === '결근'
                 ) {
                     checkInBtn.classList.add('hidden');
-
                     checkOutBtn.classList.remove('hidden');
-                    // 이미 체크아웃 했으면 비활 상태, 아니면 활성화
                     if (isCheckedOut) {
                         checkOutBtn.classList.add('disabled');
                         checkOutBtn.disabled = true;
@@ -321,17 +643,14 @@
                         checkOutBtn.disabled = false;
                     }
                 }
-                // 3) 이미 “퇴근” 상태라면 → “퇴근” 버튼 비활성화 상태로만 보이기
                 else if (latestStatus === '퇴근') {
                     checkInBtn.classList.add('hidden');
-
                     checkOutBtn.classList.remove('hidden');
                     checkOutBtn.classList.add('disabled');
                     checkOutBtn.disabled = true;
                 }
             }
 
-            // 오늘 날짜 “YYYY-MM-DD” 문자열을 반환
             function getToday() {
                 const d = new Date();
                 const yyyy = d.getFullYear();
@@ -340,12 +659,45 @@
                 return `${yyyy}-${mm}-${dd}`;
             }
 
-            // “HH:MM:SS” 또는 “HH:MM” → “HH:MM”만 반환
             function formatTime(timeStr) {
                 if (!timeStr) return '';
                 return timeStr.length > 5 ? timeStr.substring(0,5) : timeStr;
             }
         })();
+        
+        
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 37.476502, lng: 126.880193 },
+                zoom: 16,
+            });
+
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                const myPos = {
+                    lat: pos.coords.latitude,
+                    lng: pos.coords.longitude
+                };
+
+                new google.maps.Marker({
+                    position: myPos,
+                    map: map,
+                    label: "나",
+                    icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                });
+
+                map.setCenter(myPos);
+            });
+
+            const officePos = { lat: 37.476502, lng: 126.880193 };
+            new google.maps.Marker({
+                position: officePos,
+                map: map,
+                label: "회사",
+                icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+            });
+        }
+
+        window.initMap = initMap;
     </script>
 </body>
 </html>

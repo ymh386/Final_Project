@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.spring.app.equipment.EquipmentDAO">
 
@@ -9,11 +10,22 @@
         <id     property="equipmentId"       column="EQUIPMENT_ID"/>
         <result property="name"              column="NAME"/>
         <result property="description"       column="DESCRIPTION"/>
-        <result property="location"          column="LOCATION"/>
+        <result property="facilityId"        column="FACILITY_ID"/>
         <result property="lastMaintenanceAt" column="LAST_MAINTENANCE_AT"/>
         <result property="status"            column="STATUS"/>
         <result property="createdAt"         column="CREATED_AT"/>
     </resultMap>
+
+
+
+
+
+
+
+
+
+
+
 
     <!-- 모든 비품 조회 -->
     <select id="selectAllEquipment" resultMap="equipmentResultMap">
@@ -21,7 +33,7 @@
             EQUIPMENT_ID,
             NAME,
             DESCRIPTION,
-            LOCATION,
+            FACILITY_ID,
             LAST_MAINTENANCE_AT,
             STATUS,
             CREATED_AT
@@ -35,7 +47,7 @@
             EQUIPMENT_ID,
             NAME,
             DESCRIPTION,
-            LOCATION,
+            FACILITY_ID,
             LAST_MAINTENANCE_AT,
             STATUS,
             CREATED_AT
@@ -49,7 +61,7 @@
             EQUIPMENT_ID,
             NAME,
             DESCRIPTION,
-            LOCATION,
+            FACILITY_ID,
             LAST_MAINTENANCE_AT,
             STATUS,
             CREATED_AT
@@ -61,9 +73,9 @@
     <!-- 비품 등록 -->
     <insert id="insertEquipment" parameterType="EquipmentVO" useGeneratedKeys="true" keyProperty="equipmentId">
         INSERT INTO EQUIPMENT
-            (NAME, DESCRIPTION, LOCATION, LAST_MAINTENANCE_AT, STATUS, CREATED_AT)
+            (NAME, DESCRIPTION, FACILITY_ID, LAST_MAINTENANCE_AT, STATUS, CREATED_AT)
         VALUES
-            (#{name}, #{description}, #{location}, #{lastMaintenanceAt}, #{status}, #{createdAt})
+            (#{name}, #{description}, #{facilityId}, #{lastMaintenanceAt}, #{status}, #{createdAt})
     </insert>
 
     <!-- 비품 정보 수정 -->
@@ -71,7 +83,7 @@
         UPDATE EQUIPMENT
         SET NAME                 = #{name},
             DESCRIPTION          = #{description},
-            LOCATION             = #{location},
+            FACILITY_ID          = #{facilityId},
             LAST_MAINTENANCE_AT  = #{lastMaintenanceAt},
             STATUS               = #{status}
         WHERE EQUIPMENT_ID = #{equipmentId}
@@ -89,5 +101,19 @@
         DELETE FROM EQUIPMENT
         WHERE EQUIPMENT_ID = #{equipmentId}
     </delete>
+
+    <!-- 시설별 비품 조회 -->
+    <select id="selectByFacilityId" parameterType="Long" resultMap="equipmentResultMap">
+        SELECT
+            EQUIPMENT_ID,
+            NAME,
+            DESCRIPTION,
+            FACILITY_ID,
+            LAST_MAINTENANCE_AT,
+            STATUS,
+            CREATED_AT
+        FROM EQUIPMENT
+        WHERE FACILITY_ID = #{facilityId}
+    </select>
 
 </mapper>

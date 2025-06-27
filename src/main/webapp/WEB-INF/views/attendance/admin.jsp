@@ -1,283 +1,324 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <title>관리자 근태관리 시스템</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
-        }
-        
-        .header {
-            padding: 15px 0;
-        }
-        
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-        }
-        
-        .header h1 {
-            font-size: 24px;
-            font-weight: normal;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
-        
-        .control-panel {
-            background: white;
-            padding: 20px;
-            border: 1px solid #dee2e6;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .search-section {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .search-section input, .search-section select {
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-        }
-        
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            background: #007bff;
-            color: white;
-        }
-        
-        .btn:hover {
-            background: #0056b3;
-        }
-        
-        .btn-success {
-            background: #28a745;
-        }
-        
-        .btn-success:hover {
-            background: #1e7e34;
-        }
-        
-        .stats-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border: 1px solid #dee2e6;
-            text-align: center;
-        }
-        
-        .stat-card .number {
-            font-size: 2em;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .stat-card .label {
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .stat-card.total .number { color: #007bff; }
-        .stat-card.present .number { color: #28a745; }
-        .stat-card.late .number { color: #ffc107; }
-        .stat-card.absent .number { color: #dc3545; }
-        
-        .table-container {
-            background: white;
-            border: 1px solid #dee2e6;
-        }
-        
-        .table-header {
-            background: #f8f9fa;
-            padding: 15px 20px;
-            border-bottom: 1px solid #dee2e6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .table-header h2 {
-            font-size: 18px;
-            font-weight: normal;
-        }
-        
-        #attendanceTable {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        #attendanceTable th {
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        #attendanceTable td {
-            padding: 12px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        #attendanceTable tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-        
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .status-present { background: #d4edda; color: #155724; }
-        .status-late { background: #fff3cd; color: #856404; }
-        .status-absent { background: #f8d7da; color: #721c24; }
-        
-        .loading, .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        
-        @media (max-width: 768px) {
-            .control-panel {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .search-section {
-                flex-direction: column;
-            }
-            
-            .search-section input, .search-section select {
-                width: 100%;
-            }
-        }
-    </style>
+
+<html class="fontawesome-i2svg-active fontawesome-i2svg-complete"><head>
+<meta charset="UTF-8">
+<title>관리자 근태관리 시스템</title>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+	rel="stylesheet">
+<style>
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: Arial, sans-serif;
+	background-color: #f8f9fa;
+	color: #333;
+}
+
+.header {
+	padding: 15px 0;
+}
+
+.header-content {
+	max-width: 1200px;
+	margin: 0 auto;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 20px;
+}
+
+.header h1 {
+	font-size: 24px;
+	font-weight: normal;
+}
+
+.container {
+	width: 100%;
+	max-width: none;
+	margin: 0 auto;
+	padding: 0 20px;
+}
+
+.control-panel {
+	background: white;
+	padding: 20px;
+	border: 1px solid #dee2e6;
+	margin-bottom: 20px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 15px;
+}
+
+.search-section {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.search-section input, .search-section select {
+	padding: 8px 12px;
+	border: 1px solid #ccc;
+	font-size: 14px;
+}
+
+.btn {
+	padding: 8px 16px;
+	border: none;
+	cursor: pointer;
+	font-size: 14px;
+	background: #007bff;
+	color: white;
+}
+
+.btn:hover {
+	background: #0056b3;
+}
+
+.btn-success {
+	background: #28a745;
+}
+
+.btn-success:hover {
+	background: #1e7e34;
+}
+
+.stats-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 15px;
+	margin-bottom: 20px;
+}
+
+.stat-card {
+	background: white;
+	padding: 20px;
+	border: 1px solid #dee2e6;
+	text-align: center;
+}
+
+.stat-card .number {
+	font-size: 2em;
+	font-weight: bold;
+	margin-bottom: 5px;
+}
+
+.stat-card .label {
+	color: #666;
+	font-size: 14px;
+}
+
+.stat-card.total .number {
+	color: #007bff;
+}
+
+.stat-card.present .number {
+	color: #28a745;
+}
+
+.stat-card.late .number {
+	color: #ffc107;
+}
+
+.stat-card.absent .number {
+	color: #dc3545;
+}
+
+.table-container {
+	background: white;
+	border: 1px solid #dee2e6;
+}
+
+.table-header {
+	background: #f8f9fa;
+	padding: 15px 20px;
+	border-bottom: 1px solid #dee2e6;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.table-header h2 {
+	font-size: 18px;
+	font-weight: normal;
+}
+
+#attendanceTable {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+#attendanceTable th {
+	padding: 12px;
+	text-align: left;
+	font-weight: 600;
+	background: #f8f9fa;
+	border-bottom: 1px solid #dee2e6;
+}
+
+#attendanceTable td {
+	padding: 12px;
+	border-bottom: 1px solid #dee2e6;
+}
+
+#attendanceTable tbody tr:hover {
+	background-color: #f8f9fa;
+}
+
+.status-badge {
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.status-present {
+	background: #d4edda;
+	color: #155724;
+}
+
+.status-late {
+	background: #fff3cd;
+	color: #856404;
+}
+
+.status-absent {
+	background: #f8d7da;
+	color: #721c24;
+}
+
+.loading, .no-data {
+	text-align: center;
+	padding: 40px;
+	color: #666;
+}
+
+@media ( max-width : 768px) {
+	.control-panel {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.search-section {
+		flex-direction: column;
+	}
+	.search-section input, .search-section select {
+		width: 100%;
+	}
+}
+</style>
+<c:import url="/WEB-INF/views/templates/header.jsp"></c:import>
+
 </head>
-<body>
-    <div class="header">
-        <div class="header-content">
-            <h1>근태관리 시스템</h1>
-            <div class="admin-info">
-                <span>관리자</span>
-            </div>
-        </div>
-    </div>
+<body class="sb-nav-fixed">
+	<c:import url="/WEB-INF/views/templates/topbar.jsp"></c:import>
+	<div id="layoutSidenav">
+		<c:import url="/WEB-INF/views/templates/sidebar.jsp"></c:import>
 
-    <div class="container">
-        <!-- 통계 카드 -->
-        <div class="stats-cards">
-            <div class="stat-card total">
-                <div class="number" id="totalCount">0</div>
-                <div class="label">전체 트레이너</div>
-            </div>
-            <div class="stat-card present">
-                <div class="number" id="presentCount">0</div>
-                <div class="label">출근</div>
-            </div>
-            <div class="stat-card late">
-                <div class="number" id="lateCount">0</div>
-                <div class="label">지각</div>
-            </div>
-            <div class="stat-card absent">
-                <div class="number" id="absentCount">0</div>
-                <div class="label">결근</div>
-            </div>
-        </div>
+		<div id="layoutSidenav_content">
+			<main>
+				<div class="container-fluid px-4" style="margin-top: 30px;">
+					<div class="header">
+						<div class="header-content">
+							<h1>근태관리 시스템</h1>
+							<div class="admin-info">
+								<span>관리자</span>
+							</div>
+						</div>
+					</div>
 
-        <!-- 제어 패널 -->
-        <div class="control-panel">
-            <div class="search-section">
-                <input type="text" id="searchUser" placeholder="트레이너명 검색...">
-                <input type="date" id="searchDate" value="">
-                <select id="statusFilter">
-                    <option value="">전체 상태</option>
-                    <option value="present">출근</option>
-                    <option value="late">지각</option>
-                    <option value="absent">결근</option>
-                </select>
-                <button class="btn" onclick="filterData()">검색</button>
-            </div>
-            <div>
-                <button class="btn btn-success" onclick="exportToExcel()">Excel 내보내기</button>
-                <button class="btn" onclick="loadAttendanceData()">새로고침</button>
-            </div>
-        </div>
+					<div class="container">
+						<!-- 통계 카드 -->
+						<div class="stats-cards">
+							<div class="stat-card total">
+								<div class="number" id="totalCount">0</div>
+								<div class="label">전체 트레이너</div>
+							</div>
+							<div class="stat-card present">
+								<div class="number" id="presentCount">0</div>
+								<div class="label">출근</div>
+							</div>
+							<div class="stat-card late">
+								<div class="number" id="lateCount">0</div>
+								<div class="label">지각</div>
+							</div>
+							<div class="stat-card absent">
+								<div class="number" id="absentCount">0</div>
+								<div class="label">결근</div>
+							</div>
+						</div>
 
-        <!-- 출석 테이블 -->
-        <div class="table-container">
-            <div class="table-header">
-                <h2>출석 현황</h2>
-                <span id="lastUpdate">최종 업데이트: -</span>
-            </div>
-            
-            <div id="loadingDiv" class="loading">
-                데이터를 불러오는 중...
-            </div>
-            
-            <table id="attendanceTable" style="display: none;">
-                <thead>
-                    <tr>
-                        <th>트레이너명</th>
-                        <th>출근시간</th>
-                        <th>퇴근시간</th>
-                        <th>근무시간</th>
-                        <th>상태</th>
-                        <th>날짜</th>
-                        <th>수정</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            
-            <div id="noDataDiv" class="no-data" style="display: none;">
-                표시할 데이터가 없습니다.
-            </div>
-        </div>
-    </div>
+						<!-- 제어 패널 -->
+						<div class="control-panel">
+							<div class="search-section">
+								<input type="text" id="searchUser" placeholder="트레이너명 검색...">
+								<input type="date" id="searchDate" value=""> <select
+									id="statusFilter">
+									<option value="">전체 상태</option>
+									<option value="present">출근</option>
+									<option value="late">지각</option>
+									<option value="absent">결근</option>
+								</select>
+								<button class="btn" onclick="filterData()">검색</button>
+							</div>
+							<div>
+								<button class="btn btn-success" onclick="exportToExcel()">Excel
+									내보내기</button>
+								<button class="btn" onclick="loadAttendanceData()">새로고침</button>
+							</div>
+						</div>
 
-    <script>
+						<!-- 출석 테이블 -->
+						<div class="table-container">
+							<div class="table-header">
+								<h2>출석 현황</h2>
+								<span id="lastUpdate">최종 업데이트: -</span>
+							</div>
+
+							<div id="loadingDiv" class="loading">데이터를 불러오는 중...</div>
+
+							<table id="attendanceTable" style="display: none;">
+								<thead>
+									<tr>
+										<th>트레이너명</th>
+										<th>출근시간</th>
+										<th>퇴근시간</th>
+										<th>근무시간</th>
+										<th>상태</th>
+										<th>날짜</th>
+										<th>수정</th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+
+							<div id="noDataDiv" class="no-data" style="display: none;">
+								표시할 데이터가 없습니다.</div>
+						</div>
+					</div>
+				</div>
+			</main>
+
+			<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+		</div>
+	</div>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+	<script>
         let originalData = [];
         let totalTrainers = 0;
         
@@ -400,10 +441,16 @@
             const hour = parseInt(timeParts[0]);
             const minute = parseInt(timeParts[1]);
             
-            // 9시 이후면 지각, 그 전이면 정상출근
-            if (hour > 9 || (hour === 9 && minute > 0)) {
+            // 9시 30분 이후면 결근
+            if (hour > 9 || (hour === 9 && minute >= 30)) {
+                return 'absent';
+            }
+
+            // 9시 초과이면 지각
+            if (hour === 9 && minute > 0) {
                 return 'late';
             }
+
             return 'present';
         }
 
@@ -462,23 +509,25 @@
             const searchUser = $('#searchUser').val().toLowerCase();
             const searchDate = $('#searchDate').val();
             const statusFilter = $('#statusFilter').val();
-            
-            // 날짜가 변경되었으면 새로 데이터를 로드
+
             loadAttendanceData();
-            
-            // 사용자명과 상태로 필터링
+
             setTimeout(function() {
                 let filteredData = originalData.filter(function(attendance) {
-                	const matchUser = !searchUser || (attendance.NAME && attendance.NAME.includes(searchUser));
+                    const matchUser = !searchUser || 
+                        (attendance.name && attendance.name.toLowerCase().includes(searchUser)) || 
+                        (attendance.username && attendance.username.toLowerCase().includes(searchUser));
+
                     const matchStatus = !statusFilter || getAttendanceStatus(attendance.checkinTime, attendance.checkoutTime) === statusFilter;
-                    
+
                     return matchUser && matchStatus;
                 });
-                
+
                 displayAttendanceList(filteredData);
                 updateStatistics(filteredData);
             }, 500);
         }
+
 
         function exportToExcel() {
             // 실제 구현 시에는 서버에서 Excel 파일을 생성하여 다운로드
@@ -554,15 +603,17 @@
 
 
 
-<div id="editModal" style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:white; padding:20px; border:1px solid #ccc; z-index:999;">
-    <h3>근무시간 수정</h3>
-    <input type="hidden" id="editId">
-    <label>출근시간: <input type="time" id="editCheckin"></label><br><br>
-    <label>퇴근시간: <input type="time" id="editCheckout"></label><br><br>
-    <label>사유: <input type="text" id="editReason"></label><br><br>
-    <button onclick="submitEdit()">저장</button>
-    <button onclick="$('#editModal').hide()">닫기</button>
-</div>
+	<div id="editModal"
+		style="display: none; position: fixed; top: 20%; left: 50%; transform: translateX(-50%); background: white; padding: 20px; border: 1px solid #ccc; z-index: 999;">
+		<h3>근무시간 수정</h3>
+		<input type="hidden" id="editId"> <label>출근시간: <input
+			type="time" id="editCheckin"></label><br>
+		<br> <label>퇴근시간: <input type="time" id="editCheckout"></label><br>
+		<br> <label>사유: <input type="text" id="editReason"></label><br>
+		<br>
+		<button onclick="submitEdit()">저장</button>
+		<button onclick="$('#editModal').hide()">닫기</button>
+	</div>
 
 </body>
 </html>

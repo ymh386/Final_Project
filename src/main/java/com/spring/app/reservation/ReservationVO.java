@@ -3,6 +3,7 @@ package com.spring.app.reservation;
 
 	import java.time.LocalDateTime;
 
+import com.spring.app.facility.FacilityVO;
 import com.spring.app.schedule.ScheduleVO;
 import com.spring.app.user.UserVO;
 
