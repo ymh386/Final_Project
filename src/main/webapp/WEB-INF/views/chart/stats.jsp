@@ -52,14 +52,13 @@
 							<!-- contents -->
 							<h2>통계 차트</h2>
 							<div class="container py-5">
-								<h3 class="mb-4">근태 통계</h2>
-
+								<h3 class="mb-4">근태율</h2>
 								<form id="filterForm" method="get" action="./stats" class="row g-3 mb-4">
 									<div class="col-md-2">
 									<label class="form-label">연도</label>
 									<select name="year" class="form-select">
 										<c:forEach var="y" items="${yearList}">
-										<option value="${y}" <c:if test="${y == year}">selected</c:if>>${y}년</option>
+											<option value="${y}" <c:if test="${y == year}">selected</c:if>>${y}년</option>
 										</c:forEach>
 									</select>
 									</div>
@@ -79,10 +78,10 @@
 									<div class="col-md-3" id="deptSelectContainer" style="display:none">
 										<label class="form-label">부서</label>
 										<select id="deptSelect" name="departmentId" class="form-select" onchange="onDeptChange()">
-										<option value="">전체</option>
-										<c:forEach var="dept" items="${deptList}">
-											<option value="${dept.departmentId}"  <c:if test="${dept.departmentId == deptId}">selected</c:if>>${dept.departmentName}</option>
-										</c:forEach>
+											<option value="">전체</option>
+											<c:forEach var="dept" items="${deptList}">
+												<option value="${dept.departmentId}"  <c:if test="${dept.departmentId == deptId}">selected</c:if>>${dept.departmentName}</option>
+											</c:forEach>
 										</select>
 									</div>
 								
@@ -111,6 +110,15 @@
 									<canvas id="attendanceChart" height="400"></canvas>
 								</div>
 							</div>
+							<div class="container py-5">
+								<h3 class="mb-4">휴가율</h2>
+
+									
+								<div class="card p-4 shadow">
+									<canvas id="leaveChart" height="400"></canvas>
+								</div>
+
+							</div>
 
 
 
@@ -121,27 +129,32 @@
 				<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 			</div>
 		</div>
+
+		
 					
 		<script src="/js/chart/stats.js"></script>
+		
 		<script>
+		
+		//근태율 차트
 		const labels = [
-			<c:forEach var="stat" items="${stats}">"${stat.month}월",</c:forEach>
+			<c:forEach var="stat" items="${attendanceStats}">"${stat.month}월",</c:forEach>
 		];
 
 		const presentData = [
-			<c:forEach var="stat" items="${stats}">
+			<c:forEach var="stat" items="${attendanceStats}">
 			${stat.total > 0 ? (stat.present * 100 / stat.total) : 0},
 			</c:forEach>
 		];
 
 		const lateData = [
-			<c:forEach var="stat" items="${stats}">
+			<c:forEach var="stat" items="${attendanceStats}">
 			${stat.total > 0 ? (stat.late * 100 / stat.total) : 0},
 			</c:forEach>
 		];
 
 		const absentData = [
-			<c:forEach var="stat" items="${stats}">
+			<c:forEach var="stat" items="${attendanceStats}">
 			${stat.total > 0 ? (stat.absent * 100 / stat.total) : 0},
 			</c:forEach>
 		];
@@ -207,8 +220,82 @@
 			}
 		});
 
+		
+		//휴가율 차트
+		const labels2 = [
+			<c:forEach var="stat" items="${leaveStats}">
+				"${stat.leaveVO.leaveName}",
+			</c:forEach>
+		];
+
+		const usedData = [
+			<c:forEach var="stat" items="${leaveStats}">
+				${stat.usedDays},
+			</c:forEach>
+		];
+
+		
+
+		new Chart(document.getElementById('leaveChart'), {
+			type: 'bar',
+			data: {
+				labels: labels2,
+				datasets: [{
+				label: '사용일 수',
+				data: usedData,
+				backgroundColor: ['#4caf50', '#2196f3', '#ff9800', '#9c27b0']
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+				title: {
+					display: true,
+					text: "${year}년 휴가유형별 사용일 수",
+					color: "#000000",
+					font: { size: 18 }
+				},
+				legend: {
+					labels: { color: "#000000" }
+				}
+				},
+				scales: {
+				x: {
+					ticks: { color: "#000000" },
+					grid: { color: "#e0e0e0" }
+				},
+				y: {
+					beginAtZero: true,
+					ticks: {
+					color: "#000000",
+					stepSize: 1
+					},
+					title: {
+					display: true,
+					text: '사용일 수',
+					color: "#000000"
+					},
+					grid: { color: "#e0e0e0" }
+				}
+				}
+			}
+		});
+
+		//페이지 처음 로드 시 이전 선택값 기준으로 필드 표시
+		window.addEventListener("DOMContentLoaded", () => {
+			const selectedScope = "<c:out value='${scope}' default='all'/>";
+			onScopeChange(selectedScope);
+		});
+
 
 		</script>
+		
+
+		
+
+
+
 	
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	</body>

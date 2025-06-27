@@ -40,6 +40,8 @@ public interface AttendanceDAO {
     public List<AttendanceStatVO> getDeptMonthlyStats(Integer year, Long departmentId) throws Exception;
     // 사용자별 근태율 통계
     public List<AttendanceStatVO> getUserMonthlyStats(Integer year, String username) throws Exception;
+    // 사용자별 이번달 근태율 통계
+    public AttendanceStatVO getCurrentMonthStats(Integer year, Integer month, String username) throws Exception;
 
 	
 	

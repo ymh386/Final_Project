@@ -1,5 +1,8 @@
 package com.spring.app.approval;
 
+import java.time.LocalDateTime;
+import java.time.Year;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +32,9 @@ public class ApprovalService {
 	
 	@Autowired
 	private AuditLogService auditLogService;
+	
+	@Autowired
+	private LeaveService leaveService;
 	
 	//카테고리 목록 가져오기
 	public List<FormVO> getForms() throws Exception {
@@ -241,6 +247,16 @@ public class ApprovalService {
 				if(ar2.size() < 1) {
 					documentVO.setDocumentStatus("D1");
 					result = approvalDAO.updateDocumentStatus(documentVO);
+					
+					//휴가일 경우
+					LeaveVO leaveVO = leaveService.useLeave(documentVO.getContentHtml());
+					if(leaveVO != null) {
+						leaveVO.setUsername(documentVO.getWriterId());
+						//현재년도
+						leaveVO.setYear(Year.of(LocalDateTime.now(ZoneId.of("Asia/Seoul")).getYear()));
+						leaveService.updateLeave(leaveVO);
+					}
+					
 					
 					//최종 결과 시 결재 요청자에게 알림
 					notificationManager.appOrRejNotification(documentVO, userVO);

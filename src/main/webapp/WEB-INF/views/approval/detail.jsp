@@ -30,7 +30,7 @@
 						<h2>승인 내역 정보</h2><br>
                         <div class="mb-3">
                             <label class="form-label">요청자</label>
-                            <input type="text" class="form-control" value="${vo.documentVO.writerId}" readonly>
+                            <input type="text" class="form-control" value="${vo.documentVO.userVO.name}(${vo.documentVO.writerId})" readonly>
                             <label class="form-label">종류</label>
                             <input type="text" class="form-control" value="${vo.documentVO.formVO.formTitle}" readonly>
                             <label class="form-label">문서 제목</label>

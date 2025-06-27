@@ -33,7 +33,7 @@
                             <input id="approvalId" type="hidden" value="${vo.approvalId}">
                             <input id="documentId" type="hidden" value="${vo.documentId}">
                             <label class="form-label">요청자</label>
-                            <input id="writerId" type="text" class="form-control" value="${vo.documentVO.writerId}" readonly>
+                            <input id="writerId" type="text" class="form-control" value="${vo.documentVO.userVO.name}(${vo.documentVO.writerId})" readonly>
                             <label class="form-label">종류</label>
                             <input type="text" class="form-control" value="${vo.documentVO.formVO.formTitle}" readonly>
                             <label class="form-label">제목</label>

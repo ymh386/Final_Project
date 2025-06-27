@@ -87,7 +87,7 @@ public class AttendanceController {
 	@PreAuthorize("hasRole('TRAINER')")
 	@ResponseBody
 	public ResponseEntity<?> checkIn(@RequestBody Map<String, Object> body,
-	                                 Principal principal) {
+	                                 Principal principal, HttpServletRequest request) {
 	    String username = principal.getName();
 
 	    try {
@@ -147,7 +147,7 @@ public class AttendanceController {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 	                             .body(ex.getMessage());
 	    }
-	}
+	
 
     @GetMapping("user")
     @ResponseBody

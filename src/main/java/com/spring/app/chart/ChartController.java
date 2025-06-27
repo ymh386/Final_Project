@@ -45,8 +45,12 @@ public class ChartController {
 	        // 기본 연도 설정(현재년도)
 	        year = currentYear;
 		}
-		
-    	List<AttendanceStatVO> stats = chartService.getMonthlyStats(year, scope, departmentId, username);
+		//근태율 차트
+    	List<AttendanceStatVO> attendanceStats = chartService.getMonthlyStats(year, scope, departmentId, username);
+    	//휴가율 차트
+    	List<LeaveStatVO> leaveStats = chartService.getUsedLeaveByType(year, scope, departmentId, username);
+    	
+    	
     	//현재년도로 설정용
 		model.addAttribute("year", year);
 		//연도별 필터링 시 필요한 정보들
@@ -55,7 +59,11 @@ public class ChartController {
 	    model.addAttribute("scope", scope);
 	    
 	    //통계를 차트화 할때 필요한 정보들
-	    model.addAttribute("stats", stats);
+	    //근태율
+	    model.addAttribute("attendanceStats", attendanceStats);
+	    //휴가율
+	    model.addAttribute("leaveStats", leaveStats);
+
 	    
 	    //직원별, 부서별 필터링 시 필요한 직원, 부서 정보들을 프론트로 넘김
 	    model.addAttribute("userList", userService.getUsersWithDepartment());

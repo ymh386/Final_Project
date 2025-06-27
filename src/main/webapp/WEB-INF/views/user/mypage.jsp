@@ -15,6 +15,7 @@
 		<script src="https://cdn.jsdelivr.net/npm/jstree@3.3.15/dist/jstree.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 		<script src="https://cdn.ckeditor.com/4.22.1/full-all/ckeditor.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	</head>
 <body class="sb-nav-fixed d-flex flex-column min-vh-100">
 	<style>
@@ -135,6 +136,38 @@
           </div>
         </div>
 
+        <div class="container py-5" id="chart">
+          <h1 class="mb-4">근태/휴가 통계</h1>
+
+          <form id="filterForm" method="get" action="./mypage#chart" class="row g-3 mb-4">
+            <div class="col-md-2">
+            <label class="form-label">연도</label>
+            <select name="year" class="form-select">
+              <c:forEach var="y" items="${yearList}">
+                <option value="${y}" <c:if test="${y == year}">selected</c:if>>${y}년</option>
+              </c:forEach>
+            </select>
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-dark">조회</button>
+            </div>
+          </form>
+
+          <div class="card p-4 shadow">
+            <canvas id="attendanceChart" height="400"></canvas>
+          </div>
+
+		  <div class="card p-4 shadow">
+				<canvas id="leaveChart" height="400"></canvas>
+			</div>
+        </div>
+
+				
+			
+
+		
+
 		<sec:authorize access="hasAnyRole('ADMIN', 'TRAINER')">
 			<h1 class="mb-4">전자 결재</h1>
         <div class="card mb-4 shadow-sm">
@@ -192,7 +225,7 @@
         </div>
 		</sec:authorize>	
 
-	    <h2>구독 내역</h2>
+	    <h1>구독 내역</h1>
 		<table id="subList" border="1" cellpadding="8">
 			<tr><th>상품명</th><th>시작날짜</th><th>종료날짜</th><th>가격</th></tr>
 			<c:forEach var="l" items="${list}">
@@ -219,5 +252,154 @@
 
   <!-- Bootstrap JS (필요하다면) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+
+		//근태율 차트
+		const labels = [
+			<c:forEach var="stat" items="${attendanceStats}">"${stat.month}월",</c:forEach>
+		];
+
+		const presentData = [
+			<c:forEach var="stat" items="${attendanceStats}">
+			${stat.total > 0 ? (stat.present * 100 / stat.total) : 0},
+			</c:forEach>
+		];
+
+		const lateData = [
+			<c:forEach var="stat" items="${attendanceStats}">
+			${stat.total > 0 ? (stat.late * 100 / stat.total) : 0},
+			</c:forEach>
+		];
+
+		const absentData = [
+			<c:forEach var="stat" items="${attendanceStats}">
+			${stat.total > 0 ? (stat.absent * 100 / stat.total) : 0},
+			</c:forEach>
+		];
+
+		new Chart(document.getElementById('attendanceChart'), {
+			type: 'bar',
+			data: {
+			labels: labels,
+			datasets: [
+				{
+				label: '출근',
+				data: presentData,
+				backgroundColor: 'rgba(54, 162, 235, 0.8)'
+				},
+				{
+				label: '지각',
+				data: lateData,
+				backgroundColor: 'rgba(255, 206, 86, 0.8)'
+				},
+				{
+				label: '결근',
+				data: absentData,
+				backgroundColor: 'rgba(255, 99, 132, 0.8)'
+				}
+			]
+			},
+			options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			plugins: {
+				title: {
+				display: true,
+				text: "${year}년 월별 근태율 (출근/지각/결근)",
+				color: "#000000",
+				font: { size: 18 }
+				},
+				legend: {
+				labels: { color: "#000000" }
+				}
+			},
+			scales: {
+				x: {
+				stacked: true,
+				ticks: { color: "#000000" },
+				grid: { color: "#e0e0e0" }
+				},
+				y: {
+				stacked: true,
+				min: 0,
+				max: 100,
+				ticks: {
+					color: "#000000",
+					callback: function(value) { return value + '%' }
+				},
+				title: {
+					display: true,
+					text: '비율 (%)',
+					color: "#000000"
+				},
+				grid: { color: "#e0e0e0" }
+				}
+			}
+			}
+		});
+
+		//휴가율 차트
+		const labels2 = [
+			<c:forEach var="stat" items="${leaveStats}">
+				"${stat.leaveVO.leaveName}",
+			</c:forEach>
+		];
+
+		const usedData = [
+			<c:forEach var="stat" items="${leaveStats}">
+				${stat.usedDays},
+			</c:forEach>
+		];
+
+		
+
+		new Chart(document.getElementById('leaveChart'), {
+			type: 'bar',
+			data: {
+				labels: labels2,
+				datasets: [{
+				label: '사용일 수',
+				data: usedData,
+				backgroundColor: ['#4caf50', '#2196f3', '#ff9800', '#9c27b0']
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+				title: {
+					display: true,
+					text: "${year}년 휴가유형별 사용일 수",
+					color: "#000000",
+					font: { size: 18 }
+				},
+				legend: {
+					labels: { color: "#000000" }
+				}
+				},
+				scales: {
+				x: {
+					ticks: { color: "#000000" },
+					grid: { color: "#e0e0e0" }
+				},
+				y: {
+					beginAtZero: true,
+					ticks: {
+					color: "#000000",
+					stepSize: 1
+					},
+					title: {
+					display: true,
+					text: '사용일 수',
+					color: "#000000"
+					},
+					grid: { color: "#e0e0e0" }
+				}
+				}
+			}
+		});
+
+
+		</script>
 </body>
 </html>

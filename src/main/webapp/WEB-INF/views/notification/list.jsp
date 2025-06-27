@@ -28,7 +28,7 @@
 						    <form method="get" class="d-flex mb-3">
 						        <select name="searchField" class="form-select w-auto me-2">
 						            <option value="S.NAME" ${pager.searchField eq 'S.NAME' ? 'selected' : ''}>송신자</option>
-						            <option value="NOTIFICATION_TITLE" ${pager.searchField eq 'NOTIFICATION_TITLE' ? 'selected' : ''}>종류(제목)</option>
+						            <option value="NOTIFICATION_TITLE" ${pager.searchField eq 'NOTIFICATION_TITLE' ? 'selected' : ''}>제목(종류)</option>
 						            <option value="MESSAGE" ${pager.searchField eq 'MESSAGE' ? 'selected' : ''}>내용</option>
 						        </select>
 								<!-- 검색어 -->
@@ -47,7 +47,7 @@
 							 <table class="table table-hover table-bordered">
 								 <thead class="table-dark">
 									 <tr>
-										 <th scope="col">종류</th>
+										 <th scope="col">제목</th>
 										 <th scope="col">송신자</th>
 										 <th scope="col">내용</th>
 										 <th scope="col">읽음 여부</th>
@@ -58,7 +58,7 @@
 									 <c:forEach var="a" items="${ar}">
 										 <tr data-id="${a.notificationId}" data-link="${a.linkUrl}" class="trs">
 											<td>${a.notificationTitle}</td>
-											<td>${a.senderVO.name}</td>
+											<td>${a.senderVO.name}(${a.senderId})</td>
 											 <td style="white-space: pre-line;">${a.message}</td>
  
 											<c:choose>

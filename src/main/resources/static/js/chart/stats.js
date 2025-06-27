@@ -46,7 +46,7 @@ function onDeptChange() {
         //각 사용자에 대해 옵션 요소를 만들구 userSelect에 추가
         const opt = document.createElement("option");
         opt.value = user.username;
-        opt.text = user.name;
+        opt.text = user.name + '(' + user.username + ')';
         userSelect.appendChild(opt);
       });
     })
@@ -56,8 +56,3 @@ function onDeptChange() {
     });
 }
 
-// 페이지 처음 로드 시 이전 선택값 기준으로 필드 표시
-window.addEventListener("DOMContentLoaded", () => {
-    const selectedScope = "<c:out value='${scope}' default='all'/>";
-    onScopeChange(selectedScope);
-});

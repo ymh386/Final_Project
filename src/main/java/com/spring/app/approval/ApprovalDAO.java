@@ -81,4 +81,16 @@ public interface ApprovalDAO {
 	
 	//다음결재자 정보 조회
 	public ApprovalVO getChild(ApprovalVO approvalVO) throws Exception;
+	
+	//해당 유저 휴가사용
+	public int updateLeave(LeaveVO leaveVO) throws Exception;
+	
+	//타입별 휴가사용량 조회(관리자용 범위설정 가능)
+	public Long getUsedLeavesByType(Integer year, String scope, Long departmentId, String username, Long typeId) throws Exception;
+	
+	//타입별 휴가사용량 조회(유저용 자기자신 것만 조회)
+	public Long getUsedLeavesByUser(Integer year, String username, Long typeId) throws Exception;
+	
+	//휴가타입 리스트 조회
+	public List<LeaveVO> getLeaveTypes() throws Exception;
 }
