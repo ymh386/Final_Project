@@ -132,7 +132,13 @@
   <!-- 댓글 목록 조회 -->
 <select id="getCommentList" parameterType="long" resultType="com.spring.app.board.comment.CommentVO">
   SELECT 
-    COMMENT_NUM, BOARD_NUM, USERNAME, COMMENT_CONTENTS, COMMENT_DATE, PARENT_COMMENT_NUM, COMMENT_DEPTH
+    COMMENT_NUM,
+    BOARD_NUM,
+    USERNAME AS userName,
+    COMMENT_CONTENTS AS commentContents,
+    COMMENT_DATE AS commentDate,
+    PARENT_COMMENT_NUM AS parentCommentNum,
+    COMMENT_DEPTH AS commentDepth
   FROM COMMENTS
   WHERE BOARD_NUM = #{boardNum}
   ORDER BY
@@ -159,8 +165,8 @@
 
   <!-- 13) 파일 업로드 -->
   <insert id="addFile" parameterType="com.spring.app.board.BoardFileVO" useGeneratedKeys="true" keyProperty="fileNum" keyColumn="FILE_NUM">
-    INSERT INTO IMAGES (BOARD_NUM, FILE_NAME, ORI_NAME)
-    VALUES (#{boardNum}, #{fileName}, #{oriName})
+    INSERT INTO IMAGES (BOARD_NUM, FILE_NAME, OLD_NAME)
+    VALUES (#{boardNum}, #{fileName}, #{oldName})
   </insert>
 
   <!-- 14) 파일 목록 -->
