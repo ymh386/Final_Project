@@ -289,12 +289,22 @@
         <div class="small text-muted mb-1 fw-bold member" data-sender-id="${msg.senderId}">${msg.senderId}<span class="badge">🟢</span></div>
 
         <div class="d-flex align-items-end">
+        <c:if test="${map.img[status.index] eq 'default'}">
+          <img 
+            src="${pageContext.request.contextPath}/img/${map.img[status.index]}.png" 
+            alt="avatar" 
+            class="rounded-circle me-2" 
+            width="32" height="32"
+          />        
+        </c:if>
+        <c:if test="${map.img[status.index] ne 'default'}">
           <img 
             src="${map.img[status.index]}" 
             alt="avatar" 
             class="rounded-circle me-2" 
             width="32" height="32"
           />
+        </c:if>
 
           <!-- ② 말풍선 안에 텍스트 or 이미지 분기 -->
           <div class="bg-white border rounded px-3 py-2 shadow-sm" style="max-width: 60%;">

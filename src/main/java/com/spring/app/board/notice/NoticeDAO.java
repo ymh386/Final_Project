@@ -45,4 +45,6 @@ public interface NoticeDAO {
      * 조회수 증가
      */
     int hitUpdate(NoticeVO noticeVO) throws Exception;
+    
+    List<NoticeVO> noticeHome() throws Exception;
 }

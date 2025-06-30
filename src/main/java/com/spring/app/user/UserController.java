@@ -197,9 +197,36 @@ public class UserController {
 	}
 	
 	@PostMapping("join/trainerJoin")
-	String trainerJoin(UserVO userVO, HttpServletRequest request) throws Exception{
+	String trainerJoin(UserVO userVO, HttpServletRequest request, MultipartFile img, Model model) throws Exception{
 		Long code = userService.getTrainerCode();
 		userVO.setTrainerCode(code);
+		
+		String oriName = img.getOriginalFilename().toString();
+		
+		if (oriName!="") {
+			String file = oriName.substring(oriName.lastIndexOf(".")).toLowerCase();			
+			if(!ALLOWED_EXTENSIONS.contains(file)){
+				model.addAttribute("result", "이미지 파일(.png, .jpg, .jpeg, .gif)만 업로드할 수 있습니다.");
+				model.addAttribute("path", "./registerSign");
+				
+				return "commons/result";
+			}
+			
+			//랜덤 문자열 가져오기
+			String uuid = UUID.randomUUID().toString();
+			//가져온 랜덤 문자열로 파일이름 만들기
+			String fileName = uuid.concat(userVO.getUsername()).concat(".png");
+			String file2=fileManager.saveFile(path.concat("user"), img);
+			userVO.setFileName(file2);
+			userVO.setOriName(oriName);
+		}else {
+			oriName="default.png";
+			userVO.setFileName("default");
+			userVO.setOriName(oriName);
+			
+			
+		}		
+		
 		int result = userService.join(userVO);
 		
 		// 로그/감사 기록용
