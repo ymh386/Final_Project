@@ -285,7 +285,7 @@ public class BoardController {
                          @RequestParam(value = "secretPassword", required = false) String secretPassword,
                          @RequestParam(value = "category", required = true) Long category,
                          @AuthenticationPrincipal UserVO user,
-                         RedirectAttributes rttr) throws Exception {
+                         RedirectAttributes rttr, HttpServletRequest request) throws Exception {
         if (user == null) throw new RuntimeException("로그인이 필요합니다.");
 
         BoardVO original = boardService.getDetail(new BoardVO(boardVO.getBoardNum()));

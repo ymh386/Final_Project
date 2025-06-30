@@ -116,7 +116,7 @@
  	</update>
  	
  	<update id="update" parameterType="UserVO">
- 		UPDATE USER SET PASSWORD=#{password}, NAME=#{name}, EMAIL=#{email}, PHONE=#{phone} WHERE USERNAME=#{username}
+ 		UPDATE USER SET PASSWORD=#{password}, NAME=#{name}, EMAIL=#{email}, PHONE=#{phone}, BIRTH=#{birth} WHERE USERNAME=#{username}
  	</update>
  	
  	<resultMap type="UserVO" id="detailMap">
