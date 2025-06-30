@@ -87,117 +87,117 @@
 		<c:import url="/WEB-INF/views/templates/sidebar.jsp"></c:import>
 			<div id="layoutSidenav_content" class="d-flex flex-column flex-grow-1">
                 <main class="flex-grow-1">
-
-					<sec:authorize access="!hasRole('TRAINER')">
-					<div class="container mt-4">
-						<div class="row justify-content-center">
-							<div class="col-lg-8">
-								<div id="mainCarousel" class="carousel slide" data-bs-ride="carousel">
-									<div class="carousel-inner">
-									<div class="carousel-item active">
-										<img src="${pageContext.request.contextPath}/img/boxing.png" class="d-block w-100">
+					<div class="container">
+						<sec:authorize access="!hasRole('TRAINER')">
+							<div class="container mt-4">
+								<div class="row justify-content-center">
+									<div class="col-lg-12">
+										<div id="mainCarousel" class="carousel slide" data-bs-ride="carousel">
+											<div class="carousel-inner" style="height: 500px;">
+												<div class="carousel-item active">
+													<img src="${pageContext.request.contextPath}/img/boxing.png" class="d-block w-100">
+												</div>
+												<div class="carousel-item">
+													<img src="${pageContext.request.contextPath}/img/swim.png" class="d-block w-100">
+												</div>
+												<div class="carousel-item">
+													<img src="${pageContext.request.contextPath}/img/health.png" class="d-block w-100">
+												</div>		  		 						
+											</div>
+											<button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
+												<span class="carousel-control-prev-icon"></span>
+											</button>
+											<button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
+												<span class="carousel-control-next-icon"></span>
+											</button>
+										</div>
 									</div>
-									<div class="carousel-item">
-										<img src="${pageContext.request.contextPath}/img/swim.png" class="d-block w-100">
-									</div>
-									<div class="carousel-item">
-										<img src="${pageContext.request.contextPath}/img/health.png" class="d-block w-100">
-									</div>		  		 						
-									</div>
-									<button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
-									<span class="carousel-control-prev-icon"></span>
-									</button>
-									<button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
-									<span class="carousel-control-next-icon"></span>
-									</button>
 								</div>
 							</div>
-						</div>
-					</div>
 
-					<div class="container-fluid my-4">
-					<div class="row gx-4">
-						<div class="col-lg-4">
-						<div class="card h-100 notice-card">
-							<div class="card-header d-flex justify-content-between align-items-center">
-							<h5 class="mb-0">공지사항</h5>
-							<a href="/notice/list" class="small text-decoration-none">더보기 &gt;</a>
+							<div class="container-fluid my-4">
+								<div class="row gx-4">
+									<div class="col-lg-4">
+										<div class="card h-100 notice-card">
+											<div class="card-header d-flex justify-content-between align-items-center">
+											<h5 class="mb-0">공지사항</h5>
+											<a href="/notice/list" class="small text-decoration-none">더보기 &gt;</a>
+											</div>
+											<ul class="list-group list-group-flush">
+											<c:forEach items="${notice}" var="n">
+												<li class="list-group-item d-flex justify-content-between align-items-center py-2">
+												<span>
+													<span class="badge bg-secondary me-1">공지</span>
+													<a href="/notice/detail?boardNum=${n.boardNum}" class="text-decoration-none">
+													${n.boardTitle}
+													</a>
+												</span>
+												<small class="text-muted">${n.boardDate}</small>
+												</li>
+											</c:forEach>
+											
+											</ul>
+										</div>
+									</div>
+
+									<div class="col-lg-4 d-flex">
+										<div class="card flex-fill">
+											<div class="card-header d-flex justify-content-between align-items-center">
+											<h5 class="mb-0">일정</h5>
+											<a href="/schedule/page" class="small text-decoration-none">더보기 &gt;</a>
+											</div>
+											<ul class="list-group list-group-flush">
+											<c:forEach items="${reservation}" var="r">
+												<li class="list-group-item d-flex justify-content-between align-items-center py-2">
+												<span>
+													<span class="badge bg-secondary me-1">${r.trainer}</span>
+													<a href="/reservation/my" class="text-decoration-none">
+													${r.name}
+													</a>
+												</span>
+												<small class="text-muted">${r.scheduleDate}</small>
+												</li>
+											</c:forEach>
+											
+											</ul>
+										</div>
+									</div>
+
+									<div class="col-lg-4 d-flex">
+										<div class="card flex-fill">
+											<div class="card-header d-flex justify-content-between align-items-center">
+											<h5 class="mb-0">채팅</h5>
+											<a href="/chat/list" class="small text-decoration-none">더보기 &gt;</a>
+											</div>
+											<ul class="list-group list-group-flush">
+											<c:forEach items="${chat}" var="c">
+												<li class="list-group-item d-flex justify-content-between align-items-center py-2">
+												<span>
+													<span class="badge bg-secondary me-1">${c.chatMessageVO.senderId}</span>
+													<a href="/chat/list" class="text-decoration-none">
+													${c.chatMessageVO.contents}
+													</a>
+												</span>
+												<small class="text-muted">${c.chatMessageVO.createdAt}</small>
+												</li>
+											</c:forEach>							
+											</ul>
+										</div>
+									</div>						
+								</div>
 							</div>
-							<ul class="list-group list-group-flush">
-							<c:forEach items="${notice}" var="n">
-								<li class="list-group-item d-flex justify-content-between align-items-center py-2">
-								<span>
-									<span class="badge bg-secondary me-1">공지</span>
-									<a href="/notice/detail?boardNum=${n.boardNum}" class="text-decoration-none">
-									${n.boardTitle}
-									</a>
-								</span>
-								<small class="text-muted">${n.boardDate}</small>
-								</li>
-							</c:forEach>
-							
-							</ul>
-						</div>
-						</div>
+						</sec:authorize>
 
-						<div class="col-lg-4 d-flex">
-						<div class="card flex-fill">
-							<div class="card-header d-flex justify-content-between align-items-center">
-							<h5 class="mb-0">일정</h5>
-							<a href="/schedule/page" class="small text-decoration-none">더보기 &gt;</a>
-							</div>
-							<ul class="list-group list-group-flush">
-							<c:forEach items="${reservation}" var="r">
-								<li class="list-group-item d-flex justify-content-between align-items-center py-2">
-								<span>
-									<span class="badge bg-secondary me-1">${r.trainer}</span>
-									<a href="/reservation/my" class="text-decoration-none">
-									${r.name}
-									</a>
-								</span>
-								<small class="text-muted">${r.scheduleDate}</small>
-								</li>
-							</c:forEach>
-							
-							</ul>
-						</div>
-						</div>
+							<!-- 좌측: 회원 정보 카드 -->
+						<sec:authorize access="hasAnyRole('TRAINER', 'ADMIN')">
 
-						<div class="col-lg-4 d-flex">
-						<div class="card flex-fill">
-							<div class="card-header d-flex justify-content-between align-items-center">
-							<h5 class="mb-0">채팅</h5>
-							<a href="/chat/list" class="small text-decoration-none">더보기 &gt;</a>
-							</div>
-							<ul class="list-group list-group-flush">
-							<c:forEach items="${chat}" var="c">
-								<li class="list-group-item d-flex justify-content-between align-items-center py-2">
-								<span>
-									<span class="badge bg-secondary me-1">${c.chatMessageVO.senderId}</span>
-									<a href="/chat/list" class="text-decoration-none">
-									${c.chatMessageVO.contents}
-									</a>
-								</span>
-								<small class="text-muted">${c.chatMessageVO.createdAt}</small>
-								</li>
-							</c:forEach>							
-							</ul>
-						</div>
-						</div>						
-					</div>
-					</div>
-					</sec:authorize>
-
-									<!-- 좌측: 회원 정보 카드 -->
-								<sec:authorize access="hasAnyRole('TRAINER', 'ADMIN')">
-
-								<div class="container-fluid px-4 py-4">
-									<div class="row mb-4">
-										
-										<div class="col-md-6 mb-3">
-											<div class="card shadow-sm h-100">
-												<div class="card-header bg-dark text-white">
-													<i class="bi bi-person-circle"></i> 회원 정보
+							<div class="container-fluid px-4 py-4">
+								<div class="row mb-4">
+									
+									<div class="col-md-6 mb-3">
+										<div class="card shadow-sm h-100">
+											<div class="card-header bg-dark text-white">
+												<i class="bi bi-person-circle"></i> 회원 정보
 											</div>
 											<div class="card-body">
 												<div class="row gx-3">
@@ -212,7 +212,7 @@
 														<div class="card h-100">
 															<form action="" method="post">
 																<div class="card-header bg-dark text-white text-center">
-																<i class="bi bi-clock-fill"></i> 출퇴근
+																	<i class="bi bi-clock-fill"></i> 출퇴근
 																</div>
 																<div class="card-body d-flex flex-column align-items-center justify-content-center attendance-controls">
 																	<p><strong>출근 : </strong> ${user.name}</p>
@@ -246,89 +246,83 @@
 									</div>
 								</div>
 									<!-- ▶ 하단: 추가 콘텐츠 자리 -->
-														<div class="container-fluid my-4">
-					<div class="row gx-4">
-						<div class="col-lg-4">
-						<div class="card h-100 notice-card">
-							<div class="card-header d-flex justify-content-between align-items-center">
-							<h5 class="mb-0">공지사항</h5>
-							<a href="/notice/list" class="small text-decoration-none">더보기 &gt;</a>
-							</div>
-							<ul class="list-group list-group-flush">
-							<c:forEach items="${notice}" var="n">
-								<li class="list-group-item d-flex justify-content-between align-items-center py-2">
-								<span>
-									<span class="badge bg-secondary me-1">공지</span>
-									<a href="/notice/detail?boardNum=${n.boardNum}" class="text-decoration-none">
-									${n.boardTitle}
-									</a>
-								</span>
-								<small class="text-muted">${n.boardDate}</small>
-								</li>
-							</c:forEach>
-							
-							</ul>
-						</div>
-						</div>
+								<div class="container-fluid my-4">
+									<div class="row gx-4">
+										<div class="col-lg-4">
+											<div class="card h-100 notice-card">
+												<div class="card-header d-flex justify-content-between align-items-center">
+													<h5 class="mb-0">공지사항</h5>
+													<a href="/notice/list" class="small text-decoration-none">더보기 &gt;</a>
+												</div>
+												<ul class="list-group list-group-flush">
+												<c:forEach items="${notice}" var="n">
+													<li class="list-group-item d-flex justify-content-between align-items-center py-2">
+														<span>
+															<span class="badge bg-secondary me-1">공지</span>
+															<a href="/notice/detail?boardNum=${n.boardNum}" class="text-decoration-none">
+															${n.boardTitle}
+															</a>
+														</span>
+														<small class="text-muted">${n.boardDate}</small>
+													</li>
+												</c:forEach>
+												
+												</ul>
+											</div>
+										</div>
 
-						<div class="col-lg-4 d-flex">
-						<div class="card flex-fill">
-							<div class="card-header d-flex justify-content-between align-items-center">
-							<h5 class="mb-0">일정</h5>
-							<a href="/schedule/page" class="small text-decoration-none">더보기 &gt;</a>
-							</div>
-							<ul class="list-group list-group-flush">
-							<c:forEach items="${reservation}" var="r">
-								<li class="list-group-item d-flex justify-content-between align-items-center py-2">
-								<span>
-									<span class="badge bg-secondary me-1">${r.trainer}</span>
-									<a href="/reservation/my" class="text-decoration-none">
-									${r.name}
-									</a>
-								</span>
-								<small class="text-muted">${r.scheduleDate}</small>
-								</li>
-							</c:forEach>
-							
-							</ul>
-						</div>
-						</div>
+										<div class="col-lg-4 d-flex">
+											<div class="card flex-fill">
+												<div class="card-header d-flex justify-content-between align-items-center">
+													<h5 class="mb-0">일정</h5>
+													<a href="/schedule/page" class="small text-decoration-none">더보기 &gt;</a>
+												</div>
+												<ul class="list-group list-group-flush">
+												<c:forEach items="${reservation}" var="r">
+													<li class="list-group-item d-flex justify-content-between align-items-center py-2">
+														<span>
+															<span class="badge bg-secondary me-1">${r.trainer}</span>
+															<a href="/reservation/my" class="text-decoration-none">
+															${r.name}
+															</a>
+														</span>
+														<small class="text-muted">${r.scheduleDate}</small>
+													</li>
+												</c:forEach>
+												
+												</ul>
+											</div>
+										</div>
 
-						<div class="col-lg-4 d-flex">
-						<div class="card flex-fill">
-							<div class="card-header d-flex justify-content-between align-items-center">
-							<h5 class="mb-0">채팅</h5>
-							<a href="/chat/list" class="small text-decoration-none">더보기 &gt;</a>
+										<div class="col-lg-4 d-flex">
+											<div class="card flex-fill">
+												<div class="card-header d-flex justify-content-between align-items-center">
+													<h5 class="mb-0">채팅</h5>
+													<a href="/chat/list" class="small text-decoration-none">더보기 &gt;</a>
+												</div>
+												<ul class="list-group list-group-flush">
+												<c:forEach items="${chat}" var="c">
+													<li class="list-group-item d-flex justify-content-between align-items-center py-2">
+														<span>
+															<span class="badge bg-secondary me-1">${c.chatMessageVO.senderId}</span>
+															<a href="/chat/list" class="text-decoration-none">
+															${c.chatMessageVO.contents}
+															</a>
+														</span>
+														<small class="text-muted">${c.chatMessageVO.createdAt}</small>
+													</li>
+												</c:forEach>							
+												</ul>
+											</div>
+										</div>						
+									</div>
+								</div>
 							</div>
-							<ul class="list-group list-group-flush">
-							<c:forEach items="${chat}" var="c">
-								<li class="list-group-item d-flex justify-content-between align-items-center py-2">
-								<span>
-									<span class="badge bg-secondary me-1">${c.chatMessageVO.senderId}</span>
-									<a href="/chat/list" class="text-decoration-none">
-									${c.chatMessageVO.contents}
-									</a>
-								</span>
-								<small class="text-muted">${c.chatMessageVO.createdAt}</small>
-								</li>
-							</c:forEach>							
-							</ul>
-						</div>
-						</div>						
-					</div>
-					</div>
-								</sec:authorize>
+						</sec:authorize>
 								
-							</div>
-							
-							
-							
-
-						</div>
-
-						</div>
-					
 					</div>
+							
+							
 				</main>
 				<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 			</div>

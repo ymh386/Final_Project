@@ -27,55 +27,81 @@
                 <main class="flex-grow-1">
                     <div class="container">
 							<!-- contents -->
-                        <sec:authentication property="principal" var="user"/>
-                        <h2>결재 정보</h2><br>
-                        <div class="mb-3">
-                            <label class="form-label">종류</label>
-                            <input type="text" class="form-control" value="${vo.formVO.formTitle}" readonly>
-                            <label class="form-label">제목</label>
-                            <input type="text" class="form-control" value="${vo.documentTitle}" readonly>
-                            <label class="form-label">진행 상태</label>
-                            <c:choose>
-                                <c:when test="${vo.documentStatus eq 'D1'}">
-                                    <input type="text" class="form-control" value="승인" readonly style="color: blue;">
-                                </c:when>
-                                <c:when test="${vo.documentStatus eq 'D2'}">
-                                    <input type="text" class="form-control" value="반려" readonly style="color: red;">
-                                </c:when>
-                                <c:otherwise>
-                                    <input type="text" class="form-control" value="진행중" readonly>
-                                </c:otherwise>
-                            </c:choose>
-                            <label class="form-label">작성일시</label>
-                            <input type="text" class="form-control" value="${vo.createdAt}" readonly>
-                        </div>
+                        <div class="container mt-4">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-secondary text-white">
+                                    <h4 class="mb-0"><i class="bi bi-journal-check me-2"></i>결재 문서 상세</h4>
+                                </div>
 
-                        <div>
-                            ${vo.contentHtml}
-                        </div>
+                                <div class="card-body">
+                                    <sec:authentication property="principal" var="user"/>
 
-                        <c:if test="${user.username eq vo.writerId}">
-                            <div>
-                                <a href="/approval/deleteDocument?documentId=${vo.documentId}" class="btn">결재 취소</a>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">문서 양식</label>
+                                            <input type="text" class="form-control" value="${vo.formVO.formTitle}" readonly>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">문서 제목</label>
+                                            <input type="text" class="form-control" value="${vo.documentTitle}" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">진행 상태</label>
+                                            <c:choose>
+                                                <c:when test="${vo.documentStatus eq 'D1'}">
+                                                    <div class="form-control bg-light text-primary"><i class="bi bi-check-circle-fill"></i> 승인</div>
+                                                </c:when>
+                                                <c:when test="${vo.documentStatus eq 'D2'}">
+                                                    <div class="form-control bg-light text-danger"><i class="bi bi-x-circle-fill"></i> 반려</div>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <div class="form-control bg-light text-secondary"><i class="bi bi-hourglass-split"></i> 진행중</div>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">작성 일시</label>
+                                            <input type="text" class="form-control" value="${vo.createdAt}" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold">문서 내용</label>
+                                        <div class="border p-3 rounded" style="background-color:#f9f9f9">
+                                            ${vo.contentHtml}
+                                        </div>
+                                    </div>
+
+                                    <c:if test="${user.username eq vo.writerId}">
+                                        <div class="text-end">
+                                            <a href="/approval/deleteDocument?documentId=${vo.documentId}" 
+                                            class="btn btn-outline-danger">
+                                            <i class="bi bi-trash3-fill"></i> 결재 취소
+                                            </a>
+                                        </div>
+                                    </c:if>
+                                </div>
                             </div>
-                        </c:if>
+                        </div>
 
 
 
 
 
-					<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+
+					
 					</div>
 				</main>
+                <c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 			</div>
 		</div>
 					
 	
 	
 	
-	
-		<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
-		</div>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	</body>
 </html>

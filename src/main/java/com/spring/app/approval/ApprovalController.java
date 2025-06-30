@@ -256,6 +256,7 @@ public class ApprovalController {
 		deptMap.put("id", "admin");
 		deptMap.put("text", "관리자");
 		deptMap.put("data", Map.of("username", "admin", "name", "admin"));
+		deptMap.put("type", "head"); // ← 사용자 노드임을 명시(관리자는 부서들과 같은 라인이지만 유저형태를 띄기때문)
 		//조직도로 사용할 리스트tree에 map을 넣는다.
 		tree.add(deptMap);
 		//부서들중 부서하나씩 꺼내서 반복문 실행
@@ -275,9 +276,10 @@ public class ApprovalController {
 	            //부서안에서 꺼낸 유저리스트에서 하나를꺼낸 유저의 정보를 넣음
 	            userMap.put("id", user.getUsername());
 	            //부서장 직책이면 이름앞에 [부서장]으로 강조
-	            userMap.put("text", (user.getPosition().equals("DP1") ? "[부서장] " : "") + user.getName());
+	            userMap.put("text", (user.getPosition().equals("DP1") ? "[부서장] " : "") + user.getName() + "(" + user.getUsername() + ")");
 	            //data는 username과 name을 맵형태로 넣은 맵 -> 자바스크립트(프론트)에서 데이터로 사용예정
 	            userMap.put("data", Map.of("username", user.getUsername(), "name", user.getName()));
+	            userMap.put("type", ("DP1".equals(user.getPosition()) ? "head" : "user")); // ← 사용자 노드임을 명시
 	            //한 유저의 정보를 맵에 담음
 	            childMaps.add(userMap);
 	        }

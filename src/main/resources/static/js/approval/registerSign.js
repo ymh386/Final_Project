@@ -6,83 +6,91 @@ const imageData = document.getElementById("imageData");
 const stampForm = document.getElementById("stampForm");
 
 
-//서명 클릭 시
-sign.addEventListener('click', ()=>{
-    //화면 초기화
+sign.addEventListener('click', () => {
+    // 화면 초기화
     stampForm.innerHTML = '';
     signPad.innerHTML = '';
 
-    //canvas생성
+    // 부모 div: 중앙 정렬용
+    const wrapper = document.createElement('div');
+    wrapper.className = 'd-flex flex-column align-items-center';
+
+    // Canvas 생성
     const canvas = document.createElement('canvas');
     canvas.setAttribute('id', 'signature-pad');
-    canvas.setAttribute('width', '400');
+    canvas.setAttribute('width', '700'); // 가로 너비 넓힘
     canvas.setAttribute('height', '200');
-    canvas.style.border = '1px solid #000';
+    canvas.classList.add('border', 'rounded', 'mb-3', 'shadow-sm');
 
-    //클릭시 서명패드 클리어시키는 지우기 버튼 생성
+    // 버튼 그룹 생성
+    const buttonGroup = document.createElement('div');
+    buttonGroup.className = 'd-flex gap-2 justify-content-center';
+
+    // 지우기 버튼
     const clearSign = document.createElement('button');
-    clearSign.innerText = '지우기'
+    clearSign.type = 'button';
+    clearSign.className = 'btn btn-outline-secondary';
+    clearSign.innerHTML = '<i class="bi bi-eraser-fill me-1"></i>지우기';
 
-    //클릭시 서명패드에 등록된 서명 서버로 보내기
+    // 저장 버튼
     const saveSign = document.createElement('button');
-    saveSign.innerText = '저장'
-    signPad.append(canvas)
-    signPad.append(clearSign)
-    signPad.append(saveSign)
+    saveSign.type = 'button';
+    saveSign.className = 'btn btn-primary';
+    saveSign.innerHTML = '<i class="bi bi-save-fill me-1"></i>저장';
 
-    //지우기버튼 눌렀을 때
-    clearSign.addEventListener('click', ()=>{
-        clearSingature();
-    })
-    //저장버튼 눌렀을 때
-    saveSign.addEventListener('click', ()=>{
-        saveSignature();
-    })
+    // 삽입
+    wrapper.appendChild(canvas);
+    buttonGroup.appendChild(clearSign);
+    buttonGroup.appendChild(saveSign);
+    wrapper.appendChild(buttonGroup);
+    signPad.appendChild(wrapper);
 
-    //서명패드 생성
+    // 서명패드 초기화
     const signaturePad = new SignaturePad(canvas);
 
-    //서명패드 클리어 함수
-    function clearSingature() {
-    signaturePad.clear();
-    }
+    // 이벤트 바인딩
+    clearSign.addEventListener('click', () => signaturePad.clear());
+    saveSign.addEventListener('click', () => {
+        if (signaturePad.isEmpty()) {
+            alert("서명을 입력해주세요.");
+            return;
+        }
+        const dataURL = signaturePad.toDataURL("image/png");
+        imageData.value = dataURL;
+        signatureForm.submit();
+    });
+});
 
-    //작성한 서명 서버로보내는 함수
-    function saveSignature() {
-    if (signaturePad.isEmpty()) {
-        alert("서명을 입력해주세요.");
-        return;
-    }
-    //서명패드의 작성된 데이터를 Base64형태로 만들어서 form Element안에 넣기
-    const dataURL = signaturePad.toDataURL("image/png");
-    imageData.value = dataURL;
-    signatureForm.submit();
-    }
-
-    
-})
 
 //도장 클릭 시
-stamp.addEventListener('click', ()=>{
-    //화면 초기화
+stamp.addEventListener('click', () => {
+    // 화면 초기화
     stampForm.innerHTML = '';
     signPad.innerHTML = '';
 
-    //파일 불러오기
+    // 컨테이너 div
+    const wrapper = document.createElement('div');
+    wrapper.className = 'd-flex flex-column align-items-center gap-3';
+
+    // 파일 업로드 input
     const stampFile = document.createElement('input');
     stampFile.setAttribute('type', 'file');
     stampFile.setAttribute('name', 'stampFile');
     stampFile.setAttribute('accept', 'image/*');
+    stampFile.className = 'form-control w-50';
 
-    //등록한 이미지파일 서버로 보내는 버튼 생성
+    // 업로드 버튼
     const uploadStamp = document.createElement('button');
     uploadStamp.setAttribute('type', 'submit');
-    uploadStamp.innerText = '도장 업로드';
+    uploadStamp.className = 'btn btn-primary';
+    uploadStamp.innerHTML = '<i class="bi bi-upload me-1"></i>도장 업로드';
 
-    //위에서 만든 거 넣기
-    stampForm.append(stampFile)
-    stampForm.append(uploadStamp)
-})
+    // 삽입
+    wrapper.appendChild(stampFile);
+    wrapper.appendChild(uploadStamp);
+    stampForm.appendChild(wrapper);
+});
+
 
 
 

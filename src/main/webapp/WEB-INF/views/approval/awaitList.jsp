@@ -23,57 +23,73 @@
                     <div class="container">
 							<!-- contents -->
 						<div class="container mt-4">
-						<h2>승인 대기함</h2>
-
-						<c:if test="${not empty ar}">
-
-							<table class="table table-hover table-bordered">
-								<thead class="table-dark">
-									<tr>
-										<th scope="col">문서번호</th>
-										<th scope="col">종류</th>
-										<th scope="col">요청자</th>
-										<th scope="col">제목</th>
-										<th scope="col">문서상태</th>
-										<th scope="col">승인여부</th>
-									</tr>
-								</thead>
-								<tbody>
-									<c:forEach var="a" items="${ar}">
-										<tr class="table-row" onclick="location.href='./awaitDetail?approvalId=${a.approvalId}'">
-											<th scope="row">${a.documentId}</th>
-											<td>${a.documentVO.formVO.formTitle}</td>
-											<td>${a.documentVO.userVO.name}(${a.documentVO.writerId})</td>
-											<td>${a.documentVO.documentTitle}</td>
-											<c:choose>
-												<c:when test="${a.documentVO.documentStatus eq 'D1'}">
-													<td style="color: blue;">승인</td>
-												</c:when>
-												<c:when test="${a.documentVO.documentStatus eq 'D2'}">
-													<td style="color: red;">반려</td>
-												</c:when>
-												<c:otherwise>
-													<td>진행중</td>
-												</c:otherwise>
-											</c:choose>
-											<c:choose>
-												<c:when test="${a.approvalStatus eq 'AS1'}">
-													<td>승인</td>
-												</c:when>
-												<c:otherwise>
-													<td>미승인</td>
-												</c:otherwise>
-											</c:choose>
-										</tr>
-									</c:forEach>
-								</tbody>
-							</table>
-						</c:if>
-						<c:if test="${empty ar}">
-							<h3>조회된 승인대기가 없습니다.</h3>
-						</c:if>
-
-
+							<div class="card shadow-sm">
+								<div class="card-header bg-secondary text-white">
+									<h4 class="mb-0"><i class="bi bi-journal-check me-2"></i>승인 대기함</h4>
+								</div>
+								<div class="card-body">
+									<c:if test="${not empty ar}">
+										<div class="table-responsive shadow-sm rounded">
+										<table class="table table-hover align-middle text-center border">
+											<thead class="table-dark">
+											<tr>
+												<th>문서번호</th>
+												<th>종류</th>
+												<th>요청자</th>
+												<th>제목</th>
+												<th>문서상태</th>
+												<th>승인여부</th>
+											</tr>
+											</thead>
+											<tbody>
+											<c:forEach var="a" items="${ar}">
+												<tr class="table-row cursor-pointer" onclick="location.href='./awaitDetail?approvalId=${a.approvalId}'">
+												<th>${a.documentId}</th>
+												<td>${a.documentVO.formVO.formTitle}</td>
+												<td>${a.documentVO.userVO.name} (${a.documentVO.writerId})</td>
+												<td class="text-start">${a.documentVO.documentTitle}</td>
+												
+												<!-- 문서상태 -->
+												<td>
+													<c:choose>
+													<c:when test="${a.documentVO.documentStatus eq 'D1'}">
+														<span class="badge bg-success">승인</span>
+													</c:when>
+													<c:when test="${a.documentVO.documentStatus eq 'D2'}">
+														<span class="badge bg-danger">반려</span>
+													</c:when>
+													<c:otherwise>
+														<span class="badge bg-secondary">진행중</span>
+													</c:otherwise>
+													</c:choose>
+												</td>
+		
+												<!-- 승인여부 -->
+												<td>
+													<c:choose>
+													<c:when test="${a.approvalStatus eq 'AS1'}">
+														<span class="badge bg-primary">승인</span>
+													</c:when>
+													<c:otherwise>
+														<span class="badge bg-warning text-dark">미승인</span>
+													</c:otherwise>
+													</c:choose>
+												</td>
+												</tr>
+											</c:forEach>
+											</tbody>
+										</table>
+										</div>
+									</c:if>
+		
+									<c:if test="${empty ar}">
+										<div class="alert alert-info text-center mt-4" role="alert">
+										<i class="bi bi-exclamation-circle-fill me-2"></i>조회된 승인대기가 없습니다.
+										</div>
+									</c:if>
+								</div>
+							</div>
+							
 
 						</div>
 					

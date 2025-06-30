@@ -38,7 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 core: {
                     data: r //어떤 데이터를
                 },
-                plugins: ['checkbox'] //체크박스 형식으로
+                plugins: ['checkbox', 'types'], //체크박스 형식, types 플러그인 추가
+                types: {
+                    default: { icon: 'bi bi-folder-fill text-secondary' }, // 기본은 폴더
+                    user: { icon: 'bi bi-person-fill text-primary' },        // 사용자 노드는 사람모양 아이콘
+                    head: { icon: 'bi bi-person-badge-fill text-primary'}
+                }   
             });
         });
 });
@@ -168,27 +173,40 @@ function renderApprovalList() {
     })
 
     approvalLine.forEach((user, idx) => {
-        //리스트 만들고
-        const li = document.createElement('li');
-        li.dataset.username = user.approverId;
-        li.textContent = `${user.name}`;
-        //앞순번 이동버튼
-        const btnUp = document.createElement('button');
-        btnUp.textContent = '▲';
-        btnUp.addEventListener('click', ()=>moveUp(idx));
-        //뒷순번 이동버튼
-        const btnDown = document.createElement('button');
-        btnDown.textContent = '▼';
-        btnDown.addEventListener('click', ()=>moveDown(idx));
-        //삭제 버튼
-        const btnRemove = document.createElement('button');
-        btnRemove.textContent = '🗑️';
-        btnRemove.addEventListener('click', ()=>removeApprover(user.approverId));
-        //만든 버튼들 추가
-        li.appendChild(btnUp);
-        li.appendChild(btnDown);
-        li.appendChild(btnRemove);
-        //만든 리스트 추가
-        ul.appendChild(li);
-    })
+    //리스트 생성
+    const li = document.createElement('li');
+    li.dataset.username = user.approverId;
+    li.classList.add('list-group-item', 'd-flex', 'align-items-center', 'justify-content-between');
+
+    // 사용자 이름 텍스트
+    const nameSpan = document.createElement('span');
+    nameSpan.innerHTML = `<i class="bi bi-person-circle me-2 text-primary"></i>${user.name}`;
+    li.appendChild(nameSpan);
+
+    // 버튼 그룹
+    const btnGroup = document.createElement('div');
+    btnGroup.className = 'btn-group btn-group-sm';
+    //앞 순번 이동버튼
+    const btnUp = document.createElement('button');
+    btnUp.className = 'btn btn-outline-secondary';
+    btnUp.innerHTML = '<i class="bi bi-arrow-up"></i>';
+    btnUp.addEventListener('click', () => moveUp(idx));
+    //뒷 순번 이동버튼
+    const btnDown = document.createElement('button');
+    btnDown.className = 'btn btn-outline-secondary';
+    btnDown.innerHTML = '<i class="bi bi-arrow-down"></i>';
+    btnDown.addEventListener('click', () => moveDown(idx));
+    //삭제 버튼
+    const btnRemove = document.createElement('button');
+    btnRemove.className = 'btn btn-outline-danger';
+    btnRemove.innerHTML = '<i class="bi bi-x-circle"></i>';
+    btnRemove.addEventListener('click', () => removeApprover(user.approverId));
+
+    btnGroup.appendChild(btnUp);
+    btnGroup.appendChild(btnDown);
+    btnGroup.appendChild(btnRemove);
+    li.appendChild(btnGroup);
+
+    ul.appendChild(li);
+});
 }

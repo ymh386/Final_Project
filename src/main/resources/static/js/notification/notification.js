@@ -44,65 +44,90 @@ notificationBtn.addEventListener('click', ()=>{
 
 //알림목록 렌더링
 function renderNotificationList(r) {
-    notificationList.innerHTML='';
+    notificationList.innerHTML = '';
 
-    if(r.length === 0) {
-        notificationList.innerHTML = '<li class="dropdown-item text-muted">새로운 알림이 없습니다</li>';
+    if (r.length === 0) {
+        notificationList.innerHTML = `
+            <li class="dropdown-item text-center text-muted py-3">
+                <i class="bi bi-bell-slash-fill fs-5"></i><br>
+                새로운 알림이 없습니다
+            </li>`;
         return;
     }
 
     r.forEach(n => {
-        
-
         const li = document.createElement("li");
-        li.className = "dropdown-item d-flex align-items-start gap-2 border-bottom py-2";
+        li.className = "dropdown-item p-0 border-0";
 
         li.innerHTML = `
-        <i class="bi bi-info-circle-fill text-primary mt-1"></i>
-        <div class="flex-grow-1">
-            <a href="${n.linkUrl}" onclick="readNotification(event, '${n.linkUrl}', ${n.notificationId})"
-            class="text-decoration-none text-dark fw-bold d-block">
-            ${n.notificationTitle}
-            </a>
-            <p>${n.message.replace(/\n/g, "<br>")}</p>
-            <small class="text-muted">${getRelativeTime(n.createdAt)} · ${n.senderVO?.name || '알 수 없음'}</small>
-        </div>
+            <div class="notification-bubble m-2 p-3 shadow-sm">
+                <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-info-circle-fill text-primary fs-5 mt-1"></i>
+                    <div class="flex-grow-1">
+                        <a href="${n.linkUrl}" 
+                           onclick="readNotification(event, '${n.linkUrl}', ${n.notificationId})"
+                           class="text-dark fw-semibold text-decoration-none d-block">
+                            ${n.notificationTitle}
+                        </a>
+                        <div class="text-muted small mb-1" style="line-height: 1.4;">
+                            ${n.message.replace(/\n/g, "<br>")}
+                        </div>
+                        <small class="text-secondary">
+                            ${getRelativeTime(n.createdAt)} · ${n.senderVO?.name || '알 수 없음'}
+                        </small>
+                    </div>
+                </div>
+            </div>
         `;
-        li.addEventListener('click', (e)=>{
-            readNotification(e, n.linkUrl, n.notificationId)
-         })
+        li.addEventListener('click', (e) => {
+            readNotification(e, n.linkUrl, n.notificationId);
+        });
         notificationList.append(li);
-
-    })
+    });
 }
 
- // 실시간 알림 추가
-function addNotification(notification) {
-    
 
-    notificationList.innerHTML='';
+
+
+// 실시간 알림 추가
+function addNotification(notification) {
     const list = document.getElementById("notificationList");
 
     const li = document.createElement("li");
-    li.className = "dropdown-item d-flex align-items-start gap-2 border-bottom py-2";
+    li.className = "dropdown-item p-0 border-0";
 
     li.innerHTML = `
-      <i class="bi bi-info-circle-fill text-primary mt-1"></i>
-      <div class="flex-grow-1">
-        <a href="${notification.linkUrl}" onclick="readNotification(event, '${notification.linkUrl}', ${notification.notificationId})"
-           class="text-decoration-none text-dark fw-bold d-block">
-          ${notification.notificationTitle}
-        </a>
-        <p>${notification.message.replace(/\n/g, "<br>")}</p>
-        <small class="text-muted">${getRelativeTime(notification.createdAt)} · ${notification.senderVO?.name || '알 수 없음'}</small>
-      </div>
-    `;
+            <div class="notification-bubble m-2 p-3 shadow-sm">
+                <div class="d-flex gap-2 align-items-start">
+                    <i class="bi bi-info-circle-fill text-primary fs-5 mt-1"></i>
+                    <div class="flex-grow-1">
+                        <a href="${notification.linkUrl}" 
+                           onclick="readNotification(event, '${notification.linkUrl}', ${notification.notificationId})"
+                           class="text-dark fw-semibold text-decoration-none d-block">
+                            ${notification.notificationTitle}
+                        </a>
+                        <div class="text-muted small mb-1" style="line-height: 1.4;">
+                            ${notification.message.replace(/\n/g, "<br>")}
+                        </div>
+                        <small class="text-secondary">
+                            ${getRelativeTime(notification.createdAt)} · ${notification.senderVO?.name || '알 수 없음'}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        `;
+
     li.addEventListener('click', (e) => {
-        readNotification(e, notification.linkUrl, notification.notificationId)
-    })
-    list.append(li);
+        readNotification(e, notification.linkUrl, notification.notificationId);
+    });
+
+    // 알림 목록 맨 앞에 추가 (최근 알림이 위로)
+    list.prepend(li);
+
+    // 뱃지 카운트 증가
     updateBadgeCount(1);
 }
+
 
 // 읽음 처리
 function readNotification(event, linkUrl, notificationId) {

@@ -135,7 +135,7 @@
             </a>
           </div>
         </div>
-
+		<sec:authorize access="hasAnyRole('ADMIN', 'TRAINER')">
         <div class="container py-5" id="chart">
           <h1 class="mb-4">근태/휴가 통계</h1>
 
@@ -168,7 +168,7 @@
 
 		
 
-		<sec:authorize access="hasAnyRole('ADMIN', 'TRAINER')">
+		
 			<h1 class="mb-4">전자 결재</h1>
         <div class="card mb-4 shadow-sm">
           <div class="card-header bg-white">
