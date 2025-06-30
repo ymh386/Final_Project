@@ -12,6 +12,18 @@ body {
     font-family: 'Montserrat', 'Orbitron', 'Bebas Neue', Arial, sans-serif;
 }
 
+.sports-topbar { 
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 64px !important;
+    border-bottom: 4px solid #ffe600 !important;
+    margin-top: 0 !important;
+    box-shadow: none !important;
+    z-index: 1100 !important;
+  }
+
 .sports-topbar {
     width: 100%;
     background: #18191d;
@@ -151,7 +163,7 @@ body {
 }
 
 /* 프로필 드롭다운 */
-.sports-actions .dropdown-menu {
+.sports-actions .profileList {
     position: absolute;
     top: 50px;
     right: 0;
@@ -168,7 +180,7 @@ body {
     overflow: hidden;
 }
 
-.sports-actions .dropdown-menu h6 {
+.sports-actions .profileList h6 {
     color: #ffe600;
     font-size: 1.1em;
     font-weight: bold;
@@ -180,7 +192,7 @@ body {
     text-overflow: ellipsis;
 }
 
-.sports-actions .dropdown-item {
+.sports-actions .profileItem {
     display: block;
     background: #ffe600;
     color: #18191d;
@@ -196,7 +208,7 @@ body {
     text-overflow: ellipsis;
 }
 
-.sports-actions .dropdown-item:hover {
+.sports-actions .profileItem:hover {
     background: #fff338;
     color: #232326;
 }
@@ -237,11 +249,22 @@ body {
 
             <!-- 알림 아이콘 -->
             <div id="notification" data-username="${user.username}" class="sports-notify-wrap">
-                <button id="notificationButton" class="sports-notify-btn" type="button">
+                <button id="notificationButton" class="sports-notify-btn" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-bell"></i>
                     <span id="notificationBadge" class="sports-notify-badge" style="display:none;">0</span>
                 </button>
-                <ul id="notificationList" class="sports-notify-list"></ul>
+                <!-- 드롭다운 전체: div로 묶고 ul은 내부 리스트용 -->
+                <div class="dropdown-menu dropdown-menu-end p-0" style="width: 300px;">
+                    <!-- 스크롤 되는 알림 리스트 -->
+                    <ul id="notificationList" class="list-unstyled m-0" style="max-height: 350px; overflow-y: auto;">
+                    <!-- 여기에 JS로 <li><a class="dropdown-item">...</a></li> 추가 -->
+                    </ul>
+                    
+                    <!-- 항상 하단 고정되는 버튼 -->
+                    <div class="border-top text-center bg-white">
+                    <a href="/notification/list" class="btn btn-outline-dark d-block">알림함 이동</a>
+                    </div>
+                </div>
             </div>
             
 
@@ -254,27 +277,29 @@ body {
             <button id="profileButton" class="sports-profile-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="profileDropdown">
                 <i class="bi bi-person-circle"></i>
             </button>
-            <ul id="profileDropdown" class="dropdown-menu dropdown-menu-end" aria-labelledby="profileButton" role="menu">
+            <ul id="profileDropdown" class="dropdown-menu dropdown-menu-end profileList" aria-labelledby="profileButton" role="menu">
                 <sec:authorize access="isAuthenticated()">
                     <h6 title="${user.name}님, 환영합니다!">${user.name}님, 환영합니다!</h6>
-                    <li><a class="dropdown-item" href="/user/mypage">내 정보</a></li>
-                    <li><a class="dropdown-item" href="/user/logout">로그아웃</a></li>
-                    <li><a class="dropdown-item" href="/schedule/page">일정</a></li>
+                    <li><a class="dropdown-item profileItem" href="/user/mypage">내 정보</a></li>
+                    <li><a class="dropdown-item profileItem" href="/user/logout">로그아웃</a></li>
+                    <li><a class="dropdown-item profileItem" href="/schedule/page">일정</a></li>
                     <sec:authorize access="hasRole('TRAINER')">
-                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/attendance/page">근태관리</a></li>
-                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/equipment/main">비품 신고</a></li>
+                        <li><a class="dropdown-item profileItem" href="${pageContext.request.contextPath}/attendance/page">근태관리</a></li>
+                        <li><a class="dropdown-item profileItem" href="${pageContext.request.contextPath}/equipment/main">비품 신고</a></li>
                     </sec:authorize>
                     <sec:authorize access="hasRole('MEMBER')">
-                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/reservation/book">수업예약</a></li>
+                        <li><a class="dropdown-item profileItem" href="${pageContext.request.contextPath}/reservation/book">수업예약</a></li>
                     </sec:authorize>
                     <sec:authorize access="hasRole('ADMIN')">
-                        <li><a class="dropdown-item" href="/admin/main">관리자</a></li>
-                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/equipment/admin">비품 관리</a></li>
+                        <li><a class="dropdown-item profileItem" href="/admin/main">관리자</a></li>
+                        <li><a class="dropdown-item profileItem" href="${pageContext.request.contextPath}/equipment/admin">비품 관리</a></li>
+                        <li><a class="dropdown-item profileItem" href="${pageContext.request.contextPath}/attendance/admin">근태 관리(관리자	)</a></li>
+                        
                     </sec:authorize>
                 </sec:authorize>
                 <sec:authorize access="!isAuthenticated()">
-                    <li><a class="dropdown-item" href="/user/join/join">회원가입</a></li>
-                    <li><a class="dropdown-item" href="/user/login/login">로그인</a></li>
+                    <li><a class="dropdown-item profileItem" href="/user/join/join">회원가입</a></li>
+                    <li><a class="dropdown-item profileItem" href="/user/login/login">로그인</a></li>
                 </sec:authorize>
             </ul>
         </li>

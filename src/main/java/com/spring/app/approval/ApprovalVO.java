@@ -2,6 +2,8 @@ package com.spring.app.approval;
 
 import java.sql.Date;
 
+import com.spring.app.home.util.Pager;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -20,5 +22,7 @@ public class ApprovalVO {
 	private Date approvedAt;
 	
 	private DocumentVO documentVO;
+	
+	private Pager pager;
 
 }

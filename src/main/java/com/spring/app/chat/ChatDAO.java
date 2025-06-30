@@ -12,9 +12,13 @@ public interface ChatDAO {
 	
 	List<ChatRoomVO> getRoomList(@Param("username") String username) throws Exception;
 	
+	List<ChatRoomVO> roomHome(@Param("username") String username) throws Exception;
+	
 	List<RoomMemberVO> getUserByRoom(@Param("roomId") Long roomId) throws Exception;
 	
 	List<String> getUserNotInRoom(@Param("roomId") Long roomId, @Param("username") String username) throws Exception;
+	
+	List<String> getUsernameByRoom(@Param("roomId") Long roomId) throws Exception;
 	
 	List<ChatMessageVO> getLastMsg(@Param("roomId") Long roomId) throws Exception;
 	

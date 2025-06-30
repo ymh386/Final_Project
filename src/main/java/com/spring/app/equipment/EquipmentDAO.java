@@ -30,7 +30,8 @@ public interface EquipmentDAO {
     // 비품 삭제
     int deleteEquipment(@Param("equipmentId") Long equipmentId);
 	
-	
+    //시설로 id로 조회 
+	List<EquipmentVO> selectByFacilityId(Long facilityId);
 	
 }
 	

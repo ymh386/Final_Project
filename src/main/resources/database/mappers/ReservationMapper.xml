@@ -84,16 +84,6 @@
         WHERE USERNAME = #{username}
     </select>
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 <select id="selectMember" resultType="map">
     SELECT
         R.RESERVATION_ID AS reservationId,
@@ -110,6 +100,54 @@
     WHERE R.USERNAME = #{username}
     AND R.CANCELED_AT IS NULL
 </select>
+
+<select id="selectOneMember" resultMap="reserveOfScheduleMap">
+	SELECT
+		R.RESERVATION_ID,
+		R.USERNAME,
+		R.SCHEDULE_ID,
+		R.FACILITY_ID,
+		R.CANCELED_REASON,
+		S.USERNAME AS TRAINER_ID,
+		S.SCHEDULE_DATE,
+		S.START_TIME,
+		S.END_TIME,
+		F.NAME AS FACILITY_NAME,
+		F.LOCATION,
+		U.NAME,
+		T.NAME AS TRAINER_NAME
+	  FROM RESERVATION R
+	  LEFT OUTER JOIN SCHEDULE S ON R.SCHEDULE_ID=S.SCHEDULE_ID
+	  LEFT OUTER JOIN FACILITY F ON R.FACILITY_ID=F.FACILITY_ID
+	  LEFT OUTER JOIN USER U ON R.USERNAME=U.USERNAME
+	  LEFT OUTER JOIN USER T ON S.USERNAME=T.USERNAME
+	 WHERE R.RESERVATION_ID=#{reservationId}
+</select>
+
+<resultMap type="ReservationVO" id="reserveOfScheduleMap">
+	<id column="RESERVATION_ID" property="reservationId"/>
+	<result column="USERNAME" property="username"/>
+	<result column="SCHEDULE_ID" property="scheduleId"/>
+	<result column="FACILITY_ID" property="facilityId"/>
+	<result column="CANCELED_REASON" property="canceledReason"/>
+	<association javaType="ScheduleVO" property="scheduleVO">
+		<result column="TRAINER_ID" property="username"/>
+		<result column="SCHEDULE_DATE" property="scheduleDate"/>
+		<result column="START_TIME" property="startTime"/>
+		<result column="END_TIME" property="endTime"/>
+		<association javaType="UserVO" property="userVO">
+			<result column="TRAINER_NAME" property="name"/>
+		</association>
+	</association>
+	<association javaType="FacilityVO" property="facilityVO">
+		<result column="FACILITY_NAME" property="name"/>
+		<result column="LOCATION" property="location"/>
+	</association>
+	<association javaType="UserVO" property="userVO">
+		<result column="Name" property="name"/>
+	</association>
+	
+</resultMap>
   
 
  	<!--같은회원이 같은 일정 예약 못하게 방지 -->
@@ -132,6 +170,17 @@
 		AND CANCELED_AT IS NULL 
 	</select>
 
+	<select id="reservationHome" resultType="map">
+		SELECT F.NAME AS name, S.SCHEDULE_DATE AS scheduleDate, U.NAME AS trainer
+		  FROM RESERVATION R
+		  JOIN SCHEDULE S ON R.SCHEDULE_ID=S.SCHEDULE_ID
+		  JOIN FACILITY F ON S.FACILITY_ID=F.FACILITY_ID
+		  JOIN USER U ON S.USERNAME=U.USERNAME
+		 WHERE R.USERNAME=#{username}
+		   AND R.CANCELED_AT IS NULL
+		 ORDER BY S.SCHEDULE_DATE DESC, S.START_TIME DESC
+		 LIMIT 6
+	</select>
 
 
 

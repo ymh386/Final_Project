@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.user.UserController;
 import com.spring.app.user.UserVO;
 
@@ -27,6 +29,9 @@ public class FriendController {
 	
 	@Autowired
 	private FriendService friendService;
+	
+	@Autowired
+	private AuditLogService auditLogService;
 
     FriendController(UserController userController) {
         this.userController = userController;
@@ -47,7 +52,7 @@ public class FriendController {
 	@PostMapping("deleteFriend")
 	public String deleteFriend(@AuthenticationPrincipal UserVO userVO
 							 , @RequestParam("user1") String username, FriendVO friendVO
-							 , @RequestParam("user2") String friend,  Model model) throws Exception {
+							 , @RequestParam("user2") String friend,  Model model, HttpServletRequest request) throws Exception {
 		
 		username=userVO.getUsername();
 		
@@ -64,6 +69,17 @@ public class FriendController {
 		
 		model.addAttribute("result", "친구 리스트에서 삭제되었습니다.");
 		model.addAttribute("path", "/friend/list");
+		
+		// 로그/감사 기록용
+		auditLogService.log(
+				userVO.getUsername(),
+		        "DELETE_FRIEND",
+		        "FRIENDSHIP",
+		        friend,
+		        userVO.getUsername() + "이 "
+		        + friend + "인 친구삭제",
+		        request
+		    );
 		
 		return "commons/result";
 	}
@@ -82,7 +98,7 @@ public class FriendController {
 	@PostMapping("receiveList")
 	public String receiveList(@AuthenticationPrincipal UserVO userVO
 						  , @RequestParam("requesterId") String requesterId
-						  , FriendRequestVO friendRequestVO, Model model) throws Exception {
+						  , FriendRequestVO friendRequestVO, Model model, HttpServletRequest request) throws Exception {
 		
 		friendRequestVO.setReceiverId(userVO.getUsername());
 		friendRequestVO.setRequesterId(requesterId);
@@ -96,13 +112,24 @@ public class FriendController {
 		model.addAttribute("result", "친구 요청을 수락했습니다.");
 		model.addAttribute("path", "/friend/receiveList");
 		
+		// 로그/감사 기록용
+		auditLogService.log(
+				userVO.getUsername(),
+		        "RECEIVE_FRIEND",
+		        "FRIENDSHIP",
+		        requesterId,
+		        userVO.getUsername() + "이 "
+		        + requesterId + "의 친구요청 수락",
+		        request
+		    );
+		
 		return "commons/result";
 	}
 	
 	@PostMapping("rejectList")
 	public String rejectList(@AuthenticationPrincipal UserVO userVO
 						  , @RequestParam("requesterId") String requesterId
-						  , FriendRequestVO friendRequestVO, Model model) throws Exception {
+						  , FriendRequestVO friendRequestVO, Model model, HttpServletRequest request) throws Exception {
 		
 		friendRequestVO.setReceiverId(userVO.getUsername());
 		friendRequestVO.setRequesterId(requesterId);
@@ -110,6 +137,17 @@ public class FriendController {
 		
 		model.addAttribute("result", "친구 요청을 거절했습니다.");
 		model.addAttribute("path", "/friend/receiveList");
+		
+		// 로그/감사 기록용
+		auditLogService.log(
+				userVO.getUsername(),
+		        "REJECT_FRIEND",
+		        "FRIEND_REQUEST",
+		        requesterId,
+		        userVO.getUsername() + "이 "
+		        + requesterId + "의 친구요청 거절",
+		        request
+		    );
 		
 		return "commons/result";
 	}
@@ -128,15 +166,28 @@ public class FriendController {
 	@PostMapping("requestList")
 	public String requestList(@AuthenticationPrincipal UserVO userVO
 							, @RequestParam("receiverId") String receiverId
-							, FriendRequestVO friendRequestVO, Model model) throws Exception {
+							, FriendRequestVO friendRequestVO, Model model, HttpServletRequest request) throws Exception {
 			
 		if (userVO!=null) {
 			friendRequestVO.setRequesterId(userVO.getUsername());
 			friendRequestVO.setReceiverId(receiverId);
 			friendService.cleanData(friendRequestVO);
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+					userVO.getUsername(),
+			        "CANCEL_FRIEND",
+			        "FRIEND_REQUEST",
+			        receiverId,
+			        userVO.getUsername() + "이 "
+			        + receiverId + "에게 보낸 친구요청 취소",
+			        request
+			    );
 		}
 		model.addAttribute("result", "친구 요청을 취소했습니다.");
 		model.addAttribute("path", "/friend/requestList");
+		
+		
 		
 		return "commons/result";
 	}
@@ -178,6 +229,17 @@ public class FriendController {
 			model.addAttribute("result", "친구 요청을 보냈습니다.");
 			model.addAttribute("path", "/friend/suggestList");			
 		}
+		
+		// 로그/감사 기록용
+		auditLogService.log(
+				userVO.getUsername(),
+		        "REQUEST_FRIEND",
+		        "FRIEND_REQUEST",
+		        receiverId,
+		        userVO.getUsername() + "이 "
+		        + receiverId + "에게 친구요청 보냄",
+		        request
+		    );
 		
 		return "commons/result";
 	}

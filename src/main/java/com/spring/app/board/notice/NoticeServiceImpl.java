@@ -47,4 +47,9 @@ public class NoticeServiceImpl implements NoticeService {
     public void hitUpdate(NoticeVO noticeVO) throws Exception {
         noticeDAO.hitUpdate(noticeVO);
     }
+    
+    @Override
+    public List<NoticeVO> noticeHome() throws Exception {
+    	return noticeDAO.noticeHome();
+    }
 }

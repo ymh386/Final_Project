@@ -13,6 +13,11 @@
 		<script src="https://cdn.jsdelivr.net/npm/jstree@3.3.15/dist/jstree.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 		<script src="https://cdn.ckeditor.com/4.22.1/full-all/ckeditor.js"></script>
+        <style>
+            th, td {
+                border: 1px solid #000000;
+            }
+        </style>
 	</head>
 	<body class="sb-nav-fixed d-flex flex-column min-vh-100">
 		<c:import url="/WEB-INF/views/templates/topbar.jsp"></c:import>
@@ -25,7 +30,7 @@
 						<h2>승인 내역 정보</h2><br>
                         <div class="mb-3">
                             <label class="form-label">요청자</label>
-                            <input type="text" class="form-control" value="${vo.documentVO.writerId}" readonly>
+                            <input type="text" class="form-control" value="${vo.documentVO.userVO.name}(${vo.documentVO.writerId})" readonly>
                             <label class="form-label">종류</label>
                             <input type="text" class="form-control" value="${vo.documentVO.formVO.formTitle}" readonly>
                             <label class="form-label">문서 제목</label>

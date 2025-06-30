@@ -20,7 +20,11 @@
                                 <div class="card shadow-lg border-0 rounded-lg">
                                     <div class="card-header"><h3 class="text-center font-weight-light my-4">회원 가입</h3></div>
                                     <div class="card-body">
-										    <form action="" method="post">
+										    <form action="" method="post" enctype="multipart/form-data">
+												<div class="input-group mb-3">
+													<input type="file" class="form-control" name="img" id="inputGroupFile02">
+													<label class="input-group-text" for="inputGroupFile02">Upload</label>
+												</div>
 											<div class="form-floating mb-3">
 												<input class="form-control"  type="text" name="username" value="${code}" readonly>
 												<label for="inputEmail">아이디</label>
@@ -29,10 +33,10 @@
                                                 <input class="form-control"name="password" type="password" placeholder="Password">
                                                 <label for="inputEmail">비밀번호</label>
                                             </div>
-											<div class="form-floating mb-3">
+											<!-- <div class="form-floating mb-3">
                                                 <input class="form-control"name="password" type="password" placeholder="Password">
                                                 <label for="inputEmail">비밀번호 재입력</label>
-                                            </div>											
+                                            </div>											 -->
 											<div class="form-floating mb-3">
 												<input class="form-control"  type="text" name="name">
 												<label for="inputEmail">이름</label>

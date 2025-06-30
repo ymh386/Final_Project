@@ -12,8 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.schedule.ScheduleDAO;
+import com.spring.app.schedule.ScheduleVO;
 import com.spring.app.subscript.SubscriptDAO;
+import com.spring.app.websocket.NotificationManager;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class ReservationService {
@@ -26,6 +31,12 @@ public class ReservationService {
 
 	@Autowired
 	private SubscriptDAO subscriptionDAO;
+	
+	@Autowired
+    private NotificationManager notificationManager;
+	
+    @Autowired 
+    private AuditLogService auditLogService;
 	
 
 
@@ -40,7 +51,7 @@ public class ReservationService {
 	}
 
 	  @Transactional
-	    public void reserve(ReservationVO vo) {
+	    public void reserve(ReservationVO vo, HttpServletRequest request) {
 	        String username = vo.getUsername();
 
 	        // 0) 활성 구독 여부 확인
@@ -75,17 +86,66 @@ public class ReservationService {
 
 	        // 4) 남은 좌석 1 감소
 	        scheduleDAO.decrementRemainingSeats(vo.getScheduleId());
+	        
+	      // 5) 예약성공 알림보내기
+            try {
+            	vo = reservationDAO.selectOneMember(vo);
+				notificationManager.reserveNotification(vo);
+				
+				// 로그/감사 기록용
+				auditLogService.log(
+						vo.getUsername(),
+				        "RESERVE_CLASS",
+				        "RESERVATION",
+				        vo.getReservationId().toString(),
+				        vo.getUsername() + "이 "
+				        + vo.getScheduleVO().getScheduleDate() + " "
+				        + vo.getScheduleVO().getStartTime() + " ~ " + vo.getScheduleVO().getEndTime() + "시간의 "
+				        + vo.getScheduleVO().getUsername() + "의 수업을 예약",
+				        request
+				    );
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	    }
 	
 
 	@Transactional
-	public void cancel(ReservationVO vo) {
+	public void cancel(ReservationVO vo, HttpServletRequest request) {
+		
+		
 		vo.setCanceledAt(LocalDateTime.now());
 		vo.setUpdatedAt(LocalDateTime.now());
+				
+		
 		reservationDAO.cancelReservation(vo);
 
 		// 남은좌석 1증가
 		scheduleDAO.incrementRemainingSeats(vo.getScheduleId());
+		
+		// 예약취소 알림
+		try {
+			vo = reservationDAO.selectOneMember(vo);
+			notificationManager.cancelReserveNotification(vo);
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+					vo.getUsername(),
+			        "CANCEL_CLASS",
+			        "RESERVATION",
+			        vo.getReservationId().toString(),
+			        vo.getUsername() + "이 "
+			        + vo.getScheduleVO().getScheduleDate() + " "
+			        + vo.getScheduleVO().getStartTime() + " ~ " + vo.getScheduleVO().getEndTime() + "에 있는"
+			        + vo.getScheduleVO().getUsername() + "의 수업예약을 취소",
+			        request
+			    );
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	public List<ReservationVO> getReservationsByUsername(String username, int startRow, int pageSize) {
@@ -122,5 +182,16 @@ public class ReservationService {
 	 public long getTotalReservationCount(String username) {
 	        return reservationDAO.countReservationsByUsername(username);
 	    }
+	 
+	 public List<ScheduleVO> getFutureSchedules() {
+		    LocalDate today = LocalDate.now();
+		    return scheduleDAO.selectAll().stream()
+		            .filter(s -> !s.getScheduleDate().isBefore(today))
+		            .collect(Collectors.toList());
+		}
+	 
+	 public List<Map<String, Object>> reservationHome(String username) throws Exception {
+		 return reservationDAO.reservationHome(username);
+	 }
 
 }

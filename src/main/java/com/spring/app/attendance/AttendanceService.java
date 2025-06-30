@@ -1,5 +1,6 @@
 package com.spring.app.attendance;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import com.spring.app.chart.AttendanceStatVO;
 import com.spring.app.user.UserDAO;
 import com.spring.app.user.UserVO;
 
@@ -21,6 +23,9 @@ public class AttendanceService {
 	
 	@Autowired
 	public UserDAO userDAO;
+	
+	@Autowired
+	private AttendanceExcelUtil attendanceExcelUtil;
 	
 	
 	/**
@@ -88,21 +93,25 @@ public class AttendanceService {
             throw new AttendanceException("이미 퇴근 처리된 기록입니다.");
         }
 
-        // 1) Java(Asia/Seoul) 기준 현재 시각을 LocalTime으로 받아와서 VO에 세팅
+        // 1) 현재 시각 가져오기
         LocalTime nowSeoul = LocalTime.now(ZoneId.of("Asia/Seoul"));
         vo.setCheckoutTime(nowSeoul);
-        vo.setStatus("퇴근");
 
-        // 2) MyBatis 매퍼의 updateCheckOut(xml) 호출
+        // 2) 정상출근한 경우만 상태를 '퇴근'으로 변경
+        if ("정상출근".equals(vo.getStatus())) {
+            vo.setStatus("퇴근");
+        }
+        // 지각/결근이면 상태는 그대로 둠 (checkoutTime만 업데이트됨)
+
+        // 3) DB 업데이트
         try {
             attendanceDAO.updateCheckOut(vo);
         } catch (Exception ex) {
             throw new AttendanceException("퇴근 처리에 실패했습니다.");
         }
 
-        // 3) 업데이트된 레코드를 다시 조회해서 반환
-        AttendanceVO updated = attendanceDAO.selectById(attendanceId);
-        return updated;
+        // 4) 업데이트된 데이터 다시 조회
+        return attendanceDAO.selectById(attendanceId);
     }
 
     
@@ -137,6 +146,13 @@ public class AttendanceService {
 	    }
 
 	  
+	 
+
+	    public ByteArrayInputStream exportAttendanceToExcel(String date) {
+	        LocalDate searchDate = LocalDate.parse(date);
+	        List<Map<String, Object>> data = listByDate(searchDate);
+	        return attendanceExcelUtil.generateAttendanceExcel(data, date);
+	    }
 	  
 	  
 	  

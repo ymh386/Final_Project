@@ -40,8 +40,8 @@
                         </div>
 
                         <div>
-                            <a href="/approval/formUpdate?formId=${vo.formId}" class="btn">양식 수정</a><br>
-                            <a href="/approval/formDelete?formId=${vo.formId}" class="btn">양식 삭제</a>
+                            <a href="/approval/admin/formUpdate?formId=${vo.formId}" class="btn">양식 수정</a><br>
+                            <a href="/approval/admin/formDelete?formId=${vo.formId}" class="btn">양식 삭제</a>
                         </div>
 
 

@@ -1,5 +1,7 @@
 package com.spring.app.user;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -30,6 +32,11 @@ import com.spring.app.approval.DocumentVO;
 import com.spring.app.approval.FormVO;
 import com.spring.app.approval.UserSignatureVO;
 import com.spring.app.files.FileManager;
+import com.spring.app.home.util.Pager;
+import com.spring.app.auditLog.AuditLogService;
+import com.spring.app.chart.AttendanceStatVO;
+import com.spring.app.chart.ChartService;
+import com.spring.app.chart.LeaveStatVO;
 import com.spring.app.payment.PaymentService;
 import com.spring.app.subscript.SubscriptService;
 import com.spring.app.subscript.SubscriptVO;
@@ -69,6 +76,12 @@ public class UserController {
 
 	@Autowired
 	private SubscriptService subscriptService;
+	
+	@Autowired
+	private AuditLogService auditLogService;
+	
+	@Autowired
+	private ChartService chartService;
 
 	
 	@Value("${board.file.path}")
@@ -86,7 +99,33 @@ public class UserController {
 	void memberJoin() {}
 	
 	@GetMapping("mypage")
-	void myPage(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
+	void myPage(@AuthenticationPrincipal UserVO userVO, @RequestParam(required = false) Integer year, Model model) throws Exception {
+		
+		////로그인한 유저의 근태율 차트
+		// 현재 연도 기준으로 yearList 생성
+	    Integer currentYear = LocalDate.now(ZoneId.of("Asia/Seoul")).getYear();
+	    List<Integer> yearList = new ArrayList<>();
+	    for (int y = 2020; y <= currentYear; y++) {
+	        yearList.add(y);
+	    }
+	    
+	    if (year == null) {
+	        // 기본 연도 설정(현재년도)
+	        year = currentYear;
+		}
+    	
+	    //현재년도로 설정용
+		model.addAttribute("year", year);
+		//연도별 필터링 시 필요한 정보들
+		model.addAttribute("yearList", yearList);
+	    
+	    List<AttendanceStatVO> attendanceStats = chartService.getMonthlyStats(year, userVO.getUsername());
+	    //근태율 통계를 차트화 할때 필요한 정보들
+	    model.addAttribute("attendanceStats", attendanceStats);
+	    //휴가율 통계 차트화
+	    List<LeaveStatVO> leaveStats = chartService.getUsedLeaveByType(year, userVO.getUsername());
+	    model.addAttribute("leaveStats", leaveStats);
+		
 		
 		//로그인한 유저의 서명정보 담기
 		UserSignatureVO userSignatureVO = userService.getSign(userVO);
@@ -104,7 +143,7 @@ public class UserController {
 	}
 	
 	@PostMapping("join/memberJoin")
-	String memberJoin(UserVO userVO, MultipartFile img, Model model) throws Exception{
+	String memberJoin(UserVO userVO, MultipartFile img, Model model, HttpServletRequest request) throws Exception{
 		
 		String oriName = img.getOriginalFilename().toString();
 		
@@ -116,7 +155,6 @@ public class UserController {
 				
 				return "commons/result";
 			}
-			System.out.println("oriName : "+oriName);
 			
 			//랜덤 문자열 가져오기
 			String uuid = UUID.randomUUID().toString();
@@ -129,14 +167,28 @@ public class UserController {
 			oriName="default.png";
 			userVO.setFileName("default");
 			userVO.setOriName(oriName);
+			
+			
 		}
 		
-		
-		
 		int result = userService.join(userVO);
+				
+		// 로그/감사 기록용
+		auditLogService.log(
+		        userVO.getUsername(),
+		        "CREATE_MEMBER_USER",
+		        "USER",
+		        userVO.getUsername(),
+		        "일반회원 회원가입",
+		        request
+		    );
 		
 		return "redirect:/";
+
 	}
+		
+		
+		
 	
 	@GetMapping("join/trainerJoin")
 	void trainerJoin(Model model) throws Exception {
@@ -145,10 +197,47 @@ public class UserController {
 	}
 	
 	@PostMapping("join/trainerJoin")
-	String trainerJoin(UserVO userVO) throws Exception{
+	String trainerJoin(UserVO userVO, HttpServletRequest request, MultipartFile img, Model model) throws Exception{
 		Long code = userService.getTrainerCode();
 		userVO.setTrainerCode(code);
+		
+		String oriName = img.getOriginalFilename().toString();
+		
+		if (oriName!="") {
+			String file = oriName.substring(oriName.lastIndexOf(".")).toLowerCase();			
+			if(!ALLOWED_EXTENSIONS.contains(file)){
+				model.addAttribute("result", "이미지 파일(.png, .jpg, .jpeg, .gif)만 업로드할 수 있습니다.");
+				model.addAttribute("path", "./registerSign");
+				
+				return "commons/result";
+			}
+			
+			//랜덤 문자열 가져오기
+			String uuid = UUID.randomUUID().toString();
+			//가져온 랜덤 문자열로 파일이름 만들기
+			String fileName = uuid.concat(userVO.getUsername()).concat(".png");
+			String file2=fileManager.saveFile(path.concat("user"), img);
+			userVO.setFileName(file2);
+			userVO.setOriName(oriName);
+		}else {
+			oriName="default.png";
+			userVO.setFileName("default");
+			userVO.setOriName(oriName);
+			
+			
+		}		
+		
 		int result = userService.join(userVO);
+		
+		// 로그/감사 기록용
+		auditLogService.log(
+		        userVO.getUsername(),
+		        "CREATE_TRAINER_USER",
+		        "USER",
+		        userVO.getUsername(),
+		        "트레이너 회원가입",
+		        request
+		    );
 		
 		return "redirect:/";
 	}
@@ -156,7 +245,10 @@ public class UserController {
 	@GetMapping("login/login")
 	String memberLogin(@AuthenticationPrincipal UserVO userVO, @RequestParam(value = "error", required = false) String error, Model model) {
 		if (userVO != null) {
+			
 			return "redirect:/";
+			
+			
 		}
 		if (error != null) {
 			model.addAttribute("error", error);
@@ -168,6 +260,7 @@ public class UserController {
 	@GetMapping("login/trainerLogin")
 	String trainerLogin(@AuthenticationPrincipal UserVO userVO, @RequestParam(value = "error", required = false) String error, Model model) {
 		if (userVO != null) {
+			
 			return "redirect:/";
 		}
 		if (error != null) {
@@ -181,7 +274,7 @@ public class UserController {
 	void findId() throws Exception{}
 	
 	@PostMapping("findId")
-	String findId(@RequestParam("email") String input, UserVO userVO, Model model) throws Exception {
+	String findId(@RequestParam("email") String input, UserVO userVO, Model model, HttpServletRequest request) throws Exception {
 		
 		String email = findInfoService.getEmail(input);
 		userVO.setEmail(email);
@@ -190,22 +283,42 @@ public class UserController {
 			userVO=findInfoService.getUserByEmail(email);
 			String username = userVO.getUsername();
 			username=findInfoService.maskEmail(username, 3, 6);
-			System.out.println(username);
 			
 			model.addAttribute("result", "아이디는 "+username+"입니다");
 			model.addAttribute("path", "/user/login/login");
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+			        userVO.getUsername(),
+			        "FIND_ID",
+			        "USER",
+			        userVO.getUsername(),
+			        userVO.getUsername().concat("이 아이디찾기 시도 - 성공"),
+			        request
+			    );
+			return "commons/result";
 		}else {
 			model.addAttribute("result", "입력한 정보로 가입된 회원이 존재하지 않습니다.");
 			model.addAttribute("path", "/user/findId");
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+			        null,
+			        "FIND_ID",
+			        "USER",
+			        "anonymous",
+			        "anonymous이 아이디찾기 시도 - 실패",
+			        request
+			    );
+			return "commons/result";
 		}
-		return "commons/result";
 	}
 	
 	@GetMapping("findPwByEmail")
 	void findPwByEmail() throws Exception{}
 	
 	@PostMapping("findPwByEmail")
-	String findPwEmail(@RequestParam("email") String input, Model model, UserVO userVO) throws Exception{
+	String findPwEmail(@RequestParam("email") String input, Model model, UserVO userVO, HttpServletRequest request) throws Exception{
 		String email = findInfoService.getEmail(input);
 		
 		if (email!=null) {
@@ -217,8 +330,27 @@ public class UserController {
 			findInfoService.findPwByEmail(email, newPassword);
 			
 			model.addAttribute("result", "입력하신 이메일로 임시 비밀번호를 발송했습니다.");
+			// 로그/감사 기록용
+			auditLogService.log(
+			        userVO.getUsername(),
+			        "FIND_PW_EMAIL",
+			        "USER",
+			        userVO.getUsername(),
+			        userVO.getUsername().concat("이 비밀번호 찾기 시도(이메일) - 성공"),
+			        request
+			    );
+			return "commons/result";
 		}else {
 			model.addAttribute("result", "입력한 정보로 가입된 회원이 존재하지 않습니다.");
+			// 로그/감사 기록용
+			auditLogService.log(
+			        null,
+			        "FIND_PW_EMAIL",
+			        "USER",
+			        "anonymous",
+			        "anonymous이 비밀번호 찾기 시도(이메일) - 성공",
+			        request
+			    );
 		}
 		
 		List<MemberRoleVO> list = userService.getRole(userVO.getUsername());
@@ -238,7 +370,7 @@ public class UserController {
 	void findPwByPhone() throws Exception{}
 	
 	@PostMapping("findPwByPhone")
-	String findPwByPhone(@RequestParam("phone") String input, Model model, UserVO userVO) throws Exception {
+	String findPwByPhone(@RequestParam("phone") String input, Model model, UserVO userVO, HttpServletRequest request) throws Exception {
 		
 		String phone = findInfoService.getPhone(input);
 		
@@ -251,9 +383,29 @@ public class UserController {
 			
 			findInfoService.findPwByPhone(phone, newPassword);
 			
-			model.addAttribute("result", "입력하신 전화번호로 임시 비밀번호를 발송했습니다.");			
+			model.addAttribute("result", "입력하신 전화번호로 임시 비밀번호를 발송했습니다.");	
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+			        userVO.getUsername(),
+			        "FIND_PW_PHONE",
+			        "USER",
+			        userVO.getUsername(),
+			        userVO.getUsername().concat("이 비밀번호 찾기 시도(폰번호) - 성공"),
+			        request
+			    );
 		}else {
 			model.addAttribute("result", "입력한 정보로 가입된 회원이 존재하지 않습니다.");
+			
+			// 로그/감사 기록용
+			auditLogService.log(
+			        null,
+			        "FIND_PW_PHONE",
+			        "USER",
+			        "anonymous",
+			        "anonymous이 비밀번호 찾기 시도(폰번호) - 성공",
+			        request
+			    );
 		}
 		
 		
@@ -282,7 +434,7 @@ public class UserController {
 	}
 	
 	@GetMapping("update")
-	String update(Model model, UserVO userVO) throws Exception {
+	String update(Model model, UserVO userVO, HttpServletRequest request) throws Exception {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		
 		String username = auth.getName();
@@ -292,11 +444,21 @@ public class UserController {
 		
 		model.addAttribute("user", userVO);
 		
+		// 로그/감사 기록용
+		auditLogService.log(
+		        userVO.getUsername(),
+		        "UPDATE_USER",
+		        "USER",
+		        userVO.getUsername(),
+		        userVO.getUsername().concat("이 회원정보 수정"),
+		        request
+		    );
+		
 		return "user/update";
 	}
 	
 	@PostMapping("update")
-	String update(@ModelAttribute UserVO updateUser) throws Exception {
+	String update(@ModelAttribute UserVO updateUser, HttpServletRequest request) throws Exception {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String username = auth.getName();
 		UserVO userVO = new UserVO();
@@ -311,24 +473,30 @@ public class UserController {
 		
 		int result = userService.update(userVO);
 		
+		// 로그/감사 기록용
+		auditLogService.log(
+		        userVO.getUsername(),
+		        "UPDATE_USER",
+		        "USER",
+		        userVO.getUsername(),
+		        userVO.getUsername().concat("이 유저정보 수정"),
+		        request
+		    );
+
 		return "redirect:./mypage";
 	}
 	
 	//로그인한 유저가 작성한 전자결재 목록
 	@GetMapping("getDocuments")
-	public String getDocuments(@AuthenticationPrincipal UserVO userVO, DocumentVO documentVO, Model model) throws Exception {
-		//양식별로 결재문서 불러오기
-		List<FormVO> forms = approvalService.getForms();
+	public String getDocuments(@AuthenticationPrincipal UserVO userVO, DocumentVO documentVO, Pager pager, Model model) throws Exception {
 		
 		//작성자에 로그인한 유저 ID넣기
 		documentVO.setWriterId(userVO.getUsername());
 		
-		List<DocumentVO> ar = userService.getDocuments(documentVO);
+		List<DocumentVO> ar = userService.getDocuments(documentVO, pager);
 		model.addAttribute("ar", ar);
-		model.addAttribute("forms", forms);
-		
-		//양식목록을 바꾸면 해당 목록으로 selected되있게 하기위함
-		model.addAttribute("selectedFormId", documentVO.getFormId());
+		model.addAttribute("pager", pager);
+		model.addAttribute("documentStatus", documentVO.getDocumentStatus());
 		
 		return "user/document/list";
 	}

@@ -33,7 +33,20 @@
     <java.version>17</java.version>
 </properties>
 	<dependencies>		
+	
+		<!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+		<dependency>
+		    <groupId>org.jsoup</groupId>
+		    <artifactId>jsoup</artifactId>
+		    <version>1.21.1</version>
+		</dependency>
 
+		<dependency>
+		  <groupId>org.apache.poi</groupId>
+		  <artifactId>poi-ooxml</artifactId>
+		  <version>5.2.5</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>net.nurigo</groupId>
 			<artifactId>sdk</artifactId>
@@ -183,7 +196,18 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-client</artifactId>
-		</dependency>	
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>5.2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.2.3</version>
+		</dependency>
 
 		
 	</dependencies>

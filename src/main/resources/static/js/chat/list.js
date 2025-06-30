@@ -95,6 +95,7 @@ function createGroupChat() {
     // 리스트 갱신용 토픽 구독
     listClient.subscribe('/topic/chat/list', msg => {
         console.log("바디"+msg.body);
+        window.location.reload();
       const { roomId, message, createdAt, senderId} =
           JSON.parse(msg.body);
 
@@ -102,6 +103,7 @@ function createGroupChat() {
       if (!item) return;
       item.querySelector('.last-message').innerText=message;
       item.querySelector('.chat-time').innerText=createdAt;
+
       if (senderId==myUsername.value){
 
       }

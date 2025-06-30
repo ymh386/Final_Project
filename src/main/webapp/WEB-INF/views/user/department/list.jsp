@@ -22,52 +22,63 @@
                 <main class="flex-grow-1">
                     <div class="container">
 							<!-- contents -->
-						<sec:authorize access="hasRole('ADMIN')">
-                        <h2>부서정보</h2>
-                        <a class="btn" href="./user">부서별 회원 관리</a>
-                            <table class="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">부서번호</th>
-                                    <th scope="col">부서명</th>
-                                    <th scope="col">부서 요약</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <c:forEach var="a" items="${ar}">
-                                    <tr class="table-row">
-                                        <th scope="row">${a.departmentId}</th>
-                                        <td>${a.departmentName}</td>
-                                        <td>${a.description}</td>
-                                        <td><a class="btn" href="./update?departmentId=${a.departmentId}">수정</a></td>
-                                        <td><a href="./delete?departmentId=${a.departmentId}" class="btn">삭제</a></td>
-                                    </tr>
-                                </c:forEach>
-                            </tbody>
-                        </table>
-                        <a class="btn" href="./add">부서 생성</a>
-                    </sec:authorize>
-                    
-                    <sec:authorize access="!hasRole('ADMIN')">
-                        <h3>관리자만 이용 가능합니다.</h3>
-                    </sec:authorize>
+                        <div class="container mt-4">
+                            <sec:authorize access="hasRole('ADMIN')">
+                                <h2>부서정보</h2>
+                                
+
+                                <c:if test="${not empty ar}">
+
+                                    <table class="table table-hover table-bordered">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th scope="col">부서번호</th>
+                                                <th scope="col">부서명</th>
+                                                <th scope="col">부서 요약</th>
+                                                <th scope="col"></th>
+                                                <th scope="col"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <c:forEach var="a" items="${ar}">
+                                                <tr class="table-row">
+                                                    <th scope="row">${a.departmentId}</th>
+                                                    <td>${a.departmentName}</td>
+                                                    <td>${a.description}</td>
+                                                    <td><a class="btn btn-outline-dark" href="./update?departmentId=${a.departmentId}">수정</a></td>
+                                                    <td><a href="./delete?departmentId=${a.departmentId}" class="btn btn-outline-dark">삭제</a></td>
+                                                </tr>
+                                            </c:forEach>
+                                        </tbody>
+                                    </table>
+                                </c:if>
+                                <c:if test="${empty ar}">
+                                    <h3>조회된 부서가 없습니다.</h3>
+                                </c:if>
+
+                                <a class="btn btn-dark" href="./add">부서 생성</a>
+                                <a class="btn btn-warning" href="./user">부서별 회원 관리</a>
+                            </sec:authorize>
+                        
+                            <sec:authorize access="!hasRole('ADMIN')">
+                                <h3>관리자만 이용 가능합니다.</h3>
+                            </sec:authorize>
+                        </div>
 
 
 
 
-
-					<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 					</div>
 				</main>
+                <c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 			</div>
 		</div>
+        
 					
+	    
 	
 	
 	
-	
-		<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
-		</div>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	</body>
 </html>

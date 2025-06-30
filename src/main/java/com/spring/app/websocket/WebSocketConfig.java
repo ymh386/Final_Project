@@ -6,6 +6,8 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import com.spring.app.interceptor.WebSocketInterceptor;
+
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
@@ -14,6 +16,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		// TODO Auto-generated method stub
 		registry.addEndpoint("/ws-chat")
+				.addInterceptors(new WebSocketInterceptor()) // 인터셉터 등록
 				.setAllowedOriginPatterns("*")
 				.withSockJS();
 		

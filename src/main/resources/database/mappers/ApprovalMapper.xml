@@ -27,6 +27,8 @@
   		ON A.DOCUMENT_ID=D.DOCUMENT_ID
   		INNER JOIN FORM F
   		ON D.FORM_ID=F.FORM_ID
+  		INNER JOIN USER U
+  		ON D.WRITER_ID=U.USERNAME
   		WHERE A.DOCUMENT_ID IS NOT NULL AND A.APPROVER_ID=#{approverId} AND A.APPROVAL_STATUS='AS0'
   		ORDER BY APPROVAL_ID DESC
   	</select>
@@ -37,29 +39,79 @@
   		ON A.DOCUMENT_ID=D.DOCUMENT_ID
   		INNER JOIN FORM F
   		ON D.FORM_ID=F.FORM_ID
+  		INNER JOIN USER U
+  		ON D.WRITER_ID=U.USERNAME
   		WHERE A.APPROVAL_ID=#{approvalId} AND A.APPROVER_ID=#{approverId} AND A.APPROVAL_STATUS='AS0'
   	</select>
   	
   	<select id="getList" resultMap="awaitMap" parameterType="ApprovalVO">
-  		SELECT * FROM APPROVAL A
+  		SELECT * 
+  		  FROM APPROVAL A
+  				 INNER JOIN DOCUMENT D
+  			ON A.DOCUMENT_ID=D.DOCUMENT_ID
+  				 INNER JOIN FORM F
+  			ON D.FORM_ID=F.FORM_ID
+  				 INNER JOIN USER U
+  			ON D.WRITER_ID=U.USERNAME
+  		 <where>
+		    A.APPROVER_ID = #{approverId}
+		    
+		    <if test="pager.searchWord != null and pager.searchWord != ''">
+		    	<choose>
+		            <when test="pager.searchField == 'D.WRITER_ID'">
+		                AND D.WRITER_ID LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		            <when test="pager.searchField == 'D.DOCUMENT_TITLE'">
+		                AND D.DOCUMENT_TITLE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		            <when test="pager.searchField == 'F.FORM_TITLE'">
+		                AND F.FORM_TITLE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		        </choose>
+		    </if>
+		    
+		    <choose>
+	            <when test="approvalStatus == 'AS1'">AND A.APPROVAL_STATUS = 'AS1'</when>
+	            <when test="approvalStatus == 'AS2'">AND A.APPROVAL_STATUS = 'AS2'</when>
+	            <otherwise>AND A.APPROVAL_STATUS IN ('AS1', 'AS2')</otherwise>
+	        </choose>
+	        
+		</where>
+  		 ORDER BY APPROVED_AT DESC
+  		 LIMIT #{pager.startRow}, #{pager.pageSize}
+  	</select>
+  	
+  	<select id="getApprovalCount" parameterType="ApprovalVO" resultType="java.lang.Long">
+  		SELECT COUNT(*)
+  		  FROM APPROVAL A
   				 INNER JOIN DOCUMENT D
   			ON A.DOCUMENT_ID=D.DOCUMENT_ID
   				 INNER JOIN FORM F
   			ON D.FORM_ID=F.FORM_ID
   		 <where>
-		    A.APPROVER_ID = #{approvalVO.approverId}
+		    A.APPROVER_ID = #{approverId}
 		    
-		    <if test="approvalVO.documentVO.formId != null">
-		        AND D.FORM_ID = #{approvalVO.documentVO.formId}
+		    <if test="pager.searchWord != null and pager.searchWord != ''">
+		    	<choose>
+		            <when test="pager.searchField == 'D.WRITER_ID'">
+		                AND D.WRITER_ID LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		            <when test="pager.searchField == 'D.DOCUMENT_TITLE'">
+		                AND D.DOCUMENT_TITLE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		            <when test="pager.searchField == 'F.FORM_TITLE'">
+		                AND F.FORM_TITLE LIKE CONCAT('%', #{pager.searchWord}, '%')
+		            </when>
+		        </choose>
 		    </if>
-		    
-		    <if test="search != null and search != ''">
-		        AND D.WRITER_ID LIKE CONCAT('%', #{search}, '%')
-		    </if>
-		    
-		    AND A.APPROVAL_STATUS IN ('AS1', 'AS2')
+		   
+	        <choose>
+	            <when test="approvalStatus == 'AS1'">AND A.APPROVAL_STATUS = 'AS1'</when>
+	            <when test="approvalStatus == 'AS2'">AND A.APPROVAL_STATUS = 'AS2'</when>
+	            <otherwise>AND A.APPROVAL_STATUS IN ('AS1', 'AS2')</otherwise>
+	        </choose>
+	        
 		</where>
-  		 ORDER BY APPROVED_AT DESC
   	</select>
   	
   	<select id="getDetail" resultMap="awaitMap" parameterType="ApprovalVO">
@@ -68,6 +120,8 @@
   			ON A.DOCUMENT_ID=D.DOCUMENT_ID
   				 INNER JOIN FORM F
   			ON D.FORM_ID=F.FORM_ID
+  			 	 INNER JOIN USER U
+  			ON D.WRITER_ID=U.USERNAME
   		 WHERE A.APPROVAL_ID=#{approvalId}
   		 	   AND A.APPROVER_ID=#{approverId}
   		 	   AND A.APPROVAL_STATUS IN ('AS1', 'AS2')
@@ -94,6 +148,9 @@
   				<result column="CONTENT_HTML" property="contentHtml"/>
   				<result column="CREATED_AT" property="createdAt"/>
   			</association>
+  			<association javaType="UserVO" property="userVO">
+  				<result column="NAME" property="name"/>
+  			</association>
   		</association>
   	</resultMap>
   	
@@ -113,7 +170,42 @@
   		 WHERE PARENT_ID=#{approvalId}
   	</select>
   	
-  	<insert id="addForm" parameterType="FormVO">
+  	<!-- 휴가타입별 휴가 사용량 조회(관리자용 범위설정 가능) -->
+  	<select id="getUsedLeavesByType" resultType="java.lang.Long">
+	    SELECT IFNULL(SUM(USED_DAYS), 0)
+	      FROM LEAVE_BALANCE
+	     WHERE YEAR = #{year}
+	       AND TYPE_ID = #{typeId}
+	      <choose>
+	        <when test="scope == 'all'">
+	          <!-- 전체 -->
+	        </when>
+	        <when test="scope == 'dept'">
+	          AND USERNAME IN (
+	            SELECT USERNAME FROM USER WHERE DEPARTMENT_ID = #{departmentId}
+	          )
+	        </when>
+	        <when test="scope == 'user'">
+	          AND USERNAME = #{username}
+	        </when>
+	      </choose>
+	</select>
+	
+	<!-- 휴가타입별 휴가 사용량 조회 -->
+  	<select id="getUsedLeavesByUser" resultType="java.lang.Long">
+	    SELECT IFNULL(SUM(USED_DAYS), 0)
+	      FROM LEAVE_BALANCE
+	     WHERE USERNAME = #{username}
+	       AND YEAR = #{year}
+	       AND TYPE_ID = #{typeId} 
+	</select>
+	
+	<select id="getLeaveTypes" resultType="LeaveVO">
+		SELECT *
+		  FROM LEAVE_TYPE
+	</select>
+  	
+  	<insert id="addForm" parameterType="FormVO" useGeneratedKeys="true" keyProperty="formId">
   		INSERT INTO FORM VALUES
   		(
   			null,
@@ -159,7 +251,7 @@
   		)
   	</insert>
   	
-  	<insert id="addSign" parameterType="UserSignatureVO">
+  	<insert id="addSign" parameterType="UserSignatureVO" useGeneratedKeys="true" keyProperty="signatureId">
   		INSERT INTO USER_SIGNATURE VALUES
   		(
   			NULL,
@@ -196,6 +288,14 @@
   	
   	<update id="updateContent" parameterType="DocumentVO">
   		UPDATE DOCUMENT SET CONTENT_HTML=#{contentHtml} WHERE DOCUMENT_ID=#{documentId}
+  	</update>
+  	
+  	<update id="updateLeave" parameterType="LeaveVO">
+  		UPDATE LEAVE_BALANCE
+  		   SET USED_DAYS = USED_DAYS + #{usedDays}
+  		 WHERE USERNAME=#{username}
+  		   AND TYPE_ID=#{typeId}
+  		   AND YEAR=#{year}
   	</update>
   	
   	<delete id="deleteCategory" parameterType="CategoryVO">

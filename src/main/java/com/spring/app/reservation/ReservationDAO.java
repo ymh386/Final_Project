@@ -48,7 +48,9 @@ public interface ReservationDAO {
      */
     long countReservationsByUsername(String username);
     
+    ReservationVO selectOneMember(ReservationVO reservationVO) throws Exception;
     
+    List<Map<String, Object>> reservationHome(@Param("username")String username) throws Exception;
     
     
     

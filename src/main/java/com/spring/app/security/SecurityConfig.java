@@ -7,6 +7,7 @@ import org.springframework.security.authorization.AuthorityAuthorizationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -16,6 +17,7 @@ import org.springframework.security.web.authentication.AuthenticationFilter;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
 
+import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.security.jwt.JwtAuthenticationFilter;
 import com.spring.app.security.jwt.JwtLoginFilter;
 import com.spring.app.security.jwt.JwtTokenManager;
@@ -27,7 +29,7 @@ import com.spring.app.security.social.SocialService;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+public class SecurityConfig{
 	
 	@Autowired
 	private SocialLoginFailureHandler socialLoginFailureHandler;
@@ -47,9 +49,16 @@ public class SecurityConfig {
 	@Autowired
 	private SocialLoginSuccessHandler socialLoginSuccessHandler;
 	
+	@Autowired
+	private AuditLogService auditLogService;
+	
 	@Bean
 	HttpFirewall fireWall() {
 		return new DefaultHttpFirewall();
+	}
+	
+	org.springframework.security.web.access.AccessDeniedHandler accessDeniedHandler() {
+		return new AccessDeniedHandler();
 	}
 	
 	@Bean
@@ -70,10 +79,14 @@ public class SecurityConfig {
 				.requestMatchers("/user/getDocuments", "/user/getDocument").hasAnyRole("ADMIN", "TRAINER")
 				.requestMatchers("/ws-chat/**").permitAll()
 				.requestMatchers("/user/admin/**").hasRole("ADMIN")
-				.requestMatchers("/approval/form**").hasRole("ADMIN")
+				.requestMatchers("/admin/**").hasRole("ADMIN")
+				.requestMatchers("/approval/admin/**").hasRole("ADMIN")
 				.requestMatchers("/approval/**").hasAnyRole("ADMIN", "TRAINER")		
 				.requestMatchers("/user/getDocuments", "/user/getDocument").hasAuthority("APPROVE")
 				.requestMatchers("/user/department/**").hasRole("ADMIN")
+				.requestMatchers("board/**").hasAnyAuthority("APPROVE", "CANCEL")
+				.requestMatchers("qna/**").hasAnyAuthority("APPROVE", "CANCEL")
+				.requestMatchers("notice/**").hasAnyAuthority("APPROVE", "CANCEL")
 				.requestMatchers("/schedule/**").hasAuthority("APPROVE")
 				.requestMatchers("/approval/**").hasAuthority("APPROVE")
 				.requestMatchers("/user/mypage**").hasAnyRole("MEMBER", "TRAINER", "ADMIN")
@@ -88,8 +101,10 @@ public class SecurityConfig {
 		.sessionManagement(session -> {
 			session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		})
+		.exceptionHandling(ex -> ex
+				.accessDeniedHandler(accessDeniedHandler()))
 		.httpBasic(httpBasic -> httpBasic.disable())
-		.addFilter(new JwtLoginFilter(jwtTokenManager, authenticationConfiguration.getAuthenticationManager()))
+		.addFilter(new JwtLoginFilter(jwtTokenManager, authenticationConfiguration.getAuthenticationManager(), auditLogService))
 		.addFilter(new JwtAuthenticationFilter(jwtTokenManager, authenticationConfiguration.getAuthenticationManager()))
 		
 		.oauth2Login(oauth->{
