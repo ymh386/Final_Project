@@ -19,26 +19,25 @@
                             <div class="col-lg-5 d-flex">
                                 <div class="card shadow-lg border-0 rounded-lg flex-fill">
                                     <div class="card-header"><h3 class="text-center font-weight-light my-4">비밀번호 찾기</h3></div>
-                                    <div class="card-body">
-											<ul class="nav nav-tabs">
-												<li class="nav-item">
-													<a class="nav-link" aria-current="page" href="/user/findPwByEmail">이메일로 찾기</a>
-												</li>
-												<li class="nav-item">
-													<a class="nav-link active" href="/user/findPwByPhone">전화번호로 찾기</a>
-												</li>
-											</ul>										
-											<h5 class="text-center font-weight-light my-4">가입한 회원의 전화번호를 입력해주세요.</h5>
-										    <form id="findPwForm" action="/user/findPwByPhone" method="post">
-											<div class="form-floating mb-3">
-												<input class="form-control"  type="text" name="phone" id="phone">
-												<label for="inputEmail">전화번호('-'생략)</label>
-											</div>
+                                    <div class="card-body">									
+											<h5 class="text-center font-weight-light my-4">해당 회원의 임시 비밀번호를 발송합니다.</h5>
+										    <form id="findPwForm" action="/user/findPw" method="post">
+												<input hidden name="phone" value="${phone}">
+												<ul class="list-group list-group-flush">
+													<c:forEach var="id" items="${users}">
+														<li class="list-group-item d-flex justify-content-between">
+															<label>
+															<input type="radio" name="username" value="${id.username}" required />
+															${id.username}
+														</label>
+													</li>
+												</c:forEach>
+												</ul>
 											<c:if test="${not empty param.error}">
 												<p>${param.error}</p>
 											</c:if>
 											<div style="margin: 10px auto;">
-												<button style="width: 400px; margin-top: 10px; margin-bottom: 10px;" class="btn btn-dark d-block mx-auto" type="submit">확인</button>
+												<button style="width: 400px; margin-top: 10px; margin-bottom: 10px;" class="btn btn-dark d-block mx-auto" type="submit">발송</button>
 											</div>
 											
 										</form>
