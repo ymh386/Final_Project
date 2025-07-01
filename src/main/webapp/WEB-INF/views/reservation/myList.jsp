@@ -102,6 +102,11 @@
       background: #c0392b;
     }
 
+    form button:disabled {
+      background: #95a5a6;
+      cursor: not-allowed;
+    }
+
     /* Pagination - 게시판 스타일과 동일하게 */
     .pagination { 
       text-align: center; 
@@ -138,8 +143,13 @@
       color: #7f8c8d; 
       font-size: 0.9rem;
     }
+
+    .expired-class {
+      background-color: #f8f9fa !important;
+      color: #6c757d !important;
+    }
   </style>
-      <c:import url="/WEB-INF/views/templates/header.jsp"></c:import>
+  <c:import url="/WEB-INF/views/templates/header.jsp"></c:import>
   
 </head>
 <body class="sb-nav-fixed">
@@ -152,6 +162,12 @@
                 <div class="container-fluid px-4" style="margin-top:30px">
 
   <h2>내 예약 목록</h2>
+  
+  <c:if test="${not empty remainingCount}">
+  <div class="msg">
+    이번 달 예약 횟수: ${monthlyCount}회 / 남은 가능 횟수: ${remainingCount}회
+  </div>
+</c:if>
   
   <sec:authorize access="isAuthenticated()">
     <p>안녕하세요, <sec:authentication property="name"/>님</p>
@@ -182,7 +198,11 @@
         <td>
           <c:forEach var="sch" items="${schedules}">
             <c:if test="${sch.scheduleId == r.scheduleId}">
-              ${sch.scheduleDate} ${sch.startTime} ~ ${sch.endTime}
+              <span class="schedule-info" 
+                    data-date="${sch.scheduleDate}" 
+                    data-time="${sch.startTime}">
+                ${sch.scheduleDate} ${sch.startTime} ~ ${sch.endTime}
+              </span>
             </c:if>
           </c:forEach>
         </td>
@@ -219,11 +239,18 @@
         <td>${r.canceledReason}</td>
         <td>
           <c:if test="${empty r.canceledAt}">
-            <form action="${pageContext.request.contextPath}/reservation/cancel" method="post" style="display:inline;">
-              <input type="hidden" name="reservationId" value="${r.reservationId}"/>
-              <input type="text" name="canceledReason" placeholder="취소 사유" required/>
-              <button type="submit">취소</button>
-            </form>
+            <c:forEach var="sch" items="${schedules}">
+              <c:if test="${sch.scheduleId == r.scheduleId}">
+                <form action="${pageContext.request.contextPath}/reservation/cancel" 
+                      method="post" 
+                      style="display:inline;"
+                      onsubmit="return validateCancelTime('${sch.scheduleDate}', '${sch.startTime}', this)">
+                  <input type="hidden" name="reservationId" value="${r.reservationId}"/>
+                  <input type="text" name="canceledReason" placeholder="취소 사유" required/>
+                  <button type="submit">취소</button>
+                </form>
+              </c:if>
+            </c:forEach>
           </c:if>
         </td>
       </tr>
@@ -269,6 +296,57 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    function validateCancelTime(scheduleDate, startTime, form) {
+        // 현재 시간 구하기
+        const now = new Date();
+        
+        // 수업 시작 시간 구하기 (scheduleDate: yyyy-MM-dd, startTime: HH:mm:ss)
+        const classDateTime = new Date(scheduleDate + 'T' + startTime);
+        
+        // 수업이 이미 시작했는지 확인
+        if (now >= classDateTime) {
+            alert('⛔ 이미 시작한 수업은 취소할 수 없습니다.');
+            return false; // 폼 제출 막기
+        }
+        
+        // 취소 사유 확인
+        const cancelReason = form.querySelector('input[name="canceledReason"]').value.trim();
+        if (cancelReason === '') {
+            alert('❌ 취소 사유를 입력해주세요.');
+            return false;
+        }
+        
+        // 확인 메시지
+        return confirm('정말로 예약을 취소하시겠습니까?');
+    }
+    
+    // 페이지 로드 시 만료된 수업들 시각적으로 표시
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const scheduleInfos = document.querySelectorAll('.schedule-info');
+        
+        scheduleInfos.forEach(function(span) {
+            const scheduleDate = span.getAttribute('data-date');
+            const startTime = span.getAttribute('data-time');
+            const classDateTime = new Date(scheduleDate + 'T' + startTime);
+            
+            if (now >= classDateTime) {
+                // 만료된 수업의 행을 회색으로 표시
+                const row = span.closest('tr');
+                row.classList.add('expired-class');
+                
+                // 취소 버튼 비활성화
+                const cancelBtn = row.querySelector('button[type="submit"]');
+                if (cancelBtn) {
+                    cancelBtn.disabled = true;
+                    cancelBtn.textContent = '만료됨';
+                }
+            }
+        });
+    });
+    </script>
   
 </body>
 </html>
