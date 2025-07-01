@@ -5,7 +5,7 @@
 <html class="fontawesome-i2svg-active fontawesome-i2svg-complete">
 <head>
     <meta charset="UTF-8">
-    <title>트레이너 일정 관리</title>
+    <title>일정 관리</title>
     <c:import url="/WEB-INF/views/templates/header.jsp"></c:import>
     
     <!-- FullCalendar CSS -->

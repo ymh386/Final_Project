@@ -119,43 +119,42 @@ public class ReservationController {
                 .getContext()
                 .getAuthentication()
                 .getName();
-        
+
         // Pager 객체 생성 및 설정
         Pager pager = new Pager();
         pager.setCurPage(page);
-        pager.setPerPage(5); // 페이지당 10개씩 표시
-        pager.setPerBlock(5);  // 블록당 5개 페이지 번호 표시
-        
-        // DB 쿼리용 파라미터 계산 (startRow, pageSize)
+        pager.setPerPage(5);
+        pager.setPerBlock(5);
         pager.makeRow();
 
-        
-        // 현재 사용자의 전체 예약 개수 조회
+        // 전체 예약 개수
         long totalCount = reservationService.getTotalReservationCount(username);
-        
-        // 페이징 정보 계산 (totalPage, startPage, lastPage, prev, next)
         pager.makePage(totalCount);
-        
-        System.out.println("Total Page: " + pager.getTotalPage());
-        System.out.println("Current Page: " + pager.getCurPage());
-        
-        
-        // 현재 페이지의 예약 목록 조회 (LIMIT 적용)
+
+        // 예약 목록 조회
         List<ReservationVO> list = reservationService.getReservationsByUsername(
                 username, pager.getStartRow(), pager.getPageSize());
-        
-        model.addAttribute("list", list);
-        model.addAttribute("pager", pager); // 페이징 정보 추가
-        model.addAttribute("trainerList", userService.getUsersByUsernamePrefix("T%"));
-        
-        // 전체 스케줄 목록 (scheduleId → username 매핑용)
+
+        // 스케줄 및 트레이너 정보 조회
         List<ScheduleVO> schedules = scheduleService.getAllSchedules();
+        List<UserVO> trainerList = userService.getUsersByUsernamePrefix("T%");
+
+        // ✅ 이번 달 예약 횟수 & 가능 횟수 계산
+        long monthlyCount = reservationService.countByUsernameAndMonth(username);
+        long maxMonthly = 15;
+        long remaining = Math.max(0, maxMonthly - monthlyCount);
+
+        // model에 담기
+        model.addAttribute("list", list);
+        model.addAttribute("pager", pager);
         model.addAttribute("schedules", schedules);
-        
+        model.addAttribute("trainerList", trainerList);
+        model.addAttribute("monthlyCount", monthlyCount);
+        model.addAttribute("remainingCount", remaining);
+
         return "reservation/myList";
     }
-    
-    
+
     
 
     /** 5) 일정별 예약 목록 */

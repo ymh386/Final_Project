@@ -37,6 +37,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.spring.app.user.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Controller
 @RequestMapping("/attendance")
 public class AttendanceController {
@@ -147,6 +149,7 @@ public class AttendanceController {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 	                             .body(ex.getMessage());
 	    }
+	}
 	
 
     @GetMapping("user")
