@@ -7,12 +7,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.board.BoardService;
 import com.spring.app.board.interaction.InteractionVO;
 import com.spring.app.home.util.Pager;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.spring.app.user.UserVO;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/notice")
@@ -23,6 +26,9 @@ public class NoticeController {
 
     @Autowired
     private BoardService boardService;
+    
+    @Autowired
+    private AuditLogService auditLogService;
 
     // 1) 목록 (페이징)
     @GetMapping("/list")
@@ -60,14 +66,25 @@ public class NoticeController {
     @PostMapping("/add")
     public String add(NoticeVO noticeVO,
                       @AuthenticationPrincipal UserVO user,
-                      Model model) throws Exception {
+                      Model model, HttpServletRequest request) throws Exception {
         if (!isAdmin(user)) {
             model.addAttribute("msg", "등록 권한이 없습니다. 관리자만 등록할 수 있습니다.");
             model.addAttribute("path", "/notice/list");
             return "commons/result";
         }
         noticeVO.setUserName(user.getUsername());
-        noticeService.add(noticeVO);
+        int result = noticeService.add(noticeVO);
+        if(result > 0) {
+        	// 로그/감사 기록용
+    	   	auditLogService.log(
+    	   		noticeVO.getUserName(),
+    	        "CREATE_NOTICE",
+    	        "NOTICE",
+    	        noticeVO.getBoardNum().toString(),
+    	        noticeVO.getUserName() + "이 공지사항 작성",
+    	        request
+    	    );
+        }
         return "redirect:/notice/list";
     }
 
@@ -84,7 +101,7 @@ public class NoticeController {
         NoticeVO vo = new NoticeVO();
         vo.setBoardNum(boardNum);
         NoticeVO detail = noticeService.getDetail(vo);
-        model.addAttribute("notice", detail);
+        model.addAttribute("detail", detail);
         return "notice/update";
     }
 
@@ -92,20 +109,34 @@ public class NoticeController {
     @PostMapping("/update")
     public String update(NoticeVO noticeVO,
                          @AuthenticationPrincipal UserVO user,
-                         Model model) throws Exception {
+                         Model model, HttpServletRequest request) throws Exception {
         if (!isAdmin(user)) {
             model.addAttribute("msg", "수정 권한이 없습니다. 관리자만 수정할 수 있습니다.");
             model.addAttribute("path", "/notice/list");
             return "commons/result";
         }
-        noticeService.update(noticeVO);
+        
+        noticeVO.setUserName(user.getUsername());
+        int result = noticeService.update(noticeVO);
+        if(result > 0) {
+        	// 로그/감사 기록용
+    	   	auditLogService.log(
+    	   		noticeVO.getUserName(),
+    	        "UPDATE_NOTICE",
+    	        "NOTICE",
+    	        noticeVO.getBoardNum().toString(),
+    	        noticeVO.getUserName() + "이 "
+    	        + noticeVO.getBoardNum() + "번 공지사항 수정",
+    	        request
+    	    );
+        }
         return "redirect:/notice/detail?boardNum=" + noticeVO.getBoardNum();
     }
 
     @PostMapping("/delete")
     public String delete(@RequestParam("boardNum") Long boardNum,
                          @AuthenticationPrincipal UserVO user,
-                         Model model) throws Exception {
+                         Model model, HttpServletRequest request) throws Exception {
         if (!isAdmin(user)) {
             model.addAttribute("msg", "삭제 권한이 없습니다. 관리자만 삭제할 수 있습니다.");
             model.addAttribute("path", "/notice/list");
@@ -122,6 +153,17 @@ public class NoticeController {
             model.addAttribute("msg", "삭제할 공지사항을 찾을 수 없거나 삭제 권한이 없습니다.");
             model.addAttribute("path", "/notice/list");
             return "commons/result";
+        }else if(deletedCount > 0) {
+        	// 로그/감사 기록용
+    	   	auditLogService.log(
+    	   		vo.getUserName(),
+    	        "DELETE_NOTICE",
+    	        "NOTICE",
+    	        vo.getBoardNum().toString(),
+    	        vo.getUserName() + "이 "
+    	        + vo.getBoardNum() + "번 공지사항 삭제",
+    	        request
+    	    );
         }
 
         return "redirect:/notice/list";

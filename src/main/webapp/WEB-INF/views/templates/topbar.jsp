@@ -213,6 +213,33 @@ body {
     color: #232326;
 }
 
+
+.notification-bubble {
+    position: relative;
+    background: #f8f9fa;
+    border-radius: 1rem;
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    max-width: 100%; /* 부모에 맞춰 최대폭 제한 */
+    word-wrap: break-word; /* 긴 단어 줄바꿈 */
+    overflow-wrap: break-word;
+    white-space: normal; /* 줄바꿈 허용 */
+    overflow: hidden; /* 넘치는 내용 숨김 */
+}
+
+.notification-bubble::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: -10px;
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+    border-right-color: #f8f9fa;
+}
+
+
+
 @keyframes dropdown-fadein {
     from {
         opacity: 0;
@@ -261,8 +288,10 @@ body {
                     </ul>
                     
                     <!-- 항상 하단 고정되는 버튼 -->
-                    <div class="border-top text-center bg-white">
-                    <a href="/notification/list" class="btn btn-outline-dark d-block">알림함 이동</a>
+                    <div class="border-top bg-light p-2 text-center shadow-sm">
+                        <a href="/notification/list" class="btn btn-sm btn-dark w-100 rounded-pill">
+                            <i class="bi bi-bell-fill me-1"></i> 알림 목록
+                        </a>
                     </div>
                 </div>
             </div>

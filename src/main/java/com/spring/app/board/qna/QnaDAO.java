@@ -13,7 +13,7 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface QnaDAO {
     /** 원글/답글 삽입 */
-    void insertQna(QnaVO vo) throws Exception;
+    int insertQna(QnaVO vo) throws Exception;
 
     /** 답글 작성 전 같은 그룹 내 step 밀어내기 */
     void updateStepForReply(@Param("boardRef") Long boardRef, @Param("boardStep") Long boardStep) throws Exception;
@@ -29,8 +29,8 @@ public interface QnaDAO {
     QnaVO selectQnaById(Long boardNum) throws Exception;
 
     /** 글 수정 (제목, 내용, isSecret) */
-    void updateQna(QnaVO vo) throws Exception;
+    int updateQna(QnaVO vo) throws Exception;
 
     /** 글 삭제 */
-    void deleteQna(Long boardNum) throws Exception;
+    int deleteQna(Long boardNum) throws Exception;
 }

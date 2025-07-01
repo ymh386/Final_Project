@@ -250,5 +250,16 @@ public class UserService implements UserDetailsService {
 		return result;
 	}
 	
+	//회원 탈퇴
+	public int deleteUser(UserVO userVO) throws Exception {
+		return userDAO.deleteUser(userVO);
+	}
+	
+	//비밀번호 가져오기
+	public String getPasswordByUsername(UserVO userVO) throws Exception {
+		return userDAO.detail(userVO).getPassword();
+		
+	}
+	
 	
 }

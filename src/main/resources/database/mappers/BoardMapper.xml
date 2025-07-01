@@ -18,6 +18,9 @@
       LIKE_COUNT, 
       COMMENT_COUNT,
       IS_SECRET
+      <if test="secretPassword != null and secretPassword != ''">
+      	,SECRET_PASSWORD
+      </if>
     ) VALUES (
       #{userName}, 
       #{boardTitle}, 
@@ -27,6 +30,9 @@
       CURRENT_TIMESTAMP, 
       0, 0, 0,
       #{isSecret}
+      <if test="secretPassword != null and secretPassword != ''">
+      	,#{secretPassword}
+      </if>
     )
   </insert>
 
@@ -77,7 +83,8 @@
       BOARD_HITS,
       LIKE_COUNT,
       COMMENT_COUNT,
-      IS_SECRET
+      IS_SECRET,
+      SECRET_PASSWORD
     FROM BOARD
     WHERE BOARD_NUM = #{boardNum}
   </select>
@@ -95,6 +102,7 @@
     <result property="likeCount" column="LIKE_COUNT" />
     <result property="commentCount" column="COMMENT_COUNT" />
     <result property="isSecret" column="IS_SECRET" />
+    <result property="secretPassword" column="SECRET_PASSWORD"/>
   </resultMap>
 
   <!-- 6) 게시글 수정 -->

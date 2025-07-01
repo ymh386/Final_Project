@@ -23,98 +23,129 @@
                     <div class="container">
 						<!-- contents -->
 						<div class="container mt-4">
-							<h3 class="mb-3">승인 내역</h3>
-    
-    
-							<form method="get" class="d-flex mb-3">
-								<select name="searchField" class="form-select w-auto me-2">
-									<option value="D.WRITER_ID" ${pager.searchField eq 'D.WRITER_ID' ? 'selected' : ''}>요청자</option>
-									<option value="D.DOCUMENT_TITLE" ${pager.searchField eq 'D.DOCUMENT_TITLE' ? 'selected' : ''}>제목</option>
-									<option value="F.FORM_TITLE" ${pager.searchField eq 'F.FORM_TITLE' ? 'selected' : ''}>문서 양식</option>
-								</select>
-
-								<!-- 검색어 -->
-								<input type="text" name="searchWord" class="form-control me-2" value="${pager.searchWord}" placeholder="검색어">
-
-								<!-- 내용을 변경할때 마다 submit 시킴 -> 양식변경시 재렌더링 위함 -->
-								<!-- 승인 여부 선택 -->
-								<select onchange="this.form.submit()" name="approvalStatus" class="form-select w-auto me-2">
-									<option value="" ${approvalStatus == null ? 'selected' : ''}>전체</option>
-									<option value="AS1" ${approvalStatus eq 'AS1' ? 'selected' : ''}>승인</option>
-									<option value="AS2" ${approvalStatus eq 'AS2' ? 'selected' : ''}>반려</option>
-								</select>
-								<button type="submit" class="btn btn-dark">검색</button>
-							</form>
-
-							<c:if test="${not empty ar}">
-
-								<table class="table table-hover table-bordered">
-									<thead class="table-dark">
-										<tr>
-											<th scope="col">문서 번호</th>
-											<th scope="col">문서 양식</th>
-											<th scope="col">요청자</th>
-											<th scope="col">문서 제목</th>
-											<th scope="col">문서 상태</th>
-											<th scope="col">승인 여부</th>
-											<th scope="col">승인 일시</th>
-										</tr>
-									</thead>
-									<tbody>
-										<c:forEach var="a" items="${ar}">
-											<tr onclick="location.href='./detail?approvalId=${a.approvalId}'">
-												<th scope="row">${a.documentId}</th>
-												<td>${a.documentVO.formVO.formTitle}</td>
-												<td>${a.documentVO.userVO.name}(${a.documentVO.writerId})</td>
-												<td>${a.documentVO.documentTitle}</td>
-												<c:choose>
-													<c:when test="${a.documentVO.documentStatus eq 'D1'}">
-														<td style="color: blue;">승인</td>
-													</c:when>
-													<c:when test="${a.documentVO.documentStatus eq 'D2'}">
-														<td style="color: red;">반려</td>
-													</c:when>
-													<c:otherwise>
-														<td>진행중</td>
-													</c:otherwise>
-												</c:choose>
-												<c:choose>
-													<c:when test="${a.approvalStatus eq 'AS1'}">
-														<td style="color: blue;">승인</td>
-													</c:when>
-													<c:otherwise>
-														<td style="color: red;">반려</td>
-													</c:otherwise>
-												</c:choose>
-												<td>${a.approvedAt}</td>
-											</tr>
-										</c:forEach>
-									</tbody>
-								</table>
-							</c:if>
-							<c:if test="${empty ar}">
-								<h3>조회된 승인내역 없습니다.</h3>
-							</c:if>
-
-							<!-- 페이징 -->
-							<nav class="text-center mt-3">
-								<ul class="pagination justify-content-center">
-									<c:if test="${pager.prev}">
-										<li class="page-item"><a class="page-link" href="?curPage=${pager.startPage - 1}&searchField=${pager.searchField}&searchWord=${pager.searchWord}&approvalStatus=${approvalStatus}">이전</a></li>
+							<div class="card shadow-sm">
+								<div class="card-header bg-secondary text-white">
+									<h4 class="mb-0">승인 내역</h4>
+								</div>
+								<div class="card-body">
+	
+									<!-- 검색/필터 폼 -->
+									<form method="get" class="row row-cols-lg-auto g-3 align-items-center mb-4">
+										<div class="col">
+											<select name="searchField" class="form-select form-select-sm">
+												<option value="D.WRITER_ID" ${pager.searchField eq 'D.WRITER_ID' ? 'selected' : ''}>요청자ID</option>
+												<option value="D.DOCUMENT_TITLE" ${pager.searchField eq 'D.DOCUMENT_TITLE' ? 'selected' : ''}>제목</option>
+												<option value="F.FORM_TITLE" ${pager.searchField eq 'F.FORM_TITLE' ? 'selected' : ''}>문서 양식</option>
+											</select>
+										</div>
+										<div class="col">
+											<input type="text" name="searchWord" class="form-control form-control-sm"
+												value="${pager.searchWord}" placeholder="검색어 입력">
+										</div>
+										<div class="col">
+											<select onchange="this.form.submit()" name="approvalStatus" class="form-select form-select-sm">
+												<option value="" ${approvalStatus == null ? 'selected' : ''}>전체</option>
+												<option value="AS1" ${approvalStatus eq 'AS1' ? 'selected' : ''}>승인</option>
+												<option value="AS2" ${approvalStatus eq 'AS2' ? 'selected' : ''}>반려</option>
+											</select>
+										</div>
+										<div class="col">
+											<button type="submit" class="btn btn-sm btn-dark">
+												<i class="bi bi-search"></i> 검색
+											</button>
+										</div>
+									</form>
+		
+									<!-- 결과 테이블 -->
+									<c:if test="${not empty ar}">
+										<div class="table-responsive shadow-sm rounded">
+											<table class="table table-hover align-middle text-center">
+												<thead class="table-dark">
+													<tr>
+														<th>문서번호</th>
+														<th>문서 양식</th>
+														<th>요청자</th>
+														<th>문서 제목</th>
+														<th>문서 상태</th>
+														<th>승인 여부</th>
+														<th>승인 일시</th>
+													</tr>
+												</thead>
+												<tbody>
+													<c:forEach var="a" items="${ar}">
+														<tr class="clickable-row" onclick="location.href='./detail?approvalId=${a.approvalId}'" style="cursor: pointer;">
+															<td>${a.documentId}</td>
+															<td>${a.documentVO.formVO.formTitle}</td>
+															<td>${a.documentVO.userVO.name}(${a.documentVO.writerId})</td>
+															<td>${a.documentVO.documentTitle}</td>
+		
+															<!-- 문서 상태 -->
+															<td>
+																<c:choose>
+																	<c:when test="${a.documentVO.documentStatus eq 'D1'}">
+																		<span class="badge text-bg-primary">승인</span>
+																	</c:when>
+																	<c:when test="${a.documentVO.documentStatus eq 'D2'}">
+																		<span class="badge text-bg-danger">반려</span>
+																	</c:when>
+																	<c:otherwise>
+																		<span class="badge text-bg-secondary">진행중</span>
+																	</c:otherwise>
+																</c:choose>
+															</td>
+		
+															<!-- 승인 여부 -->
+															<td>
+																<c:choose>
+																	<c:when test="${a.approvalStatus eq 'AS1'}">
+																		<span class="badge bg-success">승인</span>
+																	</c:when>
+																	<c:otherwise>
+																		<span class="badge bg-danger">반려</span>
+																	</c:otherwise>
+																</c:choose>
+															</td>
+		
+															<td>${a.approvedAt}</td>
+														</tr>
+													</c:forEach>
+												</tbody>
+											</table>
+										</div>
 									</c:if>
-						
-									<c:forEach var="i" begin="${pager.startPage}" end="${pager.endPage}">
-										<li class="page-item ${pager.curPage == i ? 'active' : ''}">
-											<a class="page-link" href="?curPage=${i}&searchField=${pager.searchField}&searchWord=${pager.searchWord}&approvalStatus=${approvalStatus}">${i}</a>
-										</li>
-									</c:forEach>
-						
-									<c:if test="${pager.next}">
-										<li class="page-item"><a class="page-link" href="?curPage=${pager.endPage + 1}&searchField=${pager.searchField}&searchWord=${pager.searchWord}&approvalStatus=${approvalStatus}">다음</a></li>
+		
+									<!-- 조회결과 없음 -->
+									<c:if test="${empty ar}">
+										<div class="alert alert-secondary text-center mt-4" role="alert">
+											조회된 승인내역이 없습니다.
+										</div>
 									</c:if>
-								</ul>
-							</nav>
+		
+									<!-- 페이지네이션 -->
+									<nav class="mt-4">
+										<ul class="pagination justify-content-center">
+											<c:if test="${pager.prev}">
+												<li class="page-item">
+													<a class="page-link" href="?curPage=${pager.startPage - 1}&searchField=${pager.searchField}&searchWord=${pager.searchWord}&approvalStatus=${approvalStatus}">이전</a>
+												</li>
+											</c:if>
+											<c:forEach var="i" begin="${pager.startPage}" end="${pager.endPage}">
+												<li class="page-item ${pager.curPage == i ? 'active' : ''}">
+													<a class="page-link" href="?curPage=${i}&searchField=${pager.searchField}&searchWord=${pager.searchWord}&approvalStatus=${approvalStatus}">${i}</a>
+												</li>
+											</c:forEach>
+											<c:if test="${pager.next}">
+												<li class="page-item">
+													<a class="page-link" href="?curPage=${pager.endPage + 1}&searchField=${pager.searchField}&searchWord=${pager.searchWord}&approvalStatus=${approvalStatus}">다음</a>
+												</li>
+											</c:if>
+										</ul>
+									</nav>
+								</div>
+							</div>
+
 						</div>
+
 
 					
 					</div>

@@ -17,6 +17,49 @@
             th, td {
                 border: 1px solid #000000;
             }
+
+			.doc-box {
+				border: 1px solid #ccc;
+				background: #fff;
+				padding: 30px;
+				margin-top: 20px;
+			}
+			.doc-header {
+				border-bottom: 2px solid #000;
+				padding-bottom: 10px;
+				margin-bottom: 20px;
+			}
+			.doc-title {
+				font-size: 1.5rem;
+				font-weight: bold;
+			}
+			.doc-meta {
+				font-size: 0.9rem;
+				color: #555;
+			}
+			.doc-body {
+				min-height: 300px;
+				padding: 15px;
+				border: 1px solid #dee2e6;
+				background: #fdfdfd;
+			}
+			.doc-footer {
+				margin-top: 30px;
+				text-align: right;
+			}
+			.approval-line {
+				border: 1px dashed #999;
+				padding: 10px;
+				margin-top: 20px;
+				background: #f8f9fa;
+			}
+			.approval-line span {
+				display: inline-block;
+				width: 120px;
+				text-align: center;
+				font-weight: bold;
+			}
+
         </style>
 	</head>
 	<body class="sb-nav-fixed d-flex flex-column min-vh-100">
@@ -27,39 +70,45 @@
                 <main class="flex-grow-1">
                     <div class="container">
 							<!-- contents -->
-                        <sec:authentication property="principal" var="user"/>
-                        <h2>양식 정보</h2><br>
-                        <div class="mb-3">
-                            <label class="form-label">양식이름</label>
-                            <input type="text" class="form-control" value="${vo.formTitle}" readonly>
-                            <label class="form-label">제작일시</label>
-                            <input type="text" class="form-control" value="${vo.createdAt}" readonly>
+						<div class="container py-4">
+							<sec:authentication property="principal" var="user"/>
+							<div class="doc-box shadow-sm">
+                        
+								<!-- 헤더: 제목 및 정보 -->
+								<div class="doc-header">
+									<div class="doc-title">결재양식: ${vo.formTitle}</div>
+									<div class="doc-meta">
+										<span>양식번호: ${vo.formId}</span> |
+										<span>작성일: ${vo.createdAt}</span>
+									</div>
+								</div>
 
-                        <div>
-                            ${vo.contentHtml}
-                        </div>
+								<!-- 본문 -->
+								<div class="doc-body">
+									${vo.contentHtml}
+								</div>
 
-                        <div>
-                            <a href="/approval/admin/formUpdate?formId=${vo.formId}" class="btn">양식 수정</a><br>
-                            <a href="/approval/admin/formDelete?formId=${vo.formId}" class="btn">양식 삭제</a>
-                        </div>
+								<!-- 버튼 -->
+								<div class="doc-footer text-end mt-4">
+									<a href="/approval/admin/formUpdate?formId=${vo.formId}"
+									class="btn btn-outline-secondary me-2">
+										<i class="bi bi-pencil-square"></i> 양식 수정
+									</a>
+									<a href="/approval/admin/formDelete?formId=${vo.formId}"
+									class="btn btn-outline-danger"
+									onclick="return confirm('정말로 이 양식을 삭제하시겠습니까?');">
+										<i class="bi bi-trash"></i> 삭제하기
+									</a>
+								</div>
 
-
-
-
-
-					<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+							</div>
+						</div>
 					</div>
 				</main>
+				<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
 			</div>
 		</div>
 					
-	
-	
-	
-	
-		<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
-		</div>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	</body>
 </html>

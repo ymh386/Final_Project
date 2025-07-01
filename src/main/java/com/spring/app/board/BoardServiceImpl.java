@@ -132,10 +132,11 @@ public class BoardServiceImpl implements BoardService {
     }
     
     @Override
-    public void addReplyComment(CommentVO commentVO) throws Exception {
+    public int addReplyComment(CommentVO commentVO) throws Exception {
         // 대댓글 추가: parentCommentNum, commentDepth는 컨트롤러에서 세팅되었다고 가정
-        boardDAO.addComment(commentVO);
+        int result = boardDAO.addComment(commentVO);
         boardDAO.increaseCommentCount(commentVO.getBoardNum());
+        return result;
     }
 
     @Override

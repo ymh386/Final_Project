@@ -405,6 +405,12 @@
  		WHERE DEPARTMENT_ID=#{departmentId} AND POSITION='DP0'
  	</update>
  	
+ 	<delete id="deleteUser" parameterType="UserVO">
+ 		DELETE
+ 		  FROM USER
+ 		 WHERE USERNAME=#{username}
+ 	</delete>
+ 	
 
  	
   </mapper>

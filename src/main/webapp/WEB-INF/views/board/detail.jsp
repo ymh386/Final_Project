@@ -176,7 +176,7 @@
         <div class="secret-alert" style="color:#d32f2f; margin-bottom:14px;">
           비밀글입니다. 비밀번호를 입력하세요.
         </div>
-        <form class="secret-form" method="post" action="${pageContext.request.contextPath}/board/detail">
+        <form class="secret-form" method="get" action="${pageContext.request.contextPath}/board/detail">
           <input type="hidden" name="boardNum" value="${detail.boardNum}" />
           <input type="password" name="inputPassword" placeholder="비밀번호" required />
           <button type="submit">확인</button>

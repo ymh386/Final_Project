@@ -26,10 +26,12 @@ addUser.addEventListener('click', ()=>{
         console.log(e)
     })
 
-    //추가 버튼
+    // 추가 버튼
     const addBtn = document.createElement('button');
-    addBtn.innerHTML = '추가'
-    utilBtn.append(addBtn)
+    addBtn.type = 'button'; // submit 기본 동작 방지용(선택적)
+    addBtn.className = 'btn btn-primary btn-sm d-flex align-items-center gap-1'; 
+    addBtn.innerHTML = '<i class="bi bi-plus-circle"></i> 추가';
+    utilBtn.append(addBtn);
 
     addBtn.addEventListener('click', ()=>{
         if(userSelect.value != '' && deptSelect.value != ''){
@@ -58,10 +60,13 @@ updateUser.addEventListener('click', ()=>{
         console.log(e)
     })
 
-    //수정버튼
+    // 수정 버튼
     const updateBtn = document.createElement('button');
-    updateBtn.innerHTML = '수정'
-    utilBtn.append(updateBtn)
+    updateBtn.type = 'button';
+    updateBtn.className = 'btn btn-primary btn-sm d-flex align-items-center gap-1';
+    updateBtn.innerHTML = '<i class="bi bi-pencil-square"></i> 수정';
+    utilBtn.append(updateBtn);
+
 
     updateBtn.addEventListener('click', ()=>{
         if(userSelect.value != '' && deptSelect.value != ''){
@@ -100,10 +105,13 @@ deleteUser.addEventListener('click', ()=>{
         console.log(e)
     })
 
-    //탈퇴버튼
+    // 탈퇴 버튼
     const deleteBtn = document.createElement('button');
-    deleteBtn.innerHTML = '탈퇴'
-    utilBtn.append(deleteBtn)
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'btn btn-danger btn-sm d-flex align-items-center gap-1';
+    deleteBtn.innerHTML = '<i class="bi bi-person-x"></i> 탈퇴';
+    utilBtn.append(deleteBtn);
+
 
     deleteBtn.addEventListener('click', ()=>{
         if(userSelect.value != '' && deptSelect.value != ''){
@@ -157,10 +165,13 @@ headUser.addEventListener('click', ()=>{
         console.log(e)
     })
 
-    //임명 버튼
+    /// 임명 버튼
     const headBtn = document.createElement('button');
-    headBtn.innerHTML = '임명'
-    utilBtn.append(headBtn)
+    headBtn.type = 'button';
+    headBtn.className = 'btn btn-warning btn-sm d-flex align-items-center gap-1';
+    headBtn.innerHTML = '<i class="bi bi-award"></i> 임명';
+    utilBtn.append(headBtn);
+
 
     headBtn.addEventListener('click', ()=>{
         if(userSelect.value != '' && deptSelect.value != ''){

@@ -3,12 +3,13 @@ const appOrRej = document.getElementById("appOrRej");
 const rejection = document.getElementById("rejection");
 
 const documentId = document.getElementById("documentId");
-const writerId = document.getElementById("writerId");
+const writerId = appOrRej.getAttribute("data-writerId");
 const approvalId = document.getElementById("approvalId");
 
 let result = 0;
 
 uploadSign.addEventListener("click", ()=>{
+    console.log(writerId)
 
     //버튼 중복 클릭 방지
     if(uploadSign.disabled) return;
@@ -45,9 +46,9 @@ uploadSign.addEventListener("click", ()=>{
 
         if(result > 0) {
             approve = document.createElement("button");
-            approve.classList.add("btn");
+            approve.className = "btn btn-success ms-auto";
             approve.setAttribute("id", "approve");
-            approve.innerHTML = "승인";
+            approve.innerHTML = '<i class="bi bi-check-circle me-1"></i>승인';
             appOrRej.append(approve);
             rejection.remove();
 
@@ -61,7 +62,7 @@ uploadSign.addEventListener("click", ()=>{
                     f.append("approvalId", approvalId.value)
                     f.append("documentId", documentId.value)
                     f.append("contentHtml", document.getElementById("contentHtml").innerHTML)
-                    f.append("writerId", writerId.value)
+                    f.append("writerId", writerId)
                     //승인인지 반려인지 구분용(1 이면 승인)
                     f.append("type", 1)
 
@@ -98,7 +99,7 @@ rejection.addEventListener('click', ()=>{
     const f = new FormData();
     f.append("documentId", documentId.value)
     f.append("approvalId", approvalId.value)
-    f.append("writerId", writerId.value)
+    f.append("writerId", writerId)
     //승인인지 반려인지 구분(0 이면 반려)
     f.append("type", 0)
 
