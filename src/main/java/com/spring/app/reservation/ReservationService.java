@@ -189,6 +189,10 @@ public class ReservationService {
 		            .filter(s -> !s.getScheduleDate().isBefore(today))
 		            .collect(Collectors.toList());
 		}
+	 
+	 public List<Map<String, Object>> reservationHome(String username) throws Exception {
+		 return reservationDAO.reservationHome(username);
+	 }
 
 	 
 	 public Long countByUsernameAndMonth(String username) {

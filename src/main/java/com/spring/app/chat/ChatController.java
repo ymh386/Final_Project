@@ -386,7 +386,23 @@ public class ChatController {
 		chatListVO.setSenderId(message.getSenderId());
 		chatListVO.setUnread(chatService.getUnreadMessage(principal.getName(), message.getRoomId()));
 		
+		String roomName=chatListVO.getRoomName();
+		
+		List<String> lsit = chatService.getUsernameByRoom(message.getRoomId());
+		
+		String otherName = roomName.replace(principal.getName(), "");
+		
+		if (chatRoomVO.getRoomType().equals("1:1 채팅") && !lsit.contains(otherName)) {
+			RoomMemberVO memberVO = new RoomMemberVO();
+			memberVO.setUsername(otherName);
+			memberVO.setRoomId(message.getRoomId());
+			chatService.invite(memberVO);
+		}
+		
+		
+		
 		messagingTemplate.convertAndSend("/topic/chat/list", chatListVO);
+
 	}
 	
 	@PostMapping("kick")

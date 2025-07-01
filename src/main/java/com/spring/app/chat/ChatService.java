@@ -28,6 +28,12 @@ public class ChatService {
 		return list;
 	}
 	
+	public List<ChatRoomVO> roomHome(String username) throws Exception {
+		List<ChatRoomVO> list = chatDAO.roomHome(username);
+		
+		return list;
+	}
+	
 	public List<RoomMemberVO> getUserByRoom(Long roomId) throws Exception {
 		List<RoomMemberVO> list = chatDAO.getUserByRoom(roomId);
 		
@@ -67,6 +73,12 @@ public class ChatService {
 	
 	public List<ChatMessageVO> getMessageByRoom(Long roomId) throws Exception {
 		List<ChatMessageVO> list = chatDAO.getMessageByRoom(roomId);
+		
+		return list;
+	}
+	
+	public List<String> getUsernameByRoom(Long roomId) throws Exception {
+		List<String> list = chatDAO.getUsernameByRoom(roomId);
 		
 		return list;
 	}

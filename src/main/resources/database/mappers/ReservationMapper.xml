@@ -84,16 +84,6 @@
         WHERE USERNAME = #{username}
     </select>
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 <select id="selectMember" resultType="map">
     SELECT
         R.RESERVATION_ID AS reservationId,
@@ -180,6 +170,17 @@
 		AND CANCELED_AT IS NULL 
 	</select>
 
+	<select id="reservationHome" resultType="map">
+		SELECT F.NAME AS name, S.SCHEDULE_DATE AS scheduleDate, U.NAME AS trainer
+		  FROM RESERVATION R
+		  JOIN SCHEDULE S ON R.SCHEDULE_ID=S.SCHEDULE_ID
+		  JOIN FACILITY F ON S.FACILITY_ID=F.FACILITY_ID
+		  JOIN USER U ON S.USERNAME=U.USERNAME
+		 WHERE R.USERNAME=#{username}
+		   AND R.CANCELED_AT IS NULL
+		 ORDER BY S.SCHEDULE_DATE DESC, S.START_TIME DESC
+		 LIMIT 6
+	</select>
 
 
 

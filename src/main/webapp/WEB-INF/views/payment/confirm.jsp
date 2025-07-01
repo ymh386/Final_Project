@@ -3,32 +3,65 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <!DOCTYPE html>
-<html>
-<head>
-  <title>구독 확정</title>
-</head>
-<body>
-  <h2>구독 최종 확인</h2>
-  <sec:authentication property="principal" var="user"/>
+<html class="fontawesome-i2svg-active fontawesome-i2svg-complete">
+	<head>
+	<meta charset="UTF-8">
+	<title>Insert title here</title>
+		<c:import url="/WEB-INF/views/templates/header.jsp"></c:import>
+		
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jstree@3.3.15/dist/themes/default/style.min.css" />
+		<script src="https://cdn.jsdelivr.net/npm/jstree@3.3.15/dist/jstree.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+		<script src="https://cdn.ckeditor.com/4.22.1/full-all/ckeditor.js"></script>
+	</head>
+	<body class="sb-nav-fixed d-flex flex-column min-vh-100">
+		<c:import url="/WEB-INF/views/templates/topbar.jsp"></c:import>
+		<div id="layoutSidenav" class="d-flex flex-grow-1">
+		<c:import url="/WEB-INF/views/templates/sidebar.jsp"></c:import>
+			<div id="layoutSidenav_content" class="d-flex flex-column flex-grow-1">
+                <main class="flex-grow-1">
+                    <div class="container">
+						<div class="container mt-4">
+							<!-- contents -->
+							   <h2>구독 최종 확인</h2>
+								<sec:authentication property="principal" var="user"/>
 
-  <!-- 컨트롤러에서 subscription 객체(SubscriptionVO)를 model에 담아서 넘겼다고 가정 -->
-  <c:if test="${not empty sub}">
-    <p><strong>상품명:</strong> ${sub.subscriptionName}</p>
-    <p><strong>기간:</strong> ${sub.days}일</p>
-    <p><strong>가격:</strong> ${sub.price}원</p>
-  </c:if>
+								<!-- 컨트롤러에서 subscription 객체(SubscriptionVO)를 model에 담아서 넘겼다고 가정 -->
+								<c:if test="${not empty sub}">
+									<p><strong>상품명:</strong> ${sub.subscriptionName}</p>
+									<p><strong>기간:</strong> ${sub.days}일</p>
+									<p><strong>가격:</strong> ${sub.price}원</p>
+								</c:if>
 
-  <!-- 결제 승인(구독 확정) 요청 폼 -->
-  <form action="/subscript/subscribe" method="post">
-    <!-- 숨겨진 필드로 필요한 값 전달 -->
-    <input type="hidden" name="subscriptionId" value="${sub.subscriptionId}" />
-    <input type="hidden" name="customerKey"    value="${user.username}" />
+								<!-- 결제 승인(구독 확정) 요청 폼 -->
+								<form action="/subscript/subscribe" method="post">
+									<!-- 숨겨진 필드로 필요한 값 전달 -->
+									<input type="hidden" name="subscriptionId" value="${sub.subscriptionId}" />
+									<input type="hidden" name="customerKey"    value="${user.username}" />
 
-    <button type="submit">구독 확정하기</button>
-  </form>
+									<button type="submit" class="btn btn-primary">구독 확정하기</button>
+								</form>
 
-  <p>
-    <a href="<c:url value='/subscript/list'/>">← 다른 상품 보러가기</a>
-  </p>
-</body>
+								<p style="margin-top: 20px;">
+									<a href="<c:url value='/subscript/list'/>">← 다른 상품 보러가기</a>
+								</p>
+						
+
+
+
+
+						</div>
+					
+					</div>
+				</main>
+				<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+			</div>
+		</div>
+					
+	
+	
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	</body>
 </html>

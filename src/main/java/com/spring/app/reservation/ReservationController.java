@@ -33,14 +33,9 @@ public class ReservationController {
     @Autowired
     private ScheduleService   scheduleService;
 
-    
-    
-
-
     ReservationController(UserService userService) {
         this.userService = userService;
     }
-    
     
     
     //일반회원 예약 내역 

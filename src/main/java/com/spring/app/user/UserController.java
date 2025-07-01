@@ -31,6 +31,7 @@ import com.spring.app.approval.ApprovalService;
 import com.spring.app.approval.DocumentVO;
 import com.spring.app.approval.FormVO;
 import com.spring.app.approval.UserSignatureVO;
+import com.spring.app.attendance.AttendanceScheduler;
 import com.spring.app.files.FileManager;
 import com.spring.app.home.util.Pager;
 import com.spring.app.auditLog.AuditLogService;
@@ -52,6 +53,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/user/*")
 @Slf4j
 public class UserController {
+
+    private final AttendanceScheduler attendanceScheduler;
 	
 	private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList(".png", ".jpg", ".jpeg", ".gif");
 
@@ -87,9 +90,10 @@ public class UserController {
 	@Value("${board.file.path}")
 	private String path;
 
-    UserController(PaymentService paymentService, WebSecurityCustomizer custom) {
+    UserController(PaymentService paymentService, WebSecurityCustomizer custom, AttendanceScheduler attendanceScheduler) {
         this.paymentService = paymentService;
         this.custom = custom;
+        this.attendanceScheduler = attendanceScheduler;
     }
 	
 	@GetMapping("join/join")
@@ -197,9 +201,36 @@ public class UserController {
 	}
 	
 	@PostMapping("join/trainerJoin")
-	String trainerJoin(UserVO userVO, HttpServletRequest request) throws Exception{
+	String trainerJoin(UserVO userVO, HttpServletRequest request, MultipartFile img, Model model) throws Exception{
 		Long code = userService.getTrainerCode();
 		userVO.setTrainerCode(code);
+		
+		String oriName = img.getOriginalFilename().toString();
+		
+		if (oriName!="") {
+			String file = oriName.substring(oriName.lastIndexOf(".")).toLowerCase();			
+			if(!ALLOWED_EXTENSIONS.contains(file)){
+				model.addAttribute("result", "이미지 파일(.png, .jpg, .jpeg, .gif)만 업로드할 수 있습니다.");
+				model.addAttribute("path", "./registerSign");
+				
+				return "commons/result";
+			}
+			
+			//랜덤 문자열 가져오기
+			String uuid = UUID.randomUUID().toString();
+			//가져온 랜덤 문자열로 파일이름 만들기
+			String fileName = uuid.concat(userVO.getUsername()).concat(".png");
+			String file2=fileManager.saveFile(path.concat("user"), img);
+			userVO.setFileName(file2);
+			userVO.setOriName(oriName);
+		}else {
+			oriName="default.png";
+			userVO.setFileName("default");
+			userVO.setOriName(oriName);
+			
+			
+		}		
+		
 		int result = userService.join(userVO);
 		
 		// 로그/감사 기록용
@@ -343,18 +374,53 @@ public class UserController {
 	void findPwByPhone() throws Exception{}
 	
 	@PostMapping("findPwByPhone")
-	String findPwByPhone(@RequestParam("phone") String input, Model model, UserVO userVO, HttpServletRequest request) throws Exception {
+	String findPwByPhone(@RequestParam("phone") String phone, Model model, HttpServletRequest request) throws Exception {
 		
-		String phone = findInfoService.getPhone(input);
+		List<UserVO> list = findInfoService.getUserListByPhone(phone);
 		
-		if (phone!=null) {
-			userVO=findInfoService.getUserByPhone(phone);
+		if (list.isEmpty()) {
+			model.addAttribute("result", "입력한 정보로 가입된 회원이 존재하지 않습니다.");
+			model.addAttribute("path", "/user/findId");
 			
+			auditLogService.log(
+			        null,
+			        "FIND_PW_PHONE",
+			        "USER",
+			        "anonymous",
+			        "anonymous이 비밀번호 찾기 시도(폰번호) - 성공",
+			        request
+			    );
+			
+			return "commons/result";
+		} else if (list.size()==1) {
+			
+			model.addAttribute("username", list.get(0));
+			return "/user/findPwForm";
+		}else {
+			
+			model.addAttribute("users", list);
+			model.addAttribute("phone", phone);
+			
+			return "/user/chooseId";
+		}
+	}
+	
+	@PostMapping("findPw")
+	String findPw(@RequestParam("phone") String input, @RequestParam("username") String username, Model model, UserVO userVO, HttpServletRequest request) throws Exception {
+		
+			System.out.println("휴대번호 : "+input);
+			
+			System.out.println("이름 : "+username);
+			
+			userVO = findInfoService.getUserByPhoneAndId(username, input);
+
 			String newPassword=findInfoService.randomPassword(12);
 			userVO.setPassword(encoder.encode(newPassword));
 			findInfoService.changePw(userVO);
 			
-			findInfoService.findPwByPhone(phone, newPassword);
+			System.out.println(input);
+			
+			findInfoService.findPwByPhone(input, newPassword);
 			
 			model.addAttribute("result", "입력하신 전화번호로 임시 비밀번호를 발송했습니다.");	
 			
@@ -367,9 +433,7 @@ public class UserController {
 			        userVO.getUsername().concat("이 비밀번호 찾기 시도(폰번호) - 성공"),
 			        request
 			    );
-		}else {
-			model.addAttribute("result", "입력한 정보로 가입된 회원이 존재하지 않습니다.");
-			
+		
 			// 로그/감사 기록용
 			auditLogService.log(
 			        null,
@@ -379,7 +443,7 @@ public class UserController {
 			        "anonymous이 비밀번호 찾기 시도(폰번호) - 성공",
 			        request
 			    );
-		}
+		
 		
 		
 		List<MemberRoleVO> list = userService.getRole(userVO.getUsername());

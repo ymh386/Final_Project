@@ -10,4 +10,5 @@ public interface NoticeService {
     int update(NoticeVO noticeVO) throws Exception;
     int delete(NoticeVO noticeVO) throws Exception;
     void hitUpdate(NoticeVO noticeVO) throws Exception;
+    List<NoticeVO> noticeHome() throws Exception;
 }

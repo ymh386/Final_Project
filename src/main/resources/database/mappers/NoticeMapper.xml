@@ -91,5 +91,12 @@
       SET BOARD_HITS = BOARD_HITS + 1
     WHERE BOARD_NUM = #{boardNum}
   </update>
+  
+  <select id="noticeHome" resultType="NoticeVO">
+  	SELECT BOARD_TITLE, BOARD_DATE, BOARD_NUM
+  	  FROM NOTICE
+  	 ORDER BY BOARD_DATE DESC
+  	 LIMIT 6
+  </select>
 
 </mapper>

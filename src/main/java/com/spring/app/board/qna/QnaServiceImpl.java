@@ -73,13 +73,13 @@ public class QnaServiceImpl implements QnaService {
 
     /** 글 수정 */
     @Override
-    public void modify(QnaVO vo) throws Exception {
+    public void update(QnaVO vo) throws Exception {
         qnaDAO.updateQna(vo);
     }
 
     /** 글 삭제 */
     @Override
-    public void remove(Long boardNum) throws Exception {
+    public void delete(Long boardNum) throws Exception {
         qnaDAO.deleteQna(boardNum);
     }
 }

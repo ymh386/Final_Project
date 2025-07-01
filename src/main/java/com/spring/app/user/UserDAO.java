@@ -24,9 +24,13 @@ public interface UserDAO {
 	
 	UserVO getUserByEmail(String email) throws Exception;
 	
-	String getPhone(String phone) throws Exception;
+	List<String> getPhone(String phone) throws Exception;
 	
 	UserVO getUserByPhone(String phone) throws Exception;
+	
+	List<UserVO> getUserListByPhone(String phone) throws Exception;
+	
+	UserVO getUserByPhoneAndId(@Param("username") String username, @Param("phone") String phone);
 	
 	Long getTrainerCode() throws Exception;
 	

@@ -91,4 +91,5 @@ public interface BoardDAO {
 
 	CommentVO getCommentById(Long commentNum) throws Exception;
 	
+	
 }
