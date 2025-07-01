@@ -43,4 +43,13 @@ public class CommentDAO {
     }
 
 
-}
+    // 댓글 삭제 (작성자 혹은 관리자)
+    int deleteComment(CommentVO commentVO) throws Exception {
+    	int result = deleteComment(commentVO);
+    	
+    	return result;
+    };
+    
+    void addReplyComment(CommentVO commentVO) throws Exception{
+    };
+

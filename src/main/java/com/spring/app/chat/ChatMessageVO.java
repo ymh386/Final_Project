@@ -1,6 +1,7 @@
 package com.spring.app.chat;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -21,5 +22,6 @@ public class ChatMessageVO {
 	private String senderId;
 	private Long readStatus;
 	private String mediaUrl;
+	private Date date;
 
 }

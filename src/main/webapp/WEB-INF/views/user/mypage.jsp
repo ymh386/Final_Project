@@ -111,6 +111,31 @@
             <strong>기본 정보</strong>
           </div>
           <ul class="list-group list-group-flush">
+		    <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>프로필 사진</span>
+                    <c:if test="${user.sns eq null and user.fileName ne 'default'}">
+                    	<img src="/files/user/${user.fileName}"
+                         id="senderimg"
+                    		 class="rouned-circle me-3"
+                    		 width="48" height="48"
+                    		 alt="avatar">
+                    </c:if>
+                    <c:if test="${user.sns ne null}">
+                    	<img src="${user.fileName}"
+                         id="senderimg"
+                    		 class="rouned-circle me-3"
+                    		 width="48" height="48"
+                    		 alt="avatar">
+                    </c:if>
+                    <c:if test="${user.sns eq null and user.fileName eq 'default'}">
+	                    <img src="/img/default.png"
+                         id="senderimg" 
+	                      class="rounded-circle me-3" 
+	                      width="48" height="48" 
+	                      alt="avatar">
+                    </c:if>
+            </li>
+			<input hidden name="username" value="${user.username}">
             <li class="list-group-item d-flex justify-content-between">
               <span>아이디</span>
               <span>${user.username}</span>
@@ -118,6 +143,10 @@
             <li class="list-group-item d-flex justify-content-between">
               <span>이름</span>
               <span>${user.name}</span>
+            </li>			
+            <li class="list-group-item d-flex justify-content-between">
+              <span>이메일</span>
+              <span>${user.email}</span>
             </li>			
             <li class="list-group-item d-flex justify-content-between">
               <span>생년월일</span>
@@ -135,6 +164,7 @@
             </a>
           </div>
         </div>
+
 		<sec:authorize access="hasAnyRole('ADMIN', 'TRAINER')">
         <div class="container py-5" id="chart">
           <h1 class="mb-4">근태/휴가 통계</h1>
@@ -163,6 +193,7 @@
 			</div>
         </div>
 
+		</sec:authorize>
 				
 			
 
@@ -225,6 +256,7 @@
         </div>
 		</sec:authorize>	
 
+		<sec:authorize access="!hasRole('TRAINER')">
 	    <h1>구독 내역</h1>
 		<table id="subList" border="1" cellpadding="8">
 			<tr><th>상품명</th><th>시작날짜</th><th>종료날짜</th><th>가격</th></tr>
@@ -239,6 +271,7 @@
 			      </tr>
 			    </c:forEach>
 		</table>
+		</sec:authorize>
 
         <!-- 추가 섹션 필요하면 동일한 패턴으로 쭉 쌓기 -->
         <!-- 예: 결제 및 구독 정보, 보안 설정 등 -->

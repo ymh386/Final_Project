@@ -194,4 +194,12 @@ public class ReservationService {
 		 return reservationDAO.reservationHome(username);
 	 }
 
+	 
+	 public Long countByUsernameAndMonth(String username) {
+		    LocalDateTime now = LocalDateTime.now();
+		    int year = now.getYear();
+		    int month = now.getMonthValue();
+
+		    return (long) reservationDAO.countByUsernameAndMonth(username, year, month);
+		}
 }

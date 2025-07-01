@@ -2,6 +2,7 @@
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %> 
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -69,6 +70,15 @@
     
     .member.online .badge { 
       display: inline-block; 
+    }
+
+    .date-badge {
+      background: #f1f0f0;
+      margin: 0.5rem 0;
+      padding: 0.25rem 0.75rem;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      color: #666;
     }
     </style>
 </head>
@@ -258,6 +268,20 @@
     <div class="chat-body" id="chatContent" style="flex: 1; overflow-y: auto;">
       <input hidden id="sender" value="${user.username}">
       <c:forEach var="msg" items="${map.msg}" varStatus="status">
+        <!-- 1) 오늘 VO 의 java.sql.Date 를 "yyyy-MM-dd" 문자열로 포맷해서 변수에 저장 -->
+        <fmt:formatDate value="${msg.date}" pattern="yyyy-MM-dd" var="thisDate"/>
+
+        <!-- 2) 이전 VO 의 date 도 같은 방식으로 포맷 -->
+        <c:if test="${!status.first}">
+          <fmt:formatDate value="${map.msg[status.index-1].date}" pattern="yyyy-MM-dd" var="prevDate"/>
+        </c:if>
+
+        <!-- 3) 첫 메시지이거나 날짜가 바뀌었으면 배지 추가 -->
+        <c:if test="${status.first or thisDate ne prevDate}">
+          <li class="list-group-item date-badge text-center">
+            <small>${thisDate}</small>
+          </li>
+        </c:if>
         <c:choose>
           <c:when test="${msg.senderId == user.username}">
             <input hidden id="createdAt" name="createdAt" value="${msg.createdAt}">

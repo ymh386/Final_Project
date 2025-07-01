@@ -226,6 +226,8 @@
 			<result column="MESSAGE_TYPE" property="messageType"/>
 			<result column="CREATED_AT" property="createdAt"/>
 			<result column="READSTATUS" property="readStatus"/>
+			<result column="MEDIA_URL" property="mediaUrl"/>
+			<result column="DATE" property="date"/>
 		</association>
   	</resultMap>
   	
