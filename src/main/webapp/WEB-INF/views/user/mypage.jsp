@@ -243,6 +243,33 @@
         <!-- 추가 섹션 필요하면 동일한 패턴으로 쭉 쌓기 -->
         <!-- 예: 결제 및 구독 정보, 보안 설정 등 -->
 
+		<!-- 회원 탈퇴 -->
+		<div class="d-flex justify-content-end my-3">
+			<button id="deleteUser" type="button" class="btn btn-danger">탈퇴하기</button>
+		</div>
+		
+
+		<!-- 비밀번호 확인 모달 -->
+		<div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="passwordModalLabel">비밀번호 확인</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+			</div>
+			<div class="modal-body">
+				<p>정말 탈퇴하시겠습니까?<br><strong>※ 탈퇴 시 모든 정보는 삭제되며 복구되지 않습니다.</strong></p>
+				<input type="password" id="confirmPassword" class="form-control" placeholder="비밀번호 입력" />
+				<div id="errorMsg" class="text-danger mt-2" style="display:none;">비밀번호가 일치하지 않습니다.</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+				<button type="button" id="confirmDeleteBtn" class="btn btn-danger">확인</button>
+			</div>
+			</div>
+		</div>
+		</div>
+
       </div>
     </main>
 
@@ -252,6 +279,7 @@
 
   <!-- Bootstrap JS (필요하다면) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/user/mypage.js"></script>
   <script>
 
 		//근태율 차트

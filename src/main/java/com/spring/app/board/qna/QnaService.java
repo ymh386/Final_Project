@@ -5,10 +5,10 @@ import java.util.Map;
 public interface QnaService {
 
     /** 원글 작성 */
-    void write(QnaVO vo) throws Exception;
+    int write(QnaVO vo) throws Exception;
 
     /** 답글 작성 */
-    void reply(QnaVO vo) throws Exception;
+    int reply(QnaVO vo) throws Exception;
 
     /** 답글 작성 전 같은 그룹 내 step 밀어내기 */
     void updateStepForReply(Long boardRef, Long boardStep) throws Exception;
@@ -20,8 +20,8 @@ public interface QnaService {
     QnaVO getById(Long boardNum) throws Exception;
 
     /** 글 수정 */
-    void update(QnaVO vo) throws Exception;
+    int update(QnaVO vo) throws Exception;
 
     /** 글 삭제 */
-    void delete(Long boardNum) throws Exception;
+    int delete(Long boardNum) throws Exception;
 }

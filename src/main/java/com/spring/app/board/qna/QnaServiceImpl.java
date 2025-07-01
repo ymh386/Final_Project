@@ -17,19 +17,20 @@ public class QnaServiceImpl implements QnaService {
 
     /** 원글 작성 */
     @Override
-    public void write(QnaVO vo) throws Exception {
+    public int write(QnaVO vo) throws Exception {
         vo.setBoardDepth(0L);
         vo.setBoardStep(0L);
         vo.setBoardRef(0L);
-        qnaDAO.insertQna(vo);
+        int result = qnaDAO.insertQna(vo);
         // MyBatis useGeneratedKeys로 boardNum이 채워진 후:
         vo.setBoardRef(vo.getBoardNum());
+        return result;
     }
 
     /** 답글 작성 */
     @Override
     @Transactional
-    public void reply(QnaVO vo) throws Exception {
+    public int reply(QnaVO vo) throws Exception {
         Long parentRef   = vo.getBoardRef();
         Long parentStep  = vo.getBoardStep();
         Long parentDepth = vo.getBoardDepth();
@@ -42,7 +43,7 @@ public class QnaServiceImpl implements QnaService {
         vo.setBoardStep(parentStep + 1);
         vo.setBoardDepth(parentDepth + 1);
 
-        qnaDAO.insertQna(vo);
+        return qnaDAO.insertQna(vo);
     }
     
     @Override
@@ -73,13 +74,13 @@ public class QnaServiceImpl implements QnaService {
 
     /** 글 수정 */
     @Override
-    public void update(QnaVO vo) throws Exception {
-        qnaDAO.updateQna(vo);
+    public int update(QnaVO vo) throws Exception {
+        return qnaDAO.updateQna(vo);
     }
 
     /** 글 삭제 */
     @Override
-    public void delete(Long boardNum) throws Exception {
-        qnaDAO.deleteQna(boardNum);
+    public int delete(Long boardNum) throws Exception {
+       return qnaDAO.deleteQna(boardNum);
     }
 }

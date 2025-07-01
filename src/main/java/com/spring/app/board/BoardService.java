@@ -75,6 +75,6 @@ public interface BoardService {
     void decreaseCommentCount(Long boardNum) throws Exception;
 
     /** 23) 대댓글 추가 */
-    void addReplyComment(CommentVO commentVO) throws Exception;
+    int addReplyComment(CommentVO commentVO) throws Exception;
 
 }

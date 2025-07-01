@@ -2,12 +2,17 @@ package com.spring.app.board.qna;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import com.spring.app.auditLog.AuditLogService;
+import com.spring.app.websocket.NotificationManager;
+
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -16,6 +21,12 @@ import lombok.RequiredArgsConstructor;
 public class QnaController {
 
     private final QnaService qnaService;
+    
+    @Autowired
+    private NotificationManager notificationManager;
+    
+    @Autowired
+    private AuditLogService auditLogService;
 
     // 1. 전체 목록 (최신글 위, 답글은 부모글 아래 순서)
     @GetMapping("/list")
@@ -42,24 +53,25 @@ public class QnaController {
     }
 
     // 2. 글 상세보기 (비밀글 권한 체크 및 비밀번호 검증)
-    @GetMapping("/detail/{boardNum}")
+    @GetMapping("/detail")
     public String view(
-            @PathVariable Long boardNum,
+            Long boardNum,
             Model model,
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(value = "secretPassword", required = false) String secretPassword
     ) throws Exception {
+    	model.addAttribute("boardNum", boardNum);
         QnaVO vo = qnaService.getById(boardNum);
 
         if (vo == null) {
             model.addAttribute("errorMsg", "존재하지 않는 글입니다.");
-            return "qna/error";
+            return "qna/detail";
         }
 
         if (vo.getIsSecret() != null && Boolean.TRUE.equals(vo.getIsSecret())) {
             if (userDetails == null) {
                 model.addAttribute("errorMsg", "비밀글입니다. 로그인 후 확인하세요.");
-                return "qna/error";
+                return "qna/detail";
             }
             String username = userDetails.getUsername();
             boolean isAdmin = userDetails.getAuthorities().stream()
@@ -68,7 +80,7 @@ public class QnaController {
             if (!username.equals(vo.getUserName()) && !isAdmin) {
                 if (secretPassword == null || !secretPassword.equals(vo.getSecretPassword())) {
                     model.addAttribute("errorMsg", "비밀글입니다. 비밀번호가 틀렸거나 권한이 없습니다.");
-                    return "qna/error";
+                    return "qna/detail";
                 }
             }
         }
@@ -102,7 +114,7 @@ public class QnaController {
     @PostMapping("/add")
     public String add(
             @ModelAttribute QnaVO vo,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request
     ) throws Exception {
         if (userDetails == null) {
             return "redirect:/users/login";
@@ -119,7 +131,19 @@ public class QnaController {
         }
 
         // 새 글인 경우 boardRef = boardNum (신규 등록 후 세팅)
-        qnaService.write(vo);
+        int result = qnaService.write(vo);
+        
+        if(result > 0) {
+        	// 로그/감사 기록용
+    	   	auditLogService.log(
+    	   		vo.getUserName(),
+    	        "CREATE_QNA",
+    	        "QNA",
+    	        vo.getBoardNum().toString(),
+    	        vo.getUserName() + "이 질문글 작성",
+    	        request
+    	    );
+        }
 
         return "redirect:/qna/list";
     }
@@ -148,7 +172,7 @@ public class QnaController {
 
     // 6. 답글 등록 (관리자만 가능)
     @PostMapping("/reply")
-    public String reply(@ModelAttribute QnaVO vo, @AuthenticationPrincipal UserDetails userDetails) throws Exception {
+    public String reply(@ModelAttribute QnaVO vo, @AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request) throws Exception {
         if (userDetails == null) {
             return "redirect:/users/login";
         }
@@ -202,8 +226,20 @@ public class QnaController {
         vo.setBoardDepth(parent.getBoardDepth() + 1);
 
         // 답글 등록
-        qnaService.reply(vo);
-
+        int result = qnaService.reply(vo);
+        
+        if(result > 0) {
+        	// 로그/감사 기록용
+    	   	auditLogService.log(
+    	   		vo.getUserName(),
+    	        "REPLY_QNA",
+    	        "QNA",
+    	        vo.getBoardNum().toString(),
+    	        vo.getUserName() + "이 질문글 답글 작성",
+    	        request
+    	    );
+        }
+        
         // 리스트로 리다이렉트
         return "redirect:/qna/list";
     }
@@ -236,7 +272,7 @@ public class QnaController {
     @PostMapping("/update")
     public String update(
             @ModelAttribute QnaVO vo,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request
     ) throws Exception {
         if (userDetails == null) {
             return "redirect:/users/login";
@@ -264,7 +300,20 @@ public class QnaController {
         vo.setBoardStep(existing.getBoardStep());
         vo.setBoardDepth(existing.getBoardDepth());
 
-        qnaService.update(vo);
+        int result = qnaService.update(vo);
+        
+        if(result > 0) {
+        	// 로그/감사 기록용
+    	   	auditLogService.log(
+    	   		vo.getUserName(),
+    	        "UPDATE_QNA",
+    	        "QNA",
+    	        vo.getBoardNum().toString(),
+    	        vo.getUserName() + "이 "
+    	        + vo.getBoardNum() + "번 질문글 수정",
+    	        request
+    	    );
+        }
         
         return "redirect:/qna/detail/" + vo.getBoardNum();
     }
@@ -273,7 +322,7 @@ public class QnaController {
     @PostMapping("/delete/{boardNum}")
     public String delete(
             @PathVariable Long boardNum,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request
     ) throws Exception {
         if (userDetails == null) {
             return "redirect:/users/login";
@@ -287,7 +336,20 @@ public class QnaController {
             throw new RuntimeException("삭제 권한이 없습니다.");
         }
 
-        qnaService.delete(boardNum);
+        int result = qnaService.delete(boardNum);
+        
+        if(result > 0) {
+        	// 로그/감사 기록용
+    	   	auditLogService.log(
+    	   		username,
+    	        "DELETE_QNA",
+    	        "QNA",
+    	        boardNum.toString(),
+    	        username + "이 "
+    	        + boardNum + "번 질문글 삭제",
+    	        request
+    	    );
+        }
         return "redirect:/qna/list";
     }
 }

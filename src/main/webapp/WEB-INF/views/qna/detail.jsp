@@ -115,7 +115,8 @@
         <div class="error-msg">${errorMsg}</div>
 
         <!-- 비밀글 비밀번호 입력 폼 -->
-        <form class="secret-password-form" action="${pageContext.request.contextPath}/qna/detail/${qna.boardNum}" method="get">
+        <form class="secret-password-form" action="${pageContext.request.contextPath}/qna/detail" method="get">
+            <input type="hidden" name="boardNum" value="${boardNum}">
             <input type="password" name="secretPassword" placeholder="비밀글 비밀번호 입력" required />
             <button type="submit">확인</button>
         </form>

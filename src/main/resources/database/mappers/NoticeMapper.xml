@@ -76,7 +76,7 @@
           BOARD_CONTENTS = #{boardContents},
           UPDATE_AT      = CURRENT_TIMESTAMP
     WHERE BOARD_NUM = #{boardNum}
-      AND #{userName} = 'admin'
+      AND USERNAME = 'admin'
   </update>
 
 <delete id="delete" parameterType="com.spring.app.board.notice.NoticeVO">

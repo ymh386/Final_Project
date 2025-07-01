@@ -28,7 +28,11 @@
        BOARD_DEPTH,
        BOARD_REF,
        BOARD_STEP,
-       IS_SECRET)
+       IS_SECRET
+       <if test="secretPassword != null and secretPassword != ''">
+       		,SECRET_PASSWORD
+       </if>
+       )
     VALUES
       (#{userName},
        #{boardTitle},
@@ -37,7 +41,11 @@
        #{boardDepth},
        #{boardRef},
        #{boardStep},
-       #{isSecret})
+       #{isSecret}
+       <if test="secretPassword != null and secretPassword != ''">
+       		,#{secretPassword}
+       </if>
+       )
   </insert>
 
   <!-- 2) 답글 작성 전 같은 그룹 내 step 밀어내기 -->
@@ -83,7 +91,8 @@
       BOARD_DEPTH,
       BOARD_REF,
       BOARD_STEP,
-      IS_SECRET
+      IS_SECRET,
+      SECRET_PASSWORD
     FROM QNA
     WHERE BOARD_NUM = #{boardNum}
   </select>

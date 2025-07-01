@@ -1,5 +1,6 @@
 package com.spring.app.user;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -599,5 +600,36 @@ public class UserController {
 	public int updateHead(UserVO userVO, DepartmentVO departmentVO) throws Exception {
 		int result = userService.updateHeadOfDept(userVO, departmentVO);
 		return result;
+	}
+	
+	//회원 탈퇴
+	@PostMapping("deleteUser")
+	@ResponseBody
+	public int deleteUser(@AuthenticationPrincipal UserVO userVO, HttpServletRequest request) throws Exception {
+		int result = userService.deleteUser(userVO);
+		
+		if(result > 0) {
+			// 로그/감사 기록용
+			auditLogService.log(
+			        null,
+			        "DELETE_USER",
+			        "USER",
+			        userVO.getUsername(),
+			        userVO.getUsername().concat("이 회원 탈퇴"),
+			        request
+			    );
+		}
+		
+		
+		return result;
+	}
+
+	//비밀번호 일치하는지 확인
+	@PostMapping("checkPassword")
+	@ResponseBody
+	public boolean checkPassword(@AuthenticationPrincipal UserVO userVO, String password) throws Exception {
+		
+		return encoder.matches(password, userService.getPasswordByUsername(userVO));
+		
 	}
 }

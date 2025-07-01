@@ -180,7 +180,7 @@ function toggleReplyForm(id) {
     <c:forEach var="qna" items="${list}">
         <li class="qna-item" style="margin-left: ${qna.boardDepth * 30}px;">
             <div class="qna-main">
-                <a href="${pageContext.request.contextPath}/qna/detail/${qna.boardNum}" class="qna-title">
+                <a href="${pageContext.request.contextPath}/qna/detail?boardNum=${qna.boardNum}" class="qna-title">
                     <c:out value="${qna.boardTitle}" />
                 </a>
                 <c:if test="${qna.isSecret}">

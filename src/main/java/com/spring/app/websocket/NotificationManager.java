@@ -19,6 +19,7 @@ import com.spring.app.board.BoardVO;
 import com.spring.app.board.comment.CommentVO;
 import com.spring.app.board.interaction.InteractionVO;
 import com.spring.app.board.notice.NoticeDAO;
+import com.spring.app.board.qna.QnaVO;
 import com.spring.app.chat.ChatMessageVO;
 import com.spring.app.chat.ChatRoomVO;
 import com.spring.app.chat.RoomMemberVO;
@@ -490,4 +491,23 @@ public class NotificationManager {
 		this.sendNotification(notificationVO);
 		
 	}
+	
+	//게시글 대댓글 알림
+	public void replyCommentNotification(CommentVO commentVO, CommentVO parentCommentVO) throws Exception {
+		NotificationVO notificationVO = new NotificationVO();
+		notificationVO.setNotificationTitle("대댓글");
+		notificationVO.setUsername(parentCommentVO.getUserName());
+		notificationVO.setMessage(commentVO.getUserName() + "님께서 회원님의 댓글에 대댓글을 작성했습니다 : "
+				+ parentCommentVO.getCommentContents() + "\n - "
+				+ commentVO.getCommentContents());
+		notificationVO.setLinkUrl("/board/detail?boardNum=".concat(commentVO.getBoardNum().toString()));
+		notificationVO.setNotificationType("N17");
+		notificationVO.setSenderId(commentVO.getUserName());
+		
+		this.sendNotification(notificationVO);
+	}
+	
+	
+	
+	
 }

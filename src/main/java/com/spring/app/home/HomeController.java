@@ -68,6 +68,10 @@ public class HomeController {
 	@GetMapping("/")
 	public String home(@AuthenticationPrincipal UserVO userVO, Model model) throws Exception {
 		
+		if(userVO == null) {
+			return "user/login/login";
+		}
+		
 		List<NoticeVO> list = noticeService.noticeHome();
 		
 		model.addAttribute("notice", list);

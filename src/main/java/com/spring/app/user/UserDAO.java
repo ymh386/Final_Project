@@ -104,6 +104,9 @@ public interface UserDAO {
 	//해당 부서의 나머지 부서원들의 상급자를 새로운 부서장으로 변경
 	public int updateParent(Map<String, Object> map) throws Exception;
 	
+	//회원 탈퇴
+	public int deleteUser(UserVO userVO) throws Exception;
+	
 	
 
 

@@ -80,6 +80,7 @@ public class BoardController {
         if (boardVO.getIsSecret() != null && boardVO.getIsSecret()) boardVO.setSecretPassword(secretPassword);
         else boardVO.setSecretPassword(null);
 
+        
         int result = boardService.add(boardVO, files);
         if (result > 0) {
         	// 로그/감사 기록용
@@ -128,6 +129,7 @@ public class BoardController {
             } else if (inputPassword != null && inputPassword.equals(detail.getSecretPassword())) {
                 canRead = true;
             }
+     
 
             // 조회수 증가 (본인 글이 아닌 경우에만)
             if (canRead && (currentUserName == null || !currentUserName.equals(detail.getUserName()))) {
@@ -491,7 +493,7 @@ public class BoardController {
                                   @RequestParam("parentCommentNum") Long parentCommentNum,
                                   @RequestParam("commentContents") String commentContents,
                                   @AuthenticationPrincipal UserVO user,
-                                  RedirectAttributes rttr) throws Exception {
+                                  RedirectAttributes rttr, HttpServletRequest request) throws Exception {
         if (user == null) throw new RuntimeException("로그인이 필요합니다.");
 
         if (commentContents == null || commentContents.trim().isEmpty()) {
@@ -520,7 +522,28 @@ public class BoardController {
         commentVO.setUserName(user.getUsername());
         commentVO.setCommentDepth(parent.getCommentDepth() + 1);  // 부모 댓글 깊이 + 1
 
-        boardService.addReplyComment(commentVO);
+        int result = boardService.addReplyComment(commentVO);
+       
+       if(result > 0) {
+    	   //대댓글 알림
+    	   CommentVO parentCommentVO = boardService.getCommentById(parentCommentNum);
+	    	 //자기자신 제외
+	       	if(!commentVO.getUserName().equals(parentCommentVO.getUserName())) {
+	       		notificationManager.replyCommentNotification(commentVO, parentCommentVO);
+	       	}
+    	   
+    	   // 로그/감사 기록용
+    	   auditLogService.log(
+    			   commentVO.getUserName(),
+    			   "REPLY_COMMENT",
+    			   "COMMENTS",
+    			   commentVO.getCommentNum().toString(),
+    			   commentVO.getUserName() + "이 "
+				   + commentVO.getParentCommentNum() + "번 댓글에 대댓글 작성",
+				   request
+		   );
+    	   
+       }
 
         rttr.addAttribute("boardNum", boardNum);
         return "redirect:/board/detail";
@@ -559,11 +582,11 @@ public class BoardController {
           if(result > 0) {
         	// 로그/감사 기록용
         	auditLogService.log(
-					vo.getUserName(),
+        			user.getUsername(),
 			        "DELETE_COMMENT",
 			        "COMMENTS",
 			        vo.getCommentNum().toString(),
-			        vo.getUserName() + "이 "
+			        user.getUsername() + "이 "
 			        + vo.getBoardNum() + "번 게시글의 댓글 삭제",
 			        request
 			    );
