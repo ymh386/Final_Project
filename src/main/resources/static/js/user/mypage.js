@@ -29,13 +29,7 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
                 method: 'POST',
             }).then(() => {
                 alert("회원 탈퇴가 완료되었습니다.");
-                // 로컬스토리지나 쿠키에서 JWT 토큰 제거
-                localStorage.removeItem("token"); // 또는
-                sessionStorage.removeItem("token");
-
-                // 또는 쿠키에 저장했다면
-                document.cookie = "Authorization=; path=/; max-age=0";
-                location.href = '/'; // 또는 홈으로 리다이렉트
+                
             });
         } else {
             errorMsg.style.display = 'block';
