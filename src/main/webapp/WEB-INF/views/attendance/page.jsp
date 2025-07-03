@@ -248,6 +248,7 @@
                             </h2>
                         </div>
 
+
                         <!-- 출퇴근 버튼 -->
                         <div class="attendance-controls">
                             <button id="checkInBtn" class="hidden">
