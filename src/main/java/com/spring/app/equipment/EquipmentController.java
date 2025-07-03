@@ -141,7 +141,7 @@ public class EquipmentController {
             if (success) {
             	// 신고 접수 알림
             	faultReport = equipmentService.selectFaultReportById(faultReport.getReportId());
-//            	notificationManager.reportNotification(faultReport);
+            	notificationManager.reportNotification(faultReport);
             	
 				// 로그/감사 기록용
 				auditLogService.log(
@@ -194,7 +194,7 @@ public class EquipmentController {
             if (success) {
             	//비품 신고처리중 알림
             	EquipmentFaultVO equipmentFaultVO = equipmentService.selectFaultReportById(reportId);
-//            	notificationManager.reportingNotification(equipmentFaultVO);
+            	notificationManager.reportingNotification(equipmentFaultVO);
             	
 				// 로그/감사 기록용
 				auditLogService.log(
@@ -235,7 +235,7 @@ public class EquipmentController {
             if (success) {
             	//비품 신고 처리완료 알림
             	EquipmentFaultVO equipmentFaultVO = equipmentService.selectFaultReportById(reportId);
-//            	notificationManager.reportingNotification(equipmentFaultVO);
+            	notificationManager.reportingNotification(equipmentFaultVO);
             	
 				// 로그/감사 기록용
 				auditLogService.log(
