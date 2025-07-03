@@ -14,6 +14,12 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.spring.app.chat.ChatRoomVO;
 
+import jakarta.persistence.criteria.Join;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -23,10 +29,18 @@ import lombok.ToString;
 @ToString
 public class UserVO implements UserDetails, OAuth2User {
 	
+	
+	@NotBlank(groups=JoinGroup.class)
 	private String username;
+	@Size(min=8,max=16)
+	@NotBlank(groups=JoinGroup.class)
 	private String password;
+	private String passwordCheck;
+	@NotBlank(groups = {JoinGroup.class, UpdateGroup.class})
 	private String name;
+	@Email(groups = {JoinGroup.class, UpdateGroup.class})
 	private String email;
+	@NotBlank(groups = {JoinGroup.class, UpdateGroup.class})
 	private String phone;
 	private String birth;
 	private String fileName;
