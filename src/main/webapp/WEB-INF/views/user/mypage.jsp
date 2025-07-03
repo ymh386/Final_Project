@@ -193,14 +193,14 @@
 			</div>
         </div>
 
-		</sec:authorize>
+		
 				
 			
 
 		
 
 		
-			<h1 class="mb-4">전자 결재</h1>
+		<h1 class="mb-4">전자 결재</h1>
         <div class="card mb-4 shadow-sm">
           <div class="card-header bg-white">
             <strong>전자 결재</strong>
