@@ -164,7 +164,7 @@
                 <div class="container-fluid px-4">
                     <!-- 페이지 헤더 -->
                     <div class="page-header">
-                        <h1 class="page-title">트레이너 일정 관리</h1>
+                        <h1 class="page-title">일정 관리</h1>
                         <div class="user-greeting">
                             안녕하세요,
                             <c:choose>

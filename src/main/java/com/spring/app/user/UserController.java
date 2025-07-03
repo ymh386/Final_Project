@@ -642,8 +642,14 @@ public class UserController {
 	//회원 탈퇴
 	@PostMapping("deleteUser")
 	@ResponseBody
-	public int deleteUser(@AuthenticationPrincipal UserVO userVO, HttpServletRequest request) throws Exception {
+	public int deleteUser(@AuthenticationPrincipal UserVO userVO, HttpServletRequest request, HttpSession session, HttpServletResponse response) throws Exception {
 		int result = userService.deleteUser(userVO);
+		
+		session.invalidate();
+		Cookie cookie = new Cookie("accessToken", "/");
+		cookie.setMaxAge(0);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		
 		if(result > 0) {
 			// 로그/감사 기록용
@@ -666,7 +672,18 @@ public class UserController {
 	@ResponseBody
 	public boolean checkPassword(@AuthenticationPrincipal UserVO userVO, String password) throws Exception {
 		
-		return encoder.matches(password, userService.getPasswordByUsername(userVO));
+		if (userVO.getSns()==null) {
+			return encoder.matches(password, userService.getPasswordByUsername(userVO));			
+		}else {
+			if (password.equals("탈퇴 시 모든 정보는 삭제되며 복구되지 않습니다.")) {
+				
+				return true;
+			} else {
+				
+				return false;
+			}
+		}
+		
 		
 	}
 }
