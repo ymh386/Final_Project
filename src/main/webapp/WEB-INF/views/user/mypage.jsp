@@ -254,7 +254,6 @@
             </li>
           </ul>
         </div>
-		</sec:authorize>	
 
 		<sec:authorize access="!hasRole('TRAINER')">
 	    <h1>구독 내역</h1>
