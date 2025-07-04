@@ -179,6 +179,7 @@ public class UserController {
 		}
 		
 		if (userService.errorCheck(error, userVO)) {
+			System.out.println(userVO.getPassword());
 			return "/user/join/memberJoin"; 
 		} else {
 			int result = userService.join(userVO);			

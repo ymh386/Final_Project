@@ -88,7 +88,8 @@ public class UserService implements UserDetailsService {
 		}
 		
 		String pattern = "!@#$%^&*()_-+=,<.>?";
-		Pattern p = Pattern.compile(pattern);
+		String regex = "[" + Pattern.quote(pattern) + "]";
+		Pattern p = Pattern.compile(regex);
 		Matcher m = p.matcher(userVO.getPassword());
 		
 		if (!m.find()) {
