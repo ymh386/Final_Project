@@ -196,6 +196,7 @@ public class ChatService {
 			RoomMemberVO memberVO = new RoomMemberVO();
 			memberVO.setRoomId(chatRoomVO.getRoomId());
 			memberVO.setUsername(username);
+			
 			chatDAO.insertMember(memberVO);
 			
 			// 로그/감사 기록용
@@ -240,6 +241,7 @@ public class ChatService {
 	}
 	
 	public int invite(RoomMemberVO memberVO) throws Exception {
+		System.out.println(memberVO);
 		int result = chatDAO.insertMember(memberVO);
 		
 		return result;

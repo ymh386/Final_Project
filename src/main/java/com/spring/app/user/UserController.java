@@ -20,6 +20,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -101,7 +103,7 @@ public class UserController {
 	void join() {}
 	
 	@GetMapping("join/memberJoin")
-	void memberJoin() {}
+	void memberJoin(@ModelAttribute UserVO userVO) {}
 	
 	@GetMapping("mypage")
 	void myPage(@AuthenticationPrincipal UserVO userVO, @RequestParam(required = false) Integer year, Model model) throws Exception {
@@ -148,7 +150,7 @@ public class UserController {
 	}
 	
 	@PostMapping("join/memberJoin")
-	String memberJoin(UserVO userVO, MultipartFile img, Model model, HttpServletRequest request) throws Exception{
+	String memberJoin(@Validated(JoinGroup.class) UserVO userVO, MultipartFile img, Model model, HttpServletRequest request, BindingResult error) throws Exception{
 		
 		String oriName = img.getOriginalFilename().toString();
 		
@@ -176,7 +178,12 @@ public class UserController {
 			
 		}
 		
-		int result = userService.join(userVO);
+		if (userService.errorCheck(error, userVO)) {
+			return "/user/join/memberJoin"; 
+		} else {
+			int result = userService.join(userVO);			
+		}
+		
 				
 		// 로그/감사 기록용
 		auditLogService.log(
@@ -191,18 +198,15 @@ public class UserController {
 		return "redirect:/";
 
 	}
-		
-		
-		
 	
 	@GetMapping("join/trainerJoin")
-	void trainerJoin(Model model) throws Exception {
+	void trainerJoin(Model model, @ModelAttribute UserVO userVO) throws Exception {
 		String trainerId = "T"+userService.getTrainerCode();
 		model.addAttribute("code", trainerId);
 	}
 	
 	@PostMapping("join/trainerJoin")
-	String trainerJoin(UserVO userVO, HttpServletRequest request, MultipartFile img, Model model) throws Exception{
+	String trainerJoin(@Validated(JoinGroup.class) UserVO userVO, HttpServletRequest request, MultipartFile img, Model model, BindingResult error) throws Exception{
 		Long code = userService.getTrainerCode();
 		userVO.setTrainerCode(code);
 		
@@ -232,7 +236,11 @@ public class UserController {
 			
 		}		
 		
-		int result = userService.join(userVO);
+		if (userService.errorCheck(error, userVO)) {
+			return "/user/join/trainerJoin";
+		} else {
+			int result = userService.join(userVO);			
+		}
 		
 		// 로그/감사 기록용
 		auditLogService.log(
@@ -642,8 +650,14 @@ public class UserController {
 	//회원 탈퇴
 	@PostMapping("deleteUser")
 	@ResponseBody
-	public int deleteUser(@AuthenticationPrincipal UserVO userVO, HttpServletRequest request) throws Exception {
+	public int deleteUser(@AuthenticationPrincipal UserVO userVO, HttpServletRequest request, HttpSession session, HttpServletResponse response) throws Exception {
 		int result = userService.deleteUser(userVO);
+		
+		session.invalidate();
+		Cookie cookie = new Cookie("accessToken", "/");
+		cookie.setMaxAge(0);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		
 		if(result > 0) {
 			// 로그/감사 기록용
@@ -666,7 +680,18 @@ public class UserController {
 	@ResponseBody
 	public boolean checkPassword(@AuthenticationPrincipal UserVO userVO, String password) throws Exception {
 		
-		return encoder.matches(password, userService.getPasswordByUsername(userVO));
+		if (userVO.getSns()==null) {
+			return encoder.matches(password, userService.getPasswordByUsername(userVO));			
+		}else {
+			if (password.equals("탈퇴 시 모든 정보는 삭제되며 복구되지 않습니다.")) {
+				
+				return true;
+			} else {
+				
+				return false;
+			}
+		}
+		
 		
 	}
 }
