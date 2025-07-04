@@ -156,7 +156,10 @@ public class AttendanceService {
 	  
 	  
 	  
-	  
+	    public String findNameByUsername(String username) {
+	      return attendanceDAO.findNameByUsername(username);
+	    }
+
 	  
 	  
 

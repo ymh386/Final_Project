@@ -1,289 +1,301 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="sec"
+	uri="http://www.springframework.org/security/tags"%>
 <!DOCTYPE html>
 <html class="fontawesome-i2svg-active fontawesome-i2svg-complete">
 <head>
-    <meta charset="UTF-8">
-    <title>일정 관리</title>
-    <c:import url="/WEB-INF/views/templates/header.jsp"></c:import>
-    
-    <!-- FullCalendar CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
-      <style>
-        .calendar-container {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .page-header {
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e9ecef;
-        }
-        
-        .page-title {
-            color: #495057;
-            font-weight: 600;
-            margin: 0;
-            line-height:2;
-        }
-        
-        .user-greeting {
-            color: #6c757d;
-            font-size: 1rem;
-            margin-top: 5px;
-        }
-        
-        /* FullCalendar 스타일 - 이벤트 잘림 방지 */
-        .fc-event {
-            border-radius: 4px;
-            border: none;
-            padding: 2px 4px;
-            overflow: visible !important;
-        }
-        
-        .fc-event-title {
-            font-weight: 500;
-            font-size: 12px;
-            white-space: pre-line;
-            overflow: visible !important;
-        }
-        
-        .fc-daygrid-event {
-            white-space: pre-line !important;
-            height: auto !important;
-            min-height: 40px;
-            overflow: visible !important;
-        }
-        
-        .fc-event-time {
-            display: none !important;
-        }
-        
-        /* 캘린더 셀 높이 조정 */
-        .fc-daygrid-day {
-            min-height: 120px !important;
-        }
-        
-        .fc-daygrid-day-events {
-            margin-top: 2px;
-            min-height: 80px !important;
-        }
-        
-        .fc-daygrid-event-harness {
-            margin-bottom: 2px;
-        }
-        
-        /* 캘린더 전체 높이 조정 */
-        .fc-daygrid-body {
-            min-height: 600px;
-        }
-        
-        .fc-scrollgrid-section-body > td {
-            overflow: visible !important;
-        }
-        
-        /* Modal 스타일 */
-        .modal-content {
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-top:300px;
-        }
-        
-        .modal-header {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-            border-radius: 8px 8px 0 0;
-        }
-        
-        .modal-title {
-            font-weight: 600;
-            color: #495057;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            font-weight: 500;
-            color: #495057;
-            margin-bottom: 5px;
-        }
-        
-        .form-control {
-            border-radius: 4px;
-            border: 1px solid #ced4da;
-            padding: 8px 12px;
-        }
-        
-        .form-control:focus {
-            border-color: #80bdff;
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-        }
-        
-        .form-control:disabled {
-            background-color: #e9ecef;
-            opacity: 1;
-        }
-        
-        .btn {
-            border-radius: 4px;
-            font-weight: 500;
-            padding: 8px 16px;
-        }
-        
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        
-        .btn-danger {
-            background-color: #dc3545;
-            border-color: #dc3545;
-        }
-        
-        .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>일정 관리</title>
+<c:import url="/WEB-INF/views/templates/header.jsp"></c:import>
+
+<!-- FullCalendar CSS -->
+<link
+	href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css"
+	rel="stylesheet" />
+<style>
+.calendar-container {
+	background: white;
+	border-radius: 8px;
+	padding: 20px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.page-header {
+	margin-bottom: 30px;
+	padding-bottom: 15px;
+	border-bottom: 2px solid #e9ecef;
+}
+
+.page-title {
+	color: #495057;
+	font-weight: 600;
+	margin: 0;
+	line-height: 2;
+}
+
+.user-greeting {
+	color: #6c757d;
+	font-size: 1rem;
+	margin-top: 5px;
+}
+
+/* FullCalendar 스타일 - 이벤트 잘림 방지 */
+.fc-event {
+	border-radius: 4px;
+	border: none;
+	padding: 2px 4px;
+	overflow: visible !important;
+}
+
+.fc-event-title {
+	font-weight: 500;
+	font-size: 12px;
+	white-space: pre-line;
+	overflow: visible !important;
+}
+
+.fc-daygrid-event {
+	white-space: pre-line !important;
+	height: auto !important;
+	min-height: 40px;
+	overflow: visible !important;
+}
+
+.fc-event-time {
+	display: none !important;
+}
+
+/* 캘린더 셀 높이 조정 */
+.fc-daygrid-day {
+	min-height: 120px !important;
+}
+
+.fc-daygrid-day-events {
+	margin-top: 2px;
+	min-height: 80px !important;
+}
+
+.fc-daygrid-event-harness {
+	margin-bottom: 2px;
+}
+
+/* 캘린더 전체 높이 조정 */
+.fc-daygrid-body {
+	min-height: 600px;
+}
+
+.fc-scrollgrid-section-body>td {
+	overflow: visible !important;
+}
+
+/* Modal 스타일 */
+.modal-content {
+	border-radius: 8px;
+	border: none;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+	margin-top: 300px;
+}
+
+.modal-header {
+	background-color: #f8f9fa;
+	border-bottom: 1px solid #dee2e6;
+	border-radius: 8px 8px 0 0;
+}
+
+.modal-title {
+	font-weight: 600;
+	color: #495057;
+}
+
+.form-group {
+	margin-bottom: 15px;
+}
+
+.form-group label {
+	display: block;
+	font-weight: 500;
+	color: #495057;
+	margin-bottom: 5px;
+}
+
+.form-control {
+	border-radius: 4px;
+	border: 1px solid #ced4da;
+	padding: 8px 12px;
+}
+
+.form-control:focus {
+	border-color: #80bdff;
+	box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+}
+
+.form-control:disabled {
+	background-color: #e9ecef;
+	opacity: 1;
+}
+
+.btn {
+	border-radius: 4px;
+	font-weight: 500;
+	padding: 8px 16px;
+}
+
+.btn-primary {
+	background-color: #007bff;
+	border-color: #007bff;
+}
+
+.btn-danger {
+	background-color: #dc3545;
+	border-color: #dc3545;
+}
+
+.btn-secondary {
+	background-color: #6c757d;
+	border-color: #6c757d;
+}
+</style>
 </head>
 <body class="sb-nav-fixed">
-    <c:import url="/WEB-INF/views/templates/topbar.jsp"></c:import>
-    <div id="layoutSidenav">
-        <c:import url="/WEB-INF/views/templates/sidebar.jsp"></c:import>
-        
-        <div id="layoutSidenav_content">
-            <main>
-                <div class="container-fluid px-4">
-                    <!-- 페이지 헤더 -->
-                    <div class="page-header">
-                        <h1 class="page-title">일정 관리</h1>
-                        <div class="user-greeting">
-                            안녕하세요,
-                            <c:choose>
-                                <c:when test="${not empty pageContext.request.userPrincipal}">
-                                    <strong>${pageContext.request.userPrincipal.name}</strong>
-                                </c:when>
-                                <c:otherwise><strong>손님</strong></c:otherwise>
-                            </c:choose>
-                            님
-                        </div>
-                    </div>
-                    
-                    <!-- 캘린더 -->
-                    <div class="calendar-container">
-                        <div id="calendar"></div>
-                    </div>
-                </div>
-            </main>
-            
-            <c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
-        </div>
-    </div>
+	<c:import url="/WEB-INF/views/templates/topbar.jsp"></c:import>
+	<div id="layoutSidenav">
+		<c:import url="/WEB-INF/views/templates/sidebar.jsp"></c:import>
 
-    <!-- 관리자 전용 모달 (생성/수정용) -->
-    <sec:authorize access="hasRole('ROLE_ADMIN')">
-        <div class="modal fade" id="scheduleModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle">일정 등록</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="username">트레이너</label>
-                            <select id="username" name="username" class="form-control">
-                                <option value="">-- 트레이너 선택 --</option>
-                                <c:forEach var="trainer" items="${trainerList}">
-                                    <option value="${trainer.username}">${trainer.name}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="facilityId">시설</label>
-                            <input type="text" id="facilityText" class="form-control" style="display: none;" disabled />
-                            <select id="facilityId" name="facilityId" class="form-control" required>
-                                <option value="">-- 시설 선택 --</option>
-                                <option value="1">복싱장</option>
-                                <option value="2">헬스장</option>
-                                <option value="3">수영장</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="scheduleDate">예약 날짜</label>
-                            <input type="date" id="scheduleDate" name="scheduleDate" class="form-control" />
-                        </div>
-                        <div class="form-group">
-                            <label for="startTime">시작 시간</label>
-                            <input type="time" id="startTime" name="startTime" class="form-control" />
-                        </div>
-                        <div class="form-group">
-                            <label for="endTime">종료 시간</label>
-                            <input type="time" id="endTime" name="endTime" class="form-control" />
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                        <button id="btnSave" type="button" class="btn btn-primary">저장</button>
-                        <button id="btnDelete" type="button" class="btn btn-danger" style="display: none;">삭제</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </sec:authorize>
+		<div id="layoutSidenav_content">
+			<main>
+				<div class="container-fluid px-4">
+					<!-- 페이지 헤더 -->
+					<div class="page-header">
+						<h1 class="page-title">일정 관리</h1>
+						<div class="user-greeting">
+							안녕하세요,
+							<c:choose>
+								<c:when test="${not empty realName}">
+									<strong>${realName}</strong>
+								</c:when>
+								<c:otherwise>
+									<strong>손님</strong>
+								</c:otherwise>
+							</c:choose>
+							님
+						</div>
+					</div>
 
-    <!-- 트레이너 전용 모달 (삭제 전용) -->
-    <sec:authorize access="hasRole('ROLE_TRAINER') and !hasRole('ROLE_ADMIN')">
-        <div class="modal fade" id="scheduleViewModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="viewModalTitle">일정 상세</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="viewUsername">트레이너</label>
-                            <input type="text" id="viewUsername" class="form-control" disabled />
-                        </div>
-                        <div class="form-group">
-                            <label for="viewFacilityId">시설</label>
-                            <input type="text" id="viewFacilityId" class="form-control" disabled />
-                        </div>
-                        <div class="form-group">
-                            <label for="viewScheduleDate">예약 날짜</label>
-                            <input type="date" id="viewScheduleDate" class="form-control" disabled />
-                        </div>
-                        <div class="form-group">
-                            <label for="viewStartTime">시작 시간</label>
-                            <input type="time" id="viewStartTime" class="form-control" disabled />
-                        </div>
-                        <div class="form-group">
-                            <label for="viewEndTime">종료 시간</label>
-                            <input type="time" id="viewEndTime" class="form-control" disabled />
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                        <button id="btnViewDelete" type="button" class="btn btn-danger">삭제</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </sec:authorize>
+					<!-- 캘린더 -->
+					<div class="calendar-container">
+						<div id="calendar"></div>
+					</div>
+				</div>
+			</main>
 
-    <!-- FullCalendar JS -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+			<c:import url="/WEB-INF/views/templates/footer.jsp"></c:import>
+		</div>
+	</div>
+
+	<!-- 관리자 전용 모달 (생성/수정용) -->
+	<sec:authorize access="hasRole('ROLE_ADMIN')">
+		<div class="modal fade" id="scheduleModal" tabindex="-1">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="modalTitle">일정 등록</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label for="username">트레이너</label> <select id="username"
+								name="username" class="form-control">
+								<option value="">-- 트레이너 선택 --</option>
+								<c:forEach var="trainer" items="${trainerList}">
+									<option value="${trainer.username}">${trainer.name}</option>
+								</c:forEach>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="facilityId">시설</label> <input type="text"
+								id="facilityText" class="form-control" style="display: none;"
+								disabled /> <select id="facilityId" name="facilityId"
+								class="form-control" required>
+								<option value="">-- 시설 선택 --</option>
+								<option value="1">복싱장</option>
+								<option value="2">헬스장</option>
+								<option value="3">수영장</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="scheduleDate">예약 날짜</label> <input type="date"
+								id="scheduleDate" name="scheduleDate" class="form-control" />
+						</div>
+						<div class="form-group">
+							<label for="startTime">시작 시간</label> <input type="time"
+								id="startTime" name="startTime" class="form-control" />
+						</div>
+						<div class="form-group">
+							<label for="endTime">종료 시간</label> <input type="time"
+								id="endTime" name="endTime" class="form-control" />
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary"
+							data-bs-dismiss="modal">취소</button>
+						<button id="btnSave" type="button" class="btn btn-primary">저장</button>
+						<button id="btnDelete" type="button" class="btn btn-danger"
+							style="display: none;">삭제</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</sec:authorize>
+
+	<!-- 트레이너 전용 모달 (삭제 전용) -->
+	<sec:authorize
+		access="hasRole('ROLE_TRAINER') and !hasRole('ROLE_ADMIN')">
+		<div class="modal fade" id="scheduleViewModal" tabindex="-1">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="viewModalTitle">일정 상세</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label for="viewUsername">트레이너</label> <input type="text"
+								id="viewUsername" class="form-control" disabled />
+						</div>
+						<div class="form-group">
+							<label for="viewFacilityId">시설</label> <input type="text"
+								id="viewFacilityId" class="form-control" disabled />
+						</div>
+						<div class="form-group">
+							<label for="viewScheduleDate">예약 날짜</label> <input type="date"
+								id="viewScheduleDate" class="form-control" disabled />
+						</div>
+						<div class="form-group">
+							<label for="viewStartTime">시작 시간</label> <input type="time"
+								id="viewStartTime" class="form-control" disabled />
+						</div>
+						<div class="form-group">
+							<label for="viewEndTime">종료 시간</label> <input type="time"
+								id="viewEndTime" class="form-control" disabled />
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary"
+							data-bs-dismiss="modal">취소</button>
+						<button id="btnViewDelete" type="button" class="btn btn-danger">삭제</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</sec:authorize>
+
+	<!-- FullCalendar JS -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
         document.addEventListener('DOMContentLoaded', function() {
             const isLoggedIn = ${not empty pageContext.request.userPrincipal};
             const isAdmin =
@@ -434,9 +446,14 @@
                     },
                     selectable: isAdmin,
                     editable: false,
-                    eventDisplay: 'block',
-                    dayMaxEvents: false,
+                    //eventDisplay: 'block',
+                    dayMaxEvents: true,
                     height: 'auto',
+                    allDaySlot: false,   // all-day 칸 제거
+                    slotMinTime: "09:00:00",    // ✅ 오전 9시부터
+                    slotMaxTime: "19:00:00",    // ✅ 오후 6시까지만
+                    slotDuration: "00:20:00",  // 칸은 많게 유지
+
                     
                     // 이벤트 로드
                     events: eventsUrl ? {

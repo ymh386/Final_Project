@@ -12,6 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import com.spring.app.attendance.AttendanceDAO;
+import com.spring.app.attendance.AttendanceService;
 import com.spring.app.auditLog.AuditLogService;
 import com.spring.app.user.UserService;
 import com.spring.app.user.UserVO;
@@ -40,6 +42,9 @@ public class ScheduleController {
 
     @Autowired
     private AuditLogService auditLogService;
+    
+    @Autowired
+    private AttendanceService attendanceService;
     /**
      * 1) 일정 관리 페이지 렌더링
      *    - 트레이너도, 관리자도 접근 가능
@@ -47,13 +52,23 @@ public class ScheduleController {
      *    → 트레이너 목록은 별도 API나 front-end 코드에서 처리해야 함
      */
     @GetMapping("/page")
-    public String schedulePage(Model model) {
+    public String schedulePage(Model model,@AuthenticationPrincipal UserVO user,Principal principal) {
+    	
+    	
+        if (principal != null) {
+            String username = principal.getName(); // 로그인된 ID
+            String name = attendanceService.findNameByUsername(username); // 이름 조회
+            model.addAttribute("realName", name); // JSP에 전달
+        }
+
         // 1) "T로 시작하는" 트레이너 목록 조회
         //    여기서 "T%"를 넘기면 MyBatis 쿼리가 `WHERE username LIKE 'T%'` 로 실행됨
         List<UserVO> trainerList = userService.getUsersByUsernamePrefix("T%");
 
         // 2) JSP에서 <c:forEach items="${trainerList}"> 으로 순회할 수 있도록 모델에 담아준다.
         model.addAttribute("trainerList", trainerList);
+        
+        model.addAttribute("displayName", user.getName());
 
         // 3) 폼 바인딩용 빈 ScheduleVO 추가 (선택 사항)
         model.addAttribute("scheduleVO", new ScheduleVO());
