@@ -104,9 +104,12 @@
 ## 📸 데모 스크린샷
 
 
-|---------------|--------------------|
-| ![로그인](login.png) | ![전자결재](index.png) |
-
+<table>
+  <tr>
+    <td><img src="login.png" alt="로그인" width="200"/></td>
+    <td><img src="index.png" alt="전자결재" width="200"/></td>
+  </tr>
+</table>
 
 ---
 
