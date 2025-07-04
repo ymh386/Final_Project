@@ -43,6 +43,7 @@ public interface AttendanceDAO {
     // 사용자별 이번달 근태율 통계
     public AttendanceStatVO getCurrentMonthStats(Integer year, Integer month, String username) throws Exception;
 
-	
+    String findNameByUsername(String username);
+
 	
 }
