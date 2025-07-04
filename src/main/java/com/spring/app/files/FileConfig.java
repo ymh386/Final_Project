@@ -24,8 +24,16 @@ public class FileConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    	String os = System.getProperty("os.name").toLowerCase();
+    	String resourceLocation;
+
+    	if (os.contains("win")) {
+    	    resourceLocation = "file:\\" + filePath;  // 예: C:\\goodee\\upload\\
+    	} else {
+    	    resourceLocation = "file:" + filePath;    // 예: /home/ubuntu/upload/
+    	}
         // /files/** 요청을 D:/upload/ 로 매핑
         registry.addResourceHandler(fileUrl)
-                .addResourceLocations("file:\\" + filePath);
+                .addResourceLocations(resourceLocation);
     }
 }

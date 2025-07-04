@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -127,38 +128,61 @@
                         <h3 class="font-weight-light my-3">회원 가입</h3>
                     </div>
                     <div class="card-body">
-                        <form action="" method="post" enctype="multipart/form-data">
+                        <form:form modelAttribute="userVO" cssClass="user" method="post" enctype="multipart/form-data">
                             <div class="input-group mb-3">
                                 <input type="file" class="form-control" name="img" id="inputGroupFile02">
                                 <label class="input-group-text" for="inputGroupFile02">Upload</label>
                             </div>
 
                             <div class="form-floating mb-3">
-                                <input class="form-control" type="text" name="username" placeholder=" ">
+                                <form:input cssClass="form-control" id="username" placeholder=" " path="username"/>
                                 <label for="inputEmail">아이디</label>
                             </div>
+                            <div style="margin-top: 8px;">
+                            	<form:errors path="username"></form:errors>
+                            </div>                            
 
                             <div class="form-floating mb-3">
-                                <input class="form-control" name="password" type="password" placeholder=" ">
+                                <form:password cssClass="form-control" id="username" name="password" placeholder=" " path="password"/>
                                 <label for="inputPassword">비밀번호</label>
                             </div>
+                            <div style="margin-top: 8px;">
+                            	<form:errors path="password"></form:errors>
+                            </div>                                
+                            
+                            <div class="form-floating mb-3">
+                                <form:password cssClass="form-control" name="passwordCheck" id="passwordCheck" path="passwordCheck" placeholder=" "/>
+                                <label for="inputPasswordCheck">비밀번호 재입력</label>
+                            </div>    
+                            <div style="margin-top: 8px;">
+                            	<form:errors path="passwordCheck"></form:errors>
+                            </div>                                
 
                             <div class="form-floating mb-3">
-                                <input class="form-control" type="text" name="name" placeholder=" ">
+                                <form:input cssClass="form-control" id="name" path="name" name="name" placeholder=" "/>
                                 <label for="inputName">이름</label>
                             </div>
+                            <div style="margin-top: 8px;">
+                            	<form:errors path="name"></form:errors>
+                            </div>                                
 
                             <div class="form-floating mb-3">
-                                <input class="form-control" type="email" name="email" placeholder=" ">
+                                <form:input cssClass="form-control" id="email" path="email" name="email" placeholder=" "/>
                                 <label for="inputEmail">이메일</label>
                             </div>
+                            <div style="margin-top: 8px;">
+                            	<form:errors path="email"></form:errors>
+                            </div>                                
 
                             <div class="form-floating mb-3">
-                                <input class="form-control" type="text" name="phone" placeholder=" ">
+                                <form:input cssClass="form-control" id="phone" path="phone" name="phone" placeholder=" "/>
                                 <label for="inputPhone">휴대폰 번호</label>
                             </div>
+                            <div style="margin-top: 8px;">
+                            	<form:errors path="phone"></form:errors>
+                            </div>                                
 
-                            <input type="date" name="birth" />
+                            <input type="date" name="birth" />                            
 
                             <c:if test="${not empty param.error}">
                                 <p class="text-danger mt-2">${param.error}</p>
@@ -167,7 +191,7 @@
                             <div class="text-center mt-4">
                                 <button class="btn btn-dark w-100" type="submit">가입</button>
                             </div>
-                        </form>
+                        </form:form>
                     </div>
                 </div>
             </div>

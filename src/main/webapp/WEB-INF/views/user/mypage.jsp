@@ -193,14 +193,14 @@
 			</div>
         </div>
 
-		</sec:authorize>
+		
 				
 			
 
 		
 
 		
-			<h1 class="mb-4">전자 결재</h1>
+		<h1 class="mb-4">전자 결재</h1>
         <div class="card mb-4 shadow-sm">
           <div class="card-header bg-white">
             <strong>전자 결재</strong>
@@ -254,6 +254,7 @@
             </li>
           </ul>
         </div>
+			
 
 		<sec:authorize access="!hasRole('TRAINER')">
 	    <h1>구독 내역</h1>
@@ -284,6 +285,24 @@
 		<!-- 비밀번호 확인 모달 -->
 		<div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered">
+		<c:if test="${user.sns ne null}">
+			<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="passwordModalLabel">탈퇴 확인</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+			</div>
+			<div class="modal-body">
+				<p>정말 탈퇴하시겠습니까?<br><strong>※ '탈퇴 시 모든 정보는 삭제되며 복구되지 않습니다.'를 입력해주세요.</strong></p>
+				<input type="text" id="confirmPassword" class="form-control" placeholder="탈퇴 시 모든 정보는 삭제되며 복구되지 않습니다." />
+				<div id="errorMsg" class="text-danger mt-2" style="display:none;">비밀번호가 일치하지 않습니다.</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+				<button type="button" id="confirmDeleteBtn" class="btn btn-danger">확인</button>
+			</div>
+			</div>
+		</c:if>
+		<c:if test="${user.sns eq null}">
 			<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="passwordModalLabel">비밀번호 확인</h5>
@@ -298,7 +317,8 @@
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
 				<button type="button" id="confirmDeleteBtn" class="btn btn-danger">확인</button>
 			</div>
-			</div>
+			</div>			
+		</c:if>
 		</div>
 		</div>
 
