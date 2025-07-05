@@ -34,8 +34,8 @@ public class FindInfoService {
 	@Value("${nurigo.api.secret.key}")
 	private String secretKey;
 	
-//	@Value("${nurigo.send.phone.number}")
-//	private String sendPhone;
+	@Value("${nurigo.send.phone.number}")
+	private String sendPhone;
 
 	
 	public String randomPassword(int length) throws Exception {
@@ -107,7 +107,7 @@ public class FindInfoService {
 		DefaultMessageService defaultMessageService = NurigoApp.INSTANCE.initialize(apiKey, secretKey, "https://api.solapi.com");
 		Message message = new Message();
 		
-//		message.setFrom(sendPhone);
+		message.setFrom(sendPhone);
 		message.setTo(phone);
 		message.setText("임시 비밀번호는 "+newPassword+"입니다.\n\n"
 				+"로그인 후 비밀번호를 변경해주세요.");

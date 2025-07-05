@@ -75,10 +75,16 @@ public class AttendanceController {
 	
 	
 	@GetMapping("/page")
-	public String attendancePage(Model model) {
+	public String attendancePage(Model model,Principal principal) {
 		
 		String apiKey = env.getProperty("google.maps.api.key");
         model.addAttribute("googleMapApiKey", apiKey);
+        
+        if (principal != null) {
+            String username = principal.getName();
+            String name = attendanceService.findNameByUsername(username);  // ✅ 이름 조회
+            model.addAttribute("realName", name); // JSP로 전달
+        }
 		
 		return "attendance/page";
 	}
@@ -102,6 +108,7 @@ public class AttendanceController {
 
 	        // 위치 거리 계산
 	        double distance = haversine(lat, lng, companyLat, companyLng);
+
 	        if (distance > 1000) {
 	            return ResponseEntity.status(HttpStatus.FORBIDDEN)
 	                                 .body("KM타워 반경 1000m 이내에서만 출근 가능합니다.");
@@ -135,7 +142,7 @@ public class AttendanceController {
 	}
 
 	/**
-	 * 퇴근 처리 (ROLE_TRAINER 권한)
+	 * 퇴근 처리 (ROLE_TRAINER 권한)	
 	 * POST /attendance/checkOut?attendanceId=xxx
 	 */
 	@PostMapping("/checkOut")

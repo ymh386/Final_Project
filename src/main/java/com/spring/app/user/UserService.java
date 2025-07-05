@@ -3,6 +3,8 @@ package com.spring.app.user;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import com.spring.app.approval.DocumentVO;
 import com.spring.app.approval.UserSignatureVO;
@@ -37,7 +40,7 @@ public class UserService implements UserDetailsService {
 	
 	@Value("${spring.mail.username}")
 	private String from;
-
+	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		// TODO Auto-generated method stub
@@ -67,6 +70,40 @@ public class UserService implements UserDetailsService {
 		int result = userDAO.join(userVO);
 		
 		return result;
+	}
+	
+	public boolean errorCheck(BindingResult result, UserVO userVO) throws Exception {
+		boolean check = false;
+		
+		check= result.hasErrors();
+		
+		if (!userVO.getPassword().equals(userVO.getPasswordCheck())) {
+			check=true;
+			result.rejectValue("passwordCheck", "NotEqual.password");
+		}
+		
+		if (userVO.getPassword().length()<8||userVO.getPassword().length()>16) {
+			check=true;
+			result.rejectValue("password", "Size.password");
+		}
+		
+		String pattern = "!@#$%^&*()_-+=,<.>?";
+		String regex = "[" + Pattern.quote(pattern) + "]";
+		Pattern p = Pattern.compile(regex);
+		Matcher m = p.matcher(userVO.getPassword());
+		
+		if (!m.find()) {
+			check=true;
+			result.rejectValue("password", "Pattern.password");
+		}
+		
+		UserVO checkUser = userDAO.detail(userVO);
+		if (checkUser!=null) {
+			check=true;
+			result.rejectValue("username", "NotEqual.username");
+		}
+		
+		return check;
 	}
 
 	public int giveTrainerRole(MemberRoleVO memberRoleVO) throws Exception {

@@ -193,12 +193,7 @@
 			</div>
         </div>
 
-		
-				
-			
-
-		
-
+		</sec:authorize>
 		
 		<h1 class="mb-4">전자 결재</h1>
         <div class="card mb-4 shadow-sm">
