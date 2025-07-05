@@ -254,6 +254,7 @@
             </li>
           </ul>
         </div>
+		</sec:authorize>
 			
 
 		<sec:authorize access="!hasRole('TRAINER')">

@@ -24,6 +24,8 @@ public class FileConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    	
+    	//서버거 window환경(개발서버)인지 리눅스환겅(배포서버)인지 구분
     	String os = System.getProperty("os.name").toLowerCase();
     	String resourceLocation;
 
